@@ -6,7 +6,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
-    "start": "node -r source-map-support/register dist"
+    "start": "node -r source-map-support/register dist",
+    "dev": "ts-node-dev --no-notify --respawn --transpile-only --require dotenv/config src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -19,14 +20,19 @@
   },
   "homepage": "https://github.com/taranvohra/bBot.ts#readme",
   "devDependencies": {
+    "@types/mongoose": "^5.7.35",
+    "@types/node": "^14.0.27",
     "dotenv": "^8.2.0",
     "rimraf": "^3.0.2",
     "source-map-support": "^0.5.19",
+    "ts-node-dev": "^1.0.0-pre.56",
     "typescript": "^3.9.7"
   },
   "dependencies": {
     "@typegoose/typegoose": "^7.3.1",
     "discord.js": "^12.2.0",
-    "mongoose": "^5.9.27"
+    "mongoose": "^5.9.27",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.0"
   }
 }
