@@ -1,0 +1,32 @@
+{
+  "name": "bbot",
+  "version": "1.0.0",
+  "description": "The UT99 flavored discord bot for querying servers and carrying out pickup games",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "start": "node -r source-map-support/register dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taranvohra/bBot.ts.git"
+  },
+  "author": "taranvohra",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/taranvohra/bBot.ts/issues"
+  },
+  "homepage": "https://github.com/taranvohra/bBot.ts#readme",
+  "devDependencies": {
+    "dotenv": "^8.2.0",
+    "rimraf": "^3.0.2",
+    "source-map-support": "^0.5.19",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "@typegoose/typegoose": "^7.3.1",
+    "discord.js": "^12.2.0",
+    "mongoose": "^5.9.27"
+  }
+}
