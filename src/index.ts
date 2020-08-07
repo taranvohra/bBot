@@ -1,5 +1,6 @@
 import { Client, Intents } from 'discord.js';
 import log from './log';
+import { onMessage } from '~features';
 
 /*
  *  bBot will only receive the following events
@@ -27,3 +28,5 @@ bBot.on('ready', () => {
 });
 
 bBot.on('disconnect', () => {});
+
+bBot.on('message', (message) => onMessage(message, bBot));
