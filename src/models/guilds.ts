@@ -34,6 +34,31 @@ class QueryServer {
   timestamp!: Date;
 }
 
+class User {
+  @prop()
+  id!: string;
+
+  @prop()
+  username!: string;
+}
+
+class Block {
+  @prop({ _id: false })
+  culprit!: User;
+
+  @prop({ _id: false })
+  by!: User;
+
+  @prop()
+  blockedOn!: Date;
+
+  @prop()
+  expiresAt!: Date;
+
+  @prop({ default: '' })
+  reason!: string;
+}
+
 class Tenant {
   @prop()
   serverId!: string;
@@ -55,4 +80,9 @@ class Tenant {
 
   @prop({ _id: false })
   queryServers?: QueryServer[];
+
+  @prop({ _id: false })
+  blockedUsers?: Block[];
 }
+
+export const Tenants = getModelForClass(Tenant);
