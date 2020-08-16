@@ -1,3 +1,18 @@
-import { Command } from 'src/typings';
+const group = 'general';
+const generalCommandList: Command[] = [
+  { group, key: 'handleRegisterServer', aliases: ['register'], type: 'solo' },
+  {
+    group,
+    key: 'handleSetPugChannel',
+    aliases: ['setpugchannel'],
+    type: 'solo',
+  },
+  {
+    group,
+    key: 'handleSetQueryChannel',
+    aliases: ['setquerychannel'],
+    type: 'solo',
+  },
+];
 
-export const generalCommandList: Command[] = [];
+export default generalCommandList;

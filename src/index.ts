@@ -23,7 +23,7 @@ const bBot = new Client({ ws: { intents } });
  *   E V E N T S
  */
 bBot.on('ready', () => {
-  // TODO add slack log
+  // TODO discord channel log
   log.info(`Bot started running at ${new Date().toUTCString()}`);
 });
 
