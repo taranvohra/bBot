@@ -1,6 +1,6 @@
 import { Client, Intents } from 'discord.js';
+import { onMessage } from '~handlers';
 import log from './log';
-import { onMessage } from '~features';
 
 /*
  *  bBot will only receive the following events

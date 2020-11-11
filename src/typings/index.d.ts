@@ -5,8 +5,12 @@ declare global {
     group: string;
     key: string;
     aliases: string[];
-    type: 'solo' | 'singleArg' | 'multiArg';
+    type: 'noArg' | 'singleArg' | 'multiArg';
+    isPrivileged: boolean;
   };
 
   export type Handler = (message: Message, args: string[]) => Promise<void>;
+  export type WithGuildID = {
+    guildId: string;
+  };
 }

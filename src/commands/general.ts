@@ -1,17 +1,25 @@
 const group = 'general';
 const generalCommandList: Command[] = [
-  { group, key: 'handleRegisterServer', aliases: ['register'], type: 'solo' },
+  {
+    group,
+    key: 'handleRegisterServer',
+    aliases: ['register'],
+    type: 'noArg',
+    isPrivileged: true,
+  },
   {
     group,
     key: 'handleSetPugChannel',
     aliases: ['setpugchannel'],
-    type: 'solo',
+    type: 'noArg',
+    isPrivileged: true,
   },
   {
     group,
     key: 'handleSetQueryChannel',
     aliases: ['setquerychannel'],
-    type: 'solo',
+    type: 'noArg',
+    isPrivileged: true,
   },
 ];
 

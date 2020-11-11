@@ -1,4 +1,4 @@
-import { getModelForClass, prop } from '@typegoose/typegoose';
+import { getModelForClass, prop, ReturnModelType } from '@typegoose/typegoose';
 
 class GameType {
   @prop()
@@ -36,9 +36,6 @@ class QueryServer {
 
 class User {
   @prop()
-  id!: string;
-
-  @prop()
   username!: string;
 }
 
@@ -59,30 +56,32 @@ class Block {
   reason!: string;
 }
 
-class Tenant {
+class Guild {
   @prop()
-  serverId!: string;
+  pugChannel!: string;
 
   @prop()
-  pugChannel?: string;
+  queryChannel!: string;
 
   @prop()
-  queryChannel?: string;
+  ignoredCommandGroup!: string[];
+
+  @prop({ _id: false })
+  gameTypes!: GameType[];
+
+  @prop({ _id: false })
+  queryServers!: QueryServer[];
+
+  @prop({ _id: false })
+  blockedUsers!: Block[];
 
   @prop()
   prefix?: string;
 
-  @prop()
-  ignoredCommandGroup?: string[];
-
-  @prop({ _id: false })
-  gameTypes?: GameType[];
-
-  @prop({ _id: false })
-  queryServers?: QueryServer[];
-
-  @prop({ _id: false })
-  blockedUsers?: Block[];
+  // Methods
+  public static fetchGuild(this: ReturnModelType<typeof Guild>, id: string) {
+    return this.findById(id).exec();
+  }
 }
 
-export const Tenants = getModelForClass(Tenant);
+export const Guilds = getModelForClass(Guild);
