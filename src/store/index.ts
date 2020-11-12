@@ -7,9 +7,9 @@
     }
  */
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import {} from './slices';
+import { miscReducer } from './slices';
 
-const rootReducer = combineReducers({});
+const rootReducer = combineReducers({ miscReducer });
 const store = configureStore({
   reducer: rootReducer,
 });
