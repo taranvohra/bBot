@@ -24,39 +24,29 @@ const miscSlice = createSlice({
   initialState,
   reducers: {
     initMisc(state, action: PayloadAction<InitPayload>) {
-      const {
-        payload: { guildId, ...data },
-      } = action;
+      const { guildId, ...data } = action.payload;
       state[guildId] = data;
     },
     setPrefix(state, action: PayloadAction<SetPrefixPayload>) {
-      const {
-        payload: { guildId, prefix },
-      } = action;
+      const { guildId, prefix } = action.payload;
       state[guildId].prefix = prefix;
     },
     ignoreCommandGroup(
       state,
       action: PayloadAction<IgnoreCommandGroupPayload>
     ) {
-      const {
-        payload: { guildId, command },
-      } = action;
+      const { guildId, command } = action.payload;
       state[guildId].ignoredCommandGroup.add(command);
     },
     unIgnoreCommandGroup(
       state,
       action: PayloadAction<UnIgnoreCommandGroupPayload>
     ) {
-      const {
-        payload: { guildId, command },
-      } = action;
+      const { guildId, command } = action.payload;
       state[guildId].ignoredCommandGroup.delete(command);
     },
     addCommandCooldown(state, action: PayloadAction<AddCommandCooldown>) {
-      const {
-        payload: { guildId, command, timestamp },
-      } = action;
+      const { guildId, command, timestamp } = action.payload;
       state[guildId].cooldowns[command] = timestamp;
     },
   },

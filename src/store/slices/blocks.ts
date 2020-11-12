@@ -18,21 +18,15 @@ const blocksSlice = createSlice({
   initialState,
   reducers: {
     initBlocks(state, action: PayloadAction<InitPayload>) {
-      const {
-        payload: { guildId, list },
-      } = action;
+      const { guildId, list } = action.payload;
       state[guildId].list = list;
     },
     addBlockedUser(state, action: PayloadAction<AddBlockedUserPayload>) {
-      const {
-        payload: { guildId, userId },
-      } = action;
+      const { guildId, userId } = action.payload;
       state[guildId].list.add(userId);
     },
     removeBlockedUser(state, action: PayloadAction<RemoveBlockedUserPayload>) {
-      const {
-        payload: { guildId, userId },
-      } = action;
+      const { guildId, userId } = action.payload;
       state[guildId].list.delete(userId);
     },
   },
