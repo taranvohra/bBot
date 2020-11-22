@@ -35,6 +35,13 @@ const generalCommandList: Command[] = [
     type: 'singleArg',
     isPrivileged: true,
   },
+  {
+    group,
+    key: 'handleUnIgnoreCommandGroup',
+    aliases: ['unignorecommandgroup', 'uigc'],
+    type: 'singleArg',
+    isPrivileged: true,
+  },
 ];
 
 export default generalCommandList;

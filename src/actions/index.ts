@@ -21,9 +21,19 @@ export const updateGuildPrefix = (guildId: string, prefix: string) =>
     },
   }).exec();
 
-  export const addGuildIgnoredCommandGroup = (guildId: string, group: string) =>
-  Guilds.findByIdAndUpdate(guildId: {
+export const addGuildIgnoredCommandGroup = (guildId: string, group: string) =>
+  Guilds.findByIdAndUpdate(guildId, {
     $addToSet: {
-      ignoredCommandGroup: group
-    }
-  }).exec()
+      ignoredCommandGroup: group,
+    },
+  }).exec();
+
+export const removeGuildIgnoredCommandGroup = (
+  guildId: string,
+  group: string
+) =>
+  Guilds.findByIdAndUpdate(guildId, {
+    $pull: {
+      ignoredCommandGroup: group,
+    },
+  }).exec();

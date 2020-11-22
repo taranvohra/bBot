@@ -5,6 +5,7 @@ import {
   updateGuildQueryChannel,
   updateGuildPrefix,
   addGuildIgnoredCommandGroup,
+  removeGuildIgnoredCommandGroup,
 } from '~actions';
 import store, {
   initPugs,
@@ -137,4 +138,27 @@ export const handleIgnoreCommandGroup: Handler = async (message, args) => {
     `commands under group **${group}** will be ignored from now onwards`
   );
   log.info(`Exiting handleIgnoreCommandGroup`);
+};
+
+export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
+  log.info(`Entering handleUnIgnoreCommandGroup`);
+  const { guild } = message;
+  const guildId = guild?.id as string;
+  const group = args[0].toLowerCase();
+
+  // TODO: give a list of command groups in the message
+  if (!group) {
+    message.channel.send(`Please mention a command group`);
+    return;
+  }
+
+  await removeGuildIgnoredCommandGroup(guildId, group);
+  log.info(`Removed ${group} from guild ${guildId}'s ignored command group`);
+
+  store.dispatch(unIgnoreCommandGroup({ guildId, group }));
+
+  message.channel.send(
+    `commands under group **${group}** will not be ignored from now onwards`
+  );
+  log.info(`Exiting handleUnIgnoreCommandGroup`);
 };
