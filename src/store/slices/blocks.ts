@@ -1,11 +1,19 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 type InitPayload = WithGuildID & GuildBlockState;
-type AddBlockedUserPayload = WithGuildID & { userId: string };
+type AddBlockedUserPayload = WithGuildID & Block;
 type RemoveBlockedUserPayload = WithGuildID & { userId: string };
 
+type Block = {
+  id: string;
+  username: string;
+  blockedOn: Date;
+  expiresAt: Date;
+  reason: string;
+};
+
 type GuildBlockState = {
-  list: Set<string>;
+  list: Record<string, Block>;
 };
 
 type BlocksState = {
@@ -22,12 +30,12 @@ const blocksSlice = createSlice({
       state[guildId].list = list;
     },
     addBlockedUser(state, action: PayloadAction<AddBlockedUserPayload>) {
-      const { guildId, userId } = action.payload;
-      state[guildId].list.add(userId);
+      const { guildId, ...block } = action.payload;
+      state[guildId].list[block.id] = block;
     },
     removeBlockedUser(state, action: PayloadAction<RemoveBlockedUserPayload>) {
       const { guildId, userId } = action.payload;
-      state[guildId].list.delete(userId);
+      delete state[guildId].list[userId];
     },
   },
 });

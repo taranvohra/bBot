@@ -1,8 +1,8 @@
 import { GuildMember } from 'discord.js';
 
 export const CONSTANTS = {
-  defaultPrefix: '.',
-  privilegedRoles: ['bBot Mod'],
+  defaultPrefix: '-',
+  privilegedRoles: ['bBot'],
   teamIndexes: {
     red: 0,
     blue: 1,

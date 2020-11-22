@@ -57,6 +57,9 @@ class Block {
 }
 
 class Guild {
+  @prop({ type: String })
+  _id!: string;
+
   @prop()
   pugChannel!: string;
 

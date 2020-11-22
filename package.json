@@ -7,7 +7,7 @@
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
     "start": "node -r source-map-support/register dist",
-    "dev": "ts-node-dev --no-notify --respawn --transpile-only --require dotenv/config src/index.ts"
+    "dev": "ts-node-dev -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "rimraf": "^3.0.2",
     "source-map-support": "^0.5.19",
     "ts-node-dev": "^1.0.0",
+    "tsconfig-paths": "^3.9.0",
     "typescript": "^4.0.5"
   },
   "dependencies": {

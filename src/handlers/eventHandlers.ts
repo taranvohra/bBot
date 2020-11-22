@@ -27,7 +27,7 @@ export const onMessage = async (message: Message, client: Client) => {
   if (foundCommand) {
     if (foundCommand.isPrivileged && !isMemberPrivileged(member)) {
       message.channel.send(
-        `This is a privileged command! You do not have the appropriate role to use this command`
+        `This is a privileged command. You do not have the appropriate role to use this command.`
       );
     }
 

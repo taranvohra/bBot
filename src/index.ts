@@ -1,4 +1,5 @@
 import { Client, Intents } from 'discord.js';
+import mongoose from 'mongoose';
 import { onMessage } from '~handlers';
 import log from './log';
 
@@ -12,6 +13,12 @@ const bBot = new Client({ ws: { intents } });
 
 (async () => {
   try {
+    await mongoose.connect(process.env.DB as string, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    });
+    log.info(`Connected to database`);
     await bBot.login(process.env.DISCORD_BOT_TOKEN);
   } catch (error) {
     console.log(`Error: ${error}`);

@@ -8,7 +8,7 @@ type AddCommandCooldown = WithGuildID & { command: string; timestamp: Date };
 
 type GuildMiscState = {
   prefix: string | null;
-  ignoredCommandGroup: Set<string>;
+  ignoredCommandGroup: Record<string, string>;
   cooldowns: {
     [command: string]: Date;
   };
@@ -36,14 +36,14 @@ const miscSlice = createSlice({
       action: PayloadAction<IgnoreCommandGroupPayload>
     ) {
       const { guildId, group } = action.payload;
-      state[guildId].ignoredCommandGroup.add(group);
+      state[guildId].ignoredCommandGroup[group] = group;
     },
     unIgnoreCommandGroup(
       state,
       action: PayloadAction<UnIgnoreCommandGroupPayload>
     ) {
       const { guildId, group } = action.payload;
-      state[guildId].ignoredCommandGroup.delete(group);
+      delete state[guildId].ignoredCommandGroup[group];
     },
     addCommandCooldown(state, action: PayloadAction<AddCommandCooldown>) {
       const { guildId, command, timestamp } = action.payload;
