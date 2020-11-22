@@ -22,8 +22,9 @@ import store, {
 export const handleRegisterServer: Handler = async (message, _) => {
   log.info(`Entering handleRegisterServer`);
   const { guild } = message;
+  const guildId = guild?.id as string;
 
-  const guildExists = await Guilds.findById(guild?.id as string);
+  const guildExists = await Guilds.findById(guildId);
   if (guildExists) {
     message.channel.send(
       `This discord server is already registered with bBot :wink:`
@@ -31,8 +32,8 @@ export const handleRegisterServer: Handler = async (message, _) => {
     return;
   }
 
-  const newGuild = await Guilds.create({
-    _id: guild?.id,
+  await Guilds.create({
+    _id: guildId,
     queryChannel: '',
     pugChannel: '',
     gameTypes: [],
@@ -41,7 +42,6 @@ export const handleRegisterServer: Handler = async (message, _) => {
     ignoredCommandGroup: [],
   });
 
-  const guildId = newGuild.id as string;
   log.info(`Registered new guild ${guild}`);
   log.debug(`Initializing store for ${guildId}`);
 
@@ -50,11 +50,11 @@ export const handleRegisterServer: Handler = async (message, _) => {
     initMisc({
       guildId,
       cooldowns: {},
-      ignoredCommandGroup: new Set(),
+      ignoredCommandGroup: {},
       prefix: null,
     })
   );
-  store.dispatch(initBlocks({ guildId, list: new Set() }));
+  store.dispatch(initBlocks({ guildId, list: {} }));
   store.dispatch(initQueries({ guildId, list: [], channel: null }));
 
   message.channel.send(`**${guild?.name}** has been registered with bBot!`);
