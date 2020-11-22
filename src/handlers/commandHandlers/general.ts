@@ -1,6 +1,10 @@
 import log from '../../log';
 import { Guilds } from '~models';
-import { updateGuildPugChannel, updateGuildQueryChannel } from '~actions';
+import {
+  updateGuildPugChannel,
+  updateGuildQueryChannel,
+  updateGuildPrefix,
+} from '~actions';
 import store, {
   initPugs,
   initMisc,
@@ -8,6 +12,7 @@ import store, {
   initQueries,
   setPugChannel,
   setQueryChannel,
+  setPrefix,
 } from '~store';
 
 export const handleRegisterServer: Handler = async (message, _) => {
@@ -82,6 +87,26 @@ export const handleSetQueryChannel: Handler = async (message, _) => {
   await updateGuildQueryChannel(guildId, channelId);
   log.info(`Query channel updated for guild ${guildId} to ${channelId}`);
 
+  store.dispatch(setQueryChannel({ guildId, channelId }));
+
   message.channel.send(`<#${channelId}> has been set as the query channel`);
   log.info(`Exiting handleSetQueryChannel`);
+};
+
+export const handleSetPrefix: Handler = async (message, args) => {
+  log.info(`Entering handleSetPrefix`);
+  const { guild } = message;
+  const guildId = guild?.id as string;
+  const [prefix] = args;
+
+  if (prefix.length !== 1) {
+    message.channel.send(`Prefix must be 1 character long`);
+    return;
+  }
+
+  await updateGuildPrefix(guildId, prefix);
+  log.info(`Prefix for guild ${guildId} set to ${prefix}`);
+
+  message.channel.send(`**${prefix}** has been set as the default prefix`);
+  log.info(`Exiting handleSetPrefix`);
 };

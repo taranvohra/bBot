@@ -13,3 +13,10 @@ export const updateGuildQueryChannel = (guildId: string, channelId: string) =>
       queryChannel: channelId,
     },
   }).exec();
+
+export const updateGuildPrefix = (guildId: string, prefix: string) =>
+  Guilds.findByIdAndUpdate(guildId, {
+    $set: {
+      prefix,
+    },
+  }).exec();

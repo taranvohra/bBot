@@ -21,6 +21,13 @@ const generalCommandList: Command[] = [
     type: 'noArg',
     isPrivileged: true,
   },
+  {
+    group,
+    key: 'handleSetPrefix',
+    aliases: ['setprefix'],
+    type: 'singleArg',
+    isPrivileged: true,
+  },
 ];
 
 export default generalCommandList;
