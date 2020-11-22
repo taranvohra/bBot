@@ -6,7 +6,7 @@
         misc: { byGuildId: {} }
     }
  */
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import {
   miscReducer,
   blocksReducer,
@@ -14,15 +14,13 @@ import {
   pugsReducer,
 } from './slices';
 
-const rootReducer = combineReducers({
-  miscReducer,
-  blocksReducer,
-  queriesReducer,
-  pugsReducer,
-});
-
 const store = configureStore({
-  reducer: rootReducer,
+  reducer: {
+    misc: miscReducer,
+    blocks: blocksReducer,
+    queries: queriesReducer,
+    pugs: pugsReducer,
+  },
 });
 
 export default store;

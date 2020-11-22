@@ -122,10 +122,18 @@ export const handleIgnoreCommandGroup: Handler = async (message, args) => {
   const { guild } = message;
   const guildId = guild?.id as string;
   const group = args[0].toLowerCase();
+  const cache = store.getState();
+  const { ignoredCommandGroup } = cache.misc[guildId];
 
   // TODO: give a list of command groups in the message
   if (!group) {
     message.channel.send(`Please mention a command group`);
+    return;
+  }
+
+  if (ignoredCommandGroup.includes(group)) {
+    log.info(`Command group ${group} is already present`);
+    message.channel.send(`Command group **${group}** is already ignored`);
     return;
   }
 
@@ -135,7 +143,7 @@ export const handleIgnoreCommandGroup: Handler = async (message, args) => {
   store.dispatch(ignoreCommandGroup({ guildId, group }));
 
   message.channel.send(
-    `commands under group **${group}** will be ignored from now onwards`
+    `Commands under group **${group}** will be ignored from now onwards`
   );
   log.info(`Exiting handleIgnoreCommandGroup`);
 };
@@ -145,10 +153,20 @@ export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
   const { guild } = message;
   const guildId = guild?.id as string;
   const group = args[0].toLowerCase();
+  const cache = store.getState();
+  const { ignoredCommandGroup } = cache.misc[guildId];
 
   // TODO: give a list of command groups in the message
   if (!group) {
     message.channel.send(`Please mention a command group`);
+    return;
+  }
+
+  if (!ignoredCommandGroup.includes(group)) {
+    log.info(`Command group ${group} was not ignored in the first place`);
+    message.channel.send(
+      `Invalid. Command group **${group}** was not ignored in the first place`
+    );
     return;
   }
 
@@ -158,7 +176,7 @@ export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
   store.dispatch(unIgnoreCommandGroup({ guildId, group }));
 
   message.channel.send(
-    `commands under group **${group}** will not be ignored from now onwards`
+    `Commands under group **${group}** will not be ignored from now onwards`
   );
   log.info(`Exiting handleUnIgnoreCommandGroup`);
 };
