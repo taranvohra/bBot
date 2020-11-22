@@ -102,5 +102,14 @@ const pugsSlice = createSlice({
   },
 });
 
-export const {} = pugsSlice.actions;
+export const {
+  initPugs,
+  addGameType,
+  removeGameType,
+  addPug,
+  removePug,
+  enableCoinFlip,
+  disableCoinFlip,
+  setPugChannel,
+} = pugsSlice.actions;
 export const pugsReducer = pugsSlice.reducer;
