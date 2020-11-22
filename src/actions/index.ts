@@ -20,3 +20,10 @@ export const updateGuildPrefix = (guildId: string, prefix: string) =>
       prefix,
     },
   }).exec();
+
+  export const addGuildIgnoredCommandGroup = (guildId: string, group: string) =>
+  Guilds.findByIdAndUpdate(guildId: {
+    $addToSet: {
+      ignoredCommandGroup: group
+    }
+  }).exec()

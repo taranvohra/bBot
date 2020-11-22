@@ -4,6 +4,7 @@ import {
   updateGuildPugChannel,
   updateGuildQueryChannel,
   updateGuildPrefix,
+  addGuildIgnoredCommandGroup,
 } from '~actions';
 import store, {
   initPugs,
@@ -13,6 +14,8 @@ import store, {
   setPugChannel,
   setQueryChannel,
   setPrefix,
+  ignoreCommandGroup,
+  unIgnoreCommandGroup,
 } from '~store';
 
 export const handleRegisterServer: Handler = async (message, _) => {
@@ -111,4 +114,27 @@ export const handleSetPrefix: Handler = async (message, args) => {
 
   message.channel.send(`**${prefix}** has been set as the default prefix`);
   log.info(`Exiting handleSetPrefix`);
+};
+
+export const handleIgnoreCommandGroup: Handler = async (message, args) => {
+  log.info(`Entering handleIgnoreCommandGroup`);
+  const { guild } = message;
+  const guildId = guild?.id as string;
+  const group = args[0].toLowerCase();
+
+  // TODO: give a list of command groups in the message
+  if (!group) {
+    message.channel.send(`Please mention a command group`);
+    return;
+  }
+
+  await addGuildIgnoredCommandGroup(guildId, group);
+  log.info(`Added ${group} to guild ${guildId}'s ignored command group`);
+
+  store.dispatch(ignoreCommandGroup({ guildId, group }));
+
+  message.channel.send(
+    `commands under group **${group}** will be ignored from now onwards`
+  );
+  log.info(`Exiting handleIgnoreCommandGroup`);
 };

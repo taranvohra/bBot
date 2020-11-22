@@ -28,6 +28,13 @@ const generalCommandList: Command[] = [
     type: 'singleArg',
     isPrivileged: true,
   },
+  {
+    group,
+    key: 'handleIgnoreCommandGroup',
+    aliases: ['ignorecommandgroup', 'igc'],
+    type: 'singleArg',
+    isPrivileged: true,
+  },
 ];
 
 export default generalCommandList;

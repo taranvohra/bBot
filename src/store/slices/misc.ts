@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 type InitPayload = WithGuildID & GuildMiscState;
 type SetPrefixPayload = WithGuildID & Pick<GuildMiscState, 'prefix'>;
-type IgnoreCommandGroupPayload = WithGuildID & { command: string };
+type IgnoreCommandGroupPayload = WithGuildID & { group: string };
 type UnIgnoreCommandGroupPayload = IgnoreCommandGroupPayload;
 type AddCommandCooldown = WithGuildID & { command: string; timestamp: Date };
 
@@ -35,15 +35,15 @@ const miscSlice = createSlice({
       state,
       action: PayloadAction<IgnoreCommandGroupPayload>
     ) {
-      const { guildId, command } = action.payload;
-      state[guildId].ignoredCommandGroup.add(command);
+      const { guildId, group } = action.payload;
+      state[guildId].ignoredCommandGroup.add(group);
     },
     unIgnoreCommandGroup(
       state,
       action: PayloadAction<UnIgnoreCommandGroupPayload>
     ) {
-      const { guildId, command } = action.payload;
-      state[guildId].ignoredCommandGroup.delete(command);
+      const { guildId, group } = action.payload;
+      state[guildId].ignoredCommandGroup.delete(group);
     },
     addCommandCooldown(state, action: PayloadAction<AddCommandCooldown>) {
       const { guildId, command, timestamp } = action.payload;
