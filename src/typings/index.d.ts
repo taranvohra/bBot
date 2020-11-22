@@ -1,6 +1,7 @@
 import { Message, Client } from 'discord.js';
 
 declare global {
+  //TODO: Add needsRegisteredGuild: boolean
   export type Command = {
     group: string;
     key: string;
