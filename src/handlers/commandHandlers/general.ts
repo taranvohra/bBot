@@ -26,6 +26,7 @@ export const handleRegisterServer: Handler = async (message, _) => {
 
   const guildExists = await Guilds.findById(guildId);
   if (guildExists) {
+    log.debug(`${guildId} (${guild?.name}) is already registered`);
     message.channel.send(
       `This discord server is already registered with bBot :wink:`
     );
@@ -50,11 +51,10 @@ export const handleRegisterServer: Handler = async (message, _) => {
     initMisc({
       guildId,
       cooldowns: {},
-      ignoredCommandGroup: {},
-      prefix: null,
+      ignoredCommandGroup: [],
     })
   );
-  store.dispatch(initBlocks({ guildId, list: {} }));
+  store.dispatch(initBlocks({ guildId, list: [] }));
   store.dispatch(initQueries({ guildId, list: [], channel: null }));
 
   message.channel.send(`**${guild?.name}** has been registered with bBot!`);

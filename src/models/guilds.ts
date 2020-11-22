@@ -1,4 +1,4 @@
-import { getModelForClass, prop, ReturnModelType } from '@typegoose/typegoose';
+import { getModelForClass, prop } from '@typegoose/typegoose';
 
 class GameType {
   @prop()
@@ -11,16 +11,13 @@ class GameType {
   noOfTeams!: number;
 
   @prop()
-  pickingOrder!: number[];
+  pickingOrder!: number[] | null;
 
   @prop()
   isCoinFlipEnabled!: boolean;
 }
 
 class QueryServer {
-  @prop()
-  key!: string;
-
   @prop()
   name!: string;
 
@@ -35,6 +32,9 @@ class QueryServer {
 }
 
 class User {
+  @prop()
+  id!: string;
+
   @prop()
   username!: string;
 }
@@ -56,7 +56,7 @@ class Block {
   reason!: string;
 }
 
-class Guild {
+export class Guild {
   @prop({ type: String })
   _id!: string;
 

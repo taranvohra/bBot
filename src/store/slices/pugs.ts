@@ -15,7 +15,7 @@ type GameType = GameTypeName & {
   pickingOrder: Array<number> | null;
   noOfPlayers: number;
   noOfTeams: number;
-  coinFlip: boolean;
+  isCoinFlipEnabled: boolean;
 };
 
 type PugStat = {
@@ -91,13 +91,13 @@ const pugsSlice = createSlice({
       const { guildId, name } = action.payload;
       const { gameTypes } = state[guildId];
       const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
-      state[guildId].gameTypes[gameTypeIndex].coinFlip = true;
+      state[guildId].gameTypes[gameTypeIndex].isCoinFlipEnabled = true;
     },
     disableCoinFlip(state, action: PayloadAction<DisableCoinFlipPayload>) {
       const { guildId, name } = action.payload;
       const { gameTypes } = state[guildId];
       const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
-      state[guildId].gameTypes[gameTypeIndex].coinFlip = false;
+      state[guildId].gameTypes[gameTypeIndex].isCoinFlipEnabled = false;
     },
   },
 });
