@@ -107,6 +107,8 @@ export const handleSetPrefix: Handler = async (message, args) => {
   await updateGuildPrefix(guildId, prefix);
   log.info(`Prefix for guild ${guildId} set to ${prefix}`);
 
+  store.dispatch(setPrefix({ guildId, prefix }));
+
   message.channel.send(`**${prefix}** has been set as the default prefix`);
   log.info(`Exiting handleSetPrefix`);
 };
