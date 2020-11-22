@@ -1,7 +1,7 @@
+import log from '../../log';
 import { Guilds } from '~models';
 import store, { initPugs, initMisc, initBlocks, initQueries } from '~store';
-import log from '../../log';
-
+import { updateGuildPugChannel } from '~actions';
 export const handleRegisterServer: Handler = async (message, _) => {
   log.info(`Entering handleRegisterServer`);
   const { guild } = message;
@@ -24,6 +24,7 @@ export const handleRegisterServer: Handler = async (message, _) => {
   });
 
   const guildId = newGuild.id as string;
+  log.info(`Registered new guild ${guild}`);
   log.debug(`Initializing store for ${guildId}`);
 
   store.dispatch(initPugs({ guildId, list: [], gameTypes: [], channel: null }));
@@ -39,4 +40,19 @@ export const handleRegisterServer: Handler = async (message, _) => {
   store.dispatch(initQueries({ guildId, list: [], channel: null }));
 
   message.channel.send(`**${guild?.name}** has been registered with bBot!`);
+  log.info(`Exiting handleRegisterServer`);
+};
+
+export const handleSetPugChannel: Handler = async (message, _) => {
+  log.info(`Entering handleSetPugChannel`);
+  const {
+    channel: { id },
+    guild,
+  } = message;
+
+  await updateGuildPugChannel(guild?.id as string, id);
+  log.info(`Pug channel updated for guild ${guild?.id} to ${id}`);
+
+  message.channel.send(`<#${id}> has been set as the pug channel`);
+  log.info(`Exiting handleSetPugChannel`);
 };

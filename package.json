@@ -32,7 +32,7 @@
     "@reduxjs/toolkit": "^1.4.0",
     "@typegoose/typegoose": "^7.4.0",
     "discord.js": "^12.4.1",
-    "mongoose": "^5.10.13",
+    "mongoose": "^5.10.15",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0"
   }
