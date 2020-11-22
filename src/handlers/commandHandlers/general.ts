@@ -1,16 +1,25 @@
 import log from '../../log';
 import { Guilds } from '~models';
-import store, { initPugs, initMisc, initBlocks, initQueries } from '~store';
-import { updateGuildPugChannel } from '~actions';
+import { updateGuildPugChannel, updateGuildQueryChannel } from '~actions';
+import store, {
+  initPugs,
+  initMisc,
+  initBlocks,
+  initQueries,
+  setPugChannel,
+  setQueryChannel,
+} from '~store';
+
 export const handleRegisterServer: Handler = async (message, _) => {
   log.info(`Entering handleRegisterServer`);
   const { guild } = message;
 
   const guildExists = await Guilds.findById(guild?.id as string);
   if (guildExists) {
-    return message.channel.send(
+    message.channel.send(
       `This discord server is already registered with bBot :wink:`
     );
+    return;
   }
 
   const newGuild = await Guilds.create({
@@ -46,13 +55,33 @@ export const handleRegisterServer: Handler = async (message, _) => {
 export const handleSetPugChannel: Handler = async (message, _) => {
   log.info(`Entering handleSetPugChannel`);
   const {
-    channel: { id },
+    channel: { id: channelId },
     guild,
   } = message;
 
-  await updateGuildPugChannel(guild?.id as string, id);
-  log.info(`Pug channel updated for guild ${guild?.id} to ${id}`);
+  const guildId = guild?.id as string;
 
-  message.channel.send(`<#${id}> has been set as the pug channel`);
+  await updateGuildPugChannel(guildId, channelId);
+  log.info(`Pug channel updated for guild ${guildId} to ${channelId}`);
+
+  store.dispatch(setPugChannel({ guildId, channelId }));
+
+  message.channel.send(`<#${channelId}> has been set as the pug channel`);
   log.info(`Exiting handleSetPugChannel`);
+};
+
+export const handleSetQueryChannel: Handler = async (message, _) => {
+  log.info(`Entering handleSetQueryChannel`);
+  const {
+    channel: { id: channelId },
+    guild,
+  } = message;
+
+  const guildId = guild?.id as string;
+
+  await updateGuildQueryChannel(guildId, channelId);
+  log.info(`Query channel updated for guild ${guildId} to ${channelId}`);
+
+  message.channel.send(`<#${channelId}> has been set as the query channel`);
+  log.info(`Exiting handleSetQueryChannel`);
 };
