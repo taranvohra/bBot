@@ -12,9 +12,7 @@ type Block = {
   reason: string;
 };
 
-type GuildBlockState = {
-  list: Record<string, Block>;
-};
+type GuildBlockState = Record<string, Block>;
 
 type BlocksState = {
   [guild: string]: GuildBlockState;
@@ -26,16 +24,16 @@ const blocksSlice = createSlice({
   initialState,
   reducers: {
     initBlocks(state, action: PayloadAction<InitPayload>) {
-      const { guildId, list } = action.payload;
-      state[guildId].list = list;
+      const { guildId, ...data } = action.payload;
+      state[guildId] = data;
     },
     addBlockedUser(state, action: PayloadAction<AddBlockedUserPayload>) {
       const { guildId, ...block } = action.payload;
-      state[guildId].list[block.id] = block;
+      state[guildId][block.id] = block;
     },
     removeBlockedUser(state, action: PayloadAction<RemoveBlockedUserPayload>) {
       const { guildId, userId } = action.payload;
-      delete state[guildId].list[userId];
+      delete state[guildId][userId];
     },
   },
 });

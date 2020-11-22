@@ -28,7 +28,7 @@ const queriesSlice = createSlice({
   reducers: {
     initQueries(state, action: PayloadAction<InitPayload>) {
       const { guildId, ...data } = action.payload;
-      state[guildId] = { ...data };
+      state[guildId] = data;
     },
     setQueryChannel(state, action: PayloadAction<SetQueryChannelPayload>) {
       const { channelId, guildId } = action.payload;
