@@ -48,6 +48,7 @@
        "~commands": ["src/commands/index.ts"],
        "~handlers": ["src/handlers/index.ts"],
        "~models": ["src/models/index.ts"],
+       "~store": ["src/store/index.ts"],
        "~utils": ["src/utils/index.ts"],
      },                                       /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */

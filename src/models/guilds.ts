@@ -77,11 +77,6 @@ class Guild {
 
   @prop()
   prefix?: string;
-
-  // Methods
-  public static fetchGuild(this: ReturnModelType<typeof Guild>, id: string) {
-    return this.findById(id).exec();
-  }
 }
 
 export const Guilds = getModelForClass(Guild);
