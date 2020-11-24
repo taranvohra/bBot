@@ -25,3 +25,32 @@ export const isMemberPrivileged = (member: GuildMember) =>
   member.roles.cache.some((role) =>
     CONSTANTS.privilegedRoles.includes(role.name)
   );
+
+export const computePickingOrder = (noOfPlayers: number, noOfTeams: number) => {
+  let idx = 0,
+    remainingPlayers = noOfPlayers - noOfTeams, // because captains
+    pickingOrder: Array<number> = [],
+    wholeRound: Array<number> = [];
+
+  if (noOfPlayers < noOfTeams || noOfPlayers % noOfTeams !== 0) return null; // Invalid, cannot compute from these params
+
+  if (noOfPlayers === noOfTeams) return [-1]; // 1v1, requires no picking order
+
+  while (remainingPlayers > 0) {
+    pickingOrder.push(idx);
+    wholeRound.push(idx);
+    if (
+      wholeRound.length === noOfTeams &&
+      pickingOrder.length !== noOfPlayers - noOfTeams
+    ) {
+      pickingOrder = [...pickingOrder, ...wholeRound.reverse()];
+      wholeRound = [];
+      idx = 0;
+      remainingPlayers = remainingPlayers - noOfTeams - 1;
+    } else {
+      idx++;
+      remainingPlayers--;
+    }
+  }
+  return pickingOrder;
+};

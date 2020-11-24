@@ -1,4 +1,4 @@
-import { Guilds } from '~models';
+import { Guilds, GameType } from '~models';
 
 export const updateGuildPugChannel = (guildId: string, channelId: string) =>
   Guilds.findByIdAndUpdate(guildId, {
@@ -35,5 +35,12 @@ export const removeGuildIgnoredCommandGroup = (
   Guilds.findByIdAndUpdate(guildId, {
     $pull: {
       ignoredCommandGroup: group,
+    },
+  }).exec();
+
+export const addGuildGameType = (guildId: string, gameType: GameType) =>
+  Guilds.findByIdAndUpdate(guildId, {
+    $push: {
+      gameTypes: gameType,
     },
   }).exec();

@@ -1,6 +1,6 @@
 import { getModelForClass, prop } from '@typegoose/typegoose';
 
-class GameType {
+export class GameType {
   @prop()
   name!: string;
 
@@ -17,7 +17,7 @@ class GameType {
   isCoinFlipEnabled!: boolean;
 }
 
-class QueryServer {
+export class QueryServer {
   @prop()
   name!: string;
 
@@ -39,7 +39,7 @@ class User {
   username!: string;
 }
 
-class Block {
+export class Block {
   @prop({ _id: false })
   culprit!: User;
 
