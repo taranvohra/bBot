@@ -11,7 +11,7 @@ export class GameType {
   noOfTeams!: number;
 
   @prop()
-  pickingOrder!: number[] | null;
+  pickingOrder!: Array<number>;
 
   @prop()
   isCoinFlipEnabled!: boolean;
