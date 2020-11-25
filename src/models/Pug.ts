@@ -66,4 +66,15 @@ export class Pug implements TPug {
       if (p.id === id) p.tag = '';
     });
   }
+
+  stopPug() {
+    if (this.timerFn) clearTimeout(this.timerFn);
+    this.isInPickingMode = false;
+    this.turn = 0;
+    this.captains = [];
+    this.players.forEach((p) => {
+      p.pick = null;
+      p.team = null;
+    });
+  }
 }
