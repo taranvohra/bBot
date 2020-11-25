@@ -44,3 +44,8 @@ export const addGuildGameType = (guildId: string, gameType: GameType) =>
       gameTypes: gameType,
     },
   }).exec();
+
+export const deleteGuildGameType = (guildId: string, gameTypeName: string) =>
+  Guilds.findByIdAndUpdate(guildId, {
+    $pull: { gameTypes: { name: gameTypeName } },
+  }).exec();
