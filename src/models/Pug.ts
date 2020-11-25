@@ -46,5 +46,24 @@ export class Pug implements TPug {
       tag: '',
       ...user,
     });
+    // put cases if player is already in, couldnt join or joined
+  }
+
+  removePlayer(id: string) {
+    const playerIndex = this.players.findIndex((p) => p.id === id);
+    this.players.splice(playerIndex, 1);
+    // if picking then stop pug, put check in handler
+  }
+
+  addTag(id: string, tag: string) {
+    this.players.forEach((p) => {
+      if (p.id === id) p.tag = tag;
+    });
+  }
+
+  removeTag(id: string) {
+    this.players.forEach((p) => {
+      if (p.id === id) p.tag = '';
+    });
   }
 }
