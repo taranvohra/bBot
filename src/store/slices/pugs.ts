@@ -12,7 +12,7 @@ type DisableCoinFlipPayload = WithGuildID & GameTypeName;
 type GameTypeName = { name: string };
 
 type GameType = GameTypeName & {
-  pickingOrder: Array<number> | null;
+  pickingOrder: Array<number>;
   noOfPlayers: number;
   noOfTeams: number;
   isCoinFlipEnabled: boolean;
@@ -25,23 +25,23 @@ type PugStat = {
   lost: number;
 };
 
-type PugPlayer = {
+export type PugPlayer = {
   id: string;
   name: string;
   tag: string;
-  team: number;
-  pick: number;
+  team: number | null;
+  pick: number | null;
   stats: {
     [gametype: string]: PugStat;
   };
 };
 
-type Pug = GameType & {
+export type Pug = GameType & {
   turn: number;
-  picking: boolean;
-  timerFn: number;
+  isInPickingMode: boolean;
+  timerFn: number | null;
   players: Array<PugPlayer>;
-  captains: Array<PugPlayer>;
+  captains: Array<number>;
 };
 
 type GuildPugsState = {
