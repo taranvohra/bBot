@@ -1,10 +1,15 @@
 import { Message, Client } from 'discord.js';
-import { CONSTANTS, isMemberPrivileged } from '~utils';
+import {
+  CONSTANTS,
+  isMemberPrivileged,
+  isGuildRegistered,
+  isCommandInValidChannel,
+} from '~utils';
 import commandHandlers from './commandHandlers';
 import commands from '../commands';
 
 export const onMessage = async (message: Message, client: Client) => {
-  const { author, content, guild, member } = message;
+  const { author, content, guild, member, channel } = message;
 
   if (author.id === client.user?.id) return;
   if (!guild) return;
@@ -25,10 +30,37 @@ export const onMessage = async (message: Message, client: Client) => {
   );
 
   if (foundCommand) {
+    if (foundCommand.needsRegisteredGuild && !isGuildRegistered(guild.id)) {
+      message.channel.send(
+        `Please register this guild before using any of the other commands`
+      );
+      return;
+    }
+
+    const { valid, reason } = isCommandInValidChannel(
+      foundCommand,
+      guild.id,
+      channel.id
+    );
+
+    if (!valid) {
+      if (reason === undefined) {
+        message.channel.send(
+          `Active channel for ${foundCommand.group} is not present`
+        );
+      } else {
+        message.channel.send(
+          `Active channel for ${foundCommand.group} is <#${reason}>`
+        );
+      }
+      return;
+    }
+
     if (foundCommand.isPrivileged && !isMemberPrivileged(member)) {
       message.channel.send(
         `This is a privileged command. You do not have the appropriate role to use this command.`
       );
+      return;
     }
 
     const handler = foundCommand.key as keyof typeof commandHandlers;

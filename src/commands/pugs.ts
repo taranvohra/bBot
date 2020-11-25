@@ -6,6 +6,7 @@ const pugsCommandList: Command[] = [
     aliases: ['addgametype', 'agm'],
     type: 'multiArg',
     isPrivileged: true,
+    needsRegisteredGuild: true,
   },
   {
     group,
@@ -13,6 +14,7 @@ const pugsCommandList: Command[] = [
     aliases: ['deletegametype', 'dgm'],
     type: 'singleArg',
     isPrivileged: true,
+    needsRegisteredGuild: true,
   },
 ];
 

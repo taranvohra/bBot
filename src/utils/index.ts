@@ -1,4 +1,5 @@
-import { GuildMember } from 'discord.js';
+import { Channel, GuildMember } from 'discord.js';
+import store from '~store';
 
 export const CONSTANTS = {
   defaultPrefix: '-',
@@ -21,10 +22,43 @@ export const CONSTANTS = {
   autoCaptainPickTimer: 30 * 1000,
 };
 
+export const isGuildRegistered = (guildId: string) => {
+  const cache = store.getState();
+  return cache.misc[guildId] === undefined;
+};
+
 export const isMemberPrivileged = (member: GuildMember) =>
   member.roles.cache.some((role) =>
     CONSTANTS.privilegedRoles.includes(role.name)
   );
+
+export const isCommandInValidChannel = (
+  command: Command,
+  guildId: string,
+  channelId: string
+): { valid: boolean; reason: string | undefined } => {
+  const cache = store.getState();
+  const pugChannel = cache.pugs[guildId].channel;
+  const queriesChannel = cache.queries[guildId].channel;
+  switch (command.group) {
+    case 'general':
+      return { valid: true, reason: '' };
+
+    case 'pugs':
+      return pugChannel
+        ? pugChannel === channelId
+          ? { valid: true, reason: '' }
+          : { valid: false, reason: pugChannel }
+        : { valid: false, reason: undefined };
+
+    case 'queries':
+      return queriesChannel
+        ? queriesChannel === channelId
+          ? { valid: true, reason: '' }
+          : { valid: false, reason: queriesChannel }
+        : { valid: false, reason: undefined };
+  }
+};
 
 export const computePickingOrder = (noOfPlayers: number, noOfTeams: number) => {
   let idx = 0,

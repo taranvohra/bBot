@@ -6,6 +6,7 @@ const generalCommandList: Command[] = [
     aliases: ['register'],
     type: 'noArg',
     isPrivileged: true,
+    needsRegisteredGuild: false,
   },
   {
     group,
@@ -13,6 +14,7 @@ const generalCommandList: Command[] = [
     aliases: ['setpugchannel'],
     type: 'noArg',
     isPrivileged: true,
+    needsRegisteredGuild: true,
   },
   {
     group,
@@ -20,6 +22,7 @@ const generalCommandList: Command[] = [
     aliases: ['setquerychannel'],
     type: 'noArg',
     isPrivileged: true,
+    needsRegisteredGuild: true,
   },
   {
     group,
@@ -27,6 +30,7 @@ const generalCommandList: Command[] = [
     aliases: ['setprefix'],
     type: 'singleArg',
     isPrivileged: true,
+    needsRegisteredGuild: true,
   },
   {
     group,
@@ -34,6 +38,7 @@ const generalCommandList: Command[] = [
     aliases: ['ignorecommandgroup', 'igc'],
     type: 'singleArg',
     isPrivileged: true,
+    needsRegisteredGuild: true,
   },
   {
     group,
@@ -41,6 +46,7 @@ const generalCommandList: Command[] = [
     aliases: ['unignorecommandgroup', 'uigc'],
     type: 'singleArg',
     isPrivileged: true,
+    needsRegisteredGuild: true,
   },
 ];
 
