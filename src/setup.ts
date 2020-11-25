@@ -11,7 +11,7 @@ export const connectDB = async () =>
   });
 
 export const hydrateStore = async () => {
-  const cursor = Guilds.find({}).cursor();
+  const cursor = Guilds.find({}).lean().cursor();
   for (
     let guild: DocumentType<GuildClass> = await cursor.next();
     guild != null;
