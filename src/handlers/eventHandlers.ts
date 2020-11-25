@@ -5,8 +5,11 @@ import {
   isGuildRegistered,
   isCommandInValidChannel,
 } from '~utils';
-import commandHandlers from './commandHandlers';
 import commands from '../commands';
+import * as generalHandlers from './generalHandlers';
+import * as pugHandlers from './pugHandlers';
+
+const commandHandlers = { ...generalHandlers, ...pugHandlers };
 
 export const onMessage = async (message: Message, client: Client) => {
   const { author, content, guild, member, channel } = message;

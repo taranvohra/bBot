@@ -24,7 +24,7 @@ export const CONSTANTS = {
 
 export const isGuildRegistered = (guildId: string) => {
   const cache = store.getState();
-  return cache.misc[guildId] === undefined;
+  return cache.misc[guildId] !== undefined;
 };
 
 export const isMemberPrivileged = (member: GuildMember) =>
