@@ -77,4 +77,12 @@ export class Pug implements TPug {
       p.team = null;
     });
   }
+
+  isEmpty() {
+    return this.players.length === 0;
+  }
+
+  areCaptainsDecided() {
+    return this.captains.filter(Boolean).length === this.noOfTeams;
+  }
 }
