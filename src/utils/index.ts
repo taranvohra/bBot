@@ -19,7 +19,8 @@ export const CONSTANTS = {
     spec: 'Spectators',
   },
   tagLength: 50,
-  autoCaptainPickTimer: 30 * 1000,
+  autoCaptainPickTimer: 30_000,
+  strongPlayersRatingThreshold: 3.75,
 };
 
 export const isGuildRegistered = (guildId: string) => {
@@ -88,3 +89,10 @@ export const computePickingOrder = (noOfPlayers: number, noOfTeams: number) => {
   }
   return pickingOrder;
 };
+
+export const getRandomInt = (min: number, max: number) =>
+  Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) +
+  Math.ceil(min);
+
+export const shuffle = <T>(arr: Array<T>): Array<T> =>
+  arr.slice().sort(() => Math.random() - 0.5);

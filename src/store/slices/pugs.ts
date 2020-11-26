@@ -39,9 +39,9 @@ export type PugPlayer = {
 export type Pug = GameType & {
   turn: number;
   isInPickingMode: boolean;
-  timerFn: number | null;
+  timerFn: ReturnType<typeof setTimeout> | null;
   players: Array<PugPlayer>;
-  captains: Array<number>;
+  captains: Array<string>;
 };
 
 type GuildPugsState = {
