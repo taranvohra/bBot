@@ -1,5 +1,6 @@
 import { Pug as TPug, PugPlayer } from '~store';
 import { getRandomInt, shuffle, CONSTANTS } from '~utils';
+import { pugPubSub } from '../pubsub';
 
 type User = Pick<PugPlayer, 'id' | 'name' | 'stats'>;
 
@@ -240,7 +241,7 @@ export class Pug implements TPug {
         }
       }
 
-      // TODO: emit captain ready event
+      pugPubSub.emit('captains_ready', guildId, this.name);
     }, CONSTANTS.autoCaptainPickTimer);
   }
 }
