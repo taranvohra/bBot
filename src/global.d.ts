@@ -1,4 +1,4 @@
-import { Message, Client } from 'discord.js';
+import { Message, Client, GuildMember } from 'discord.js';
 
 declare global {
   export type Command = {
@@ -10,7 +10,11 @@ declare global {
     needsRegisteredGuild: boolean;
   };
 
-  export type Handler = (message: Message, args: string[]) => Promise<void>;
+  export type Handler = (
+    message: Message,
+    args: string[],
+    user: GuildMember
+  ) => Promise<void>;
   export type WithGuildID = {
     guildId: string;
   };
