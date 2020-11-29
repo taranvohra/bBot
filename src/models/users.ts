@@ -18,8 +18,8 @@ class Stat {
 }
 
 export class User {
-  @prop({ type: String })
-  _id!: string;
+  @prop()
+  userId!: string;
 
   @prop()
   guildId!: string;

@@ -1,14 +1,25 @@
-import { formatDistance } from 'date-fns';
 import log from '../log';
+import { formatDistance } from 'date-fns';
+import { User } from 'discord.js';
+import { Pug, Users } from '~models';
 import { computePickingOrder } from '~utils';
 import { addGuildGameType, deleteGuildGameType } from '~actions';
-import store, { addGameType, removeGameType } from '~store';
-import { Pug } from '~models';
+import store, { addGameType, removeGameType, addPug } from '~store';
+import { formatPugFilledDM, formatJoinStatus } from '../formatting';
+
+export type JoinStatus = {
+  name: string;
+  result: 'full' | 'present' | 'joined' | 'not-found';
+  user?: User;
+  pug?: Pug;
+};
 
 export const handleAddGameType: Handler = async (message, args) => {
   log.info(`Entering handleAddGameType`);
   const { guild } = message;
-  const guildId = guild?.id as string;
+  if (!guild) return;
+
+  const guildId = guild.id;
   const cache = store.getState();
   const { gameTypes } = cache.pugs[guildId];
 
@@ -89,19 +100,20 @@ export const handleDeleteGameType: Handler = async (message, args) => {
 export const handleJoinGameTypes: Handler = async (message, args, user) => {
   log.info(`Entering handleJoinGameTypes`);
   const { guild } = message;
-  const guildId = guild?.id as string;
+  if (!guild) return;
+
   const cache = store.getState();
-  const { gameTypes, list } = cache.pugs[guildId];
-  const { list: blockedList } = cache.blocks[guildId];
+  const { gameTypes, list } = cache.pugs[guild.id];
+  const { list: blockedList } = cache.blocks[guild.id];
 
   const block = blockedList.find((b) => b.culprit.id === user.id);
   if (block) {
     log.debug(
-      `${user.id} cannot join pugs on ${guildId} because they are blocked`
+      `${user.id} cannot join pugs on ${guild.id} because they are blocked`
     );
     message.channel.send(
       `**${
-        user.user.username
+        user.username
       }** is blocked from joining pugs. Block expires in **${formatDistance(
         new Date(),
         new Date(block.expiresAt)
@@ -115,11 +127,104 @@ export const handleJoinGameTypes: Handler = async (message, args, user) => {
   );
   if (isPartOfFilledPug) {
     log.debug(
-      `${user.id} needs to leave ${isPartOfFilledPug.name} on ${guildId} first to join other pugs`
+      `${user.id} needs to leave ${isPartOfFilledPug.name} on ${guild.id} first to join other pugs`
     );
     message.channel.send(
       `Please leave **${isPartOfFilledPug.name.toUpperCase()}** first to join other pugs`
     );
+  }
+
+  const dbUser = await Users.findOne({
+    userId: user.id,
+    guildId: guild.id,
+  }).exec();
+
+  let toBroadcast: Pug | undefined;
+  const joinStatuses = args.map((game): JoinStatus | undefined => {
+    if (!toBroadcast) {
+      let result: 'full' | 'present' | 'joined' | 'not-found';
+      const gameType = gameTypes.find((g) => g.name === game);
+      if (!gameType) {
+        result = 'not-found';
+        return { name: game, result };
+      }
+
+      const existingPug = list.find((p) => p.name === game);
+      const pug = existingPug ?? new Pug(gameType);
+
+      const pickingStatusBeforeJoining = pug.isInPickingMode;
+
+      if (pug.isInPickingMode) {
+        log.debug(
+          `${user.id} cannot join ${pug.name} on ${guild.id} because it is already filled`
+        );
+        result = 'full';
+      } else if (pug.players.find((p) => p.id === user.id)) {
+        log.debug(
+          `${user.id} cannot join ${pug.name} on ${guild.id} because they are already in`
+        );
+        result = 'present';
+      } else {
+        const gameTypeStats = dbUser?.stats[game] ?? {
+          lost: 0,
+          won: 0,
+          totalPugs: 0,
+          totalCaptain: 0,
+          rating: 0,
+        };
+        pug.addPlayer({
+          id: user.id,
+          name: user.username,
+          stats: { [game]: gameTypeStats },
+        });
+        result = 'joined';
+        log.info(`${user.id} joined ${pug.name} on ${guild.id}`);
+      }
+
+      if (pug.players.length === pug.noOfPlayers && !pug.isInPickingMode) {
+        pug.fillPug(guild.id);
+        log.info(`Filled pug ${pug.name} on ${guild.id}`);
+      }
+
+      const pickingStatusAfterJoining = pug.isInPickingMode;
+      if (!pickingStatusBeforeJoining && pickingStatusAfterJoining) {
+        toBroadcast = pug;
+      }
+
+      if (!existingPug && result === 'joined') {
+        log.debug(`Adding ${pug.name} to store for guild ${guild.id}`);
+        store.dispatch(addPug({ guildId: guild.id, pug }));
+      }
+      return { name: game, user, pug, result };
+    }
+  });
+
+  message.channel.send(
+    formatJoinStatus(joinStatuses.filter(Boolean) as JoinStatus[])
+  );
+
+  if (toBroadcast) {
+    //TODO: compute leave messages
+    // let allLeaveMsgs = ``;
+    // for (let i = 0; i < list.length; i++) {
+    //   const otherPug = list[i];
+    //   if (otherPug.name !== toBroadcast.name) {
+    //     let allPugLeaveMsgs = ``;
+    //     for (let j = 0; j < toBroadcast.players.length; j++) {
+    //       const player = toBroadcast.players[j];
+    //     }
+    //   }
+    // }
+    /*
+     * Send DM to each player that pug fileld
+     */
+    const DM = formatPugFilledDM(toBroadcast, guild.name);
+    toBroadcast.players.forEach((player) => {
+      const user = message.client.users.cache.get(player.id);
+      user?.send(DM);
+    });
+
+    // TODO: handle case for 1v1 pug
   }
 
   log.info(`Exiting handleJoinGameTypes`);

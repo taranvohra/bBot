@@ -1,4 +1,4 @@
-import { Channel, GuildMember } from 'discord.js';
+import { GuildMember } from 'discord.js';
 import store from '~store';
 
 export const CONSTANTS = {
@@ -96,3 +96,7 @@ export const getRandomInt = (min: number, max: number) =>
 
 export const shuffle = <T>(arr: Array<T>): Array<T> =>
   arr.slice().sort(() => Math.random() - 0.5);
+
+export const emojis = {
+  tearddy: '<:tearddy:601092340865564673>',
+};

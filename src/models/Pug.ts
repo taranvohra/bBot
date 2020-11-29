@@ -1,10 +1,28 @@
-import { Pug as TPug, PugPlayer } from '~store';
 import { getRandomInt, shuffle, CONSTANTS } from '~utils';
 import { pugPubSub } from '../pubsub';
 
-type User = Pick<PugPlayer, 'id' | 'name' | 'stats'>;
+type PugUser = Pick<PugPlayer, 'id' | 'name' | 'stats'>;
 
-export class Pug implements TPug {
+type PugStat = {
+  totalCaptain: number;
+  totalPugs: number;
+  rating: number;
+  won: number;
+  lost: number;
+};
+
+type PugPlayer = {
+  id: string;
+  name: string;
+  tag: string;
+  team: number | null;
+  pick: number | null;
+  stats: {
+    [gametype: string]: PugStat;
+  };
+};
+
+export class Pug {
   name: string;
   noOfPlayers: number;
   noOfTeams: number;
@@ -41,7 +59,7 @@ export class Pug implements TPug {
     this.timerFn = null;
   }
 
-  addPlayer(user: User) {
+  addPlayer(user: PugUser) {
     this.players.push({
       team: null,
       pick: null,

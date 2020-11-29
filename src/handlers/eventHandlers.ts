@@ -67,7 +67,7 @@ export const onMessage = async (message: Message, client: Client) => {
     }
 
     const handler = foundCommand.key as keyof typeof commandHandlers;
-    commandHandlers[handler](message, args, member);
+    commandHandlers[handler](message, args, member.user);
   } else {
     // TODO send a mesage telling the user type help for list of commands
   }

@@ -1,4 +1,5 @@
-import { Message, Client, GuildMember } from 'discord.js';
+import { Message, Client, User } from 'discord.js';
+import { Pug } from '~models';
 
 declare global {
   export type Command = {
@@ -13,9 +14,17 @@ declare global {
   export type Handler = (
     message: Message,
     args: string[],
-    user: GuildMember
+    user: User
   ) => Promise<void>;
+
   export type WithGuildID = {
     guildId: string;
+  };
+
+  export type JoinStatus = {
+    name: string;
+    result: 'full' | 'present' | 'joined' | 'not-found';
+    user?: User;
+    pug?: Pug;
   };
 }

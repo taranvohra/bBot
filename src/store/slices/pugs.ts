@@ -1,10 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Pug } from '~models';
 
 type InitPayload = WithGuildID & GuildPugsState;
 type SetPugChannelPayload = WithGuildID & { channelId: string };
 type AddGameTypePayload = WithGuildID & GameType;
 type RemoveGameTypePayload = WithGuildID & GameTypeName;
-type AddPugPayload = WithGuildID & Pug;
+type AddPugPayload = WithGuildID & { pug: Pug };
 type RemovePugPayload = WithGuildID & GameTypeName;
 type EnableCoinFlipPayload = WithGuildID & GameTypeName;
 type DisableCoinFlipPayload = WithGuildID & GameTypeName;
@@ -16,32 +17,6 @@ type GameType = GameTypeName & {
   noOfPlayers: number;
   noOfTeams: number;
   isCoinFlipEnabled: boolean;
-};
-
-type PugStat = {
-  totalPugs: number;
-  rating: number;
-  won: number;
-  lost: number;
-};
-
-export type PugPlayer = {
-  id: string;
-  name: string;
-  tag: string;
-  team: number | null;
-  pick: number | null;
-  stats: {
-    [gametype: string]: PugStat;
-  };
-};
-
-export type Pug = GameType & {
-  turn: number;
-  isInPickingMode: boolean;
-  timerFn: ReturnType<typeof setTimeout> | null;
-  players: Array<PugPlayer>;
-  captains: Array<string>;
 };
 
 type GuildPugsState = {
@@ -78,7 +53,7 @@ const pugsSlice = createSlice({
       state[guildId].gameTypes.splice(gameTypeIndex, 1);
     },
     addPug(state, action: PayloadAction<AddPugPayload>) {
-      const { guildId, ...pug } = action.payload;
+      const { guildId, pug } = action.payload;
       state[guildId].list.push(pug);
     },
     removePug(state, action: PayloadAction<RemovePugPayload>) {
