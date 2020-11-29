@@ -99,4 +99,6 @@ export const shuffle = <T>(arr: Array<T>): Array<T> =>
 
 export const emojis = {
   tearddy: '<:tearddy:601092340865564673>',
+  smart: '<:smart:601094351770353664>',
+  peepoComfy: '<:peepoComfy:626060643895607296>',
 };

@@ -14,7 +14,8 @@ declare global {
   export type Handler = (
     message: Message,
     args: string[],
-    user: User
+    mentionedUser?: User,
+    returnMsg?: boolean
   ) => Promise<void>;
 
   export type WithGuildID = {
@@ -24,6 +25,13 @@ declare global {
   export type JoinStatus = {
     name: string;
     result: 'full' | 'present' | 'joined' | 'not-found';
+    user?: User;
+    pug?: Pug;
+  };
+
+  export type LeaveStatus = {
+    name: string;
+    result: 'not-in' | 'left' | 'not-found';
     user?: User;
     pug?: Pug;
   };

@@ -4,15 +4,13 @@ import { User } from 'discord.js';
 import { Pug, Users } from '~models';
 import { computePickingOrder } from '~utils';
 import { addGuildGameType, deleteGuildGameType } from '~actions';
-import store, { addGameType, removeGameType, addPug } from '~store';
-import { formatPugFilledDM, formatJoinStatus } from '../formatting';
-
-export type JoinStatus = {
-  name: string;
-  result: 'full' | 'present' | 'joined' | 'not-found';
-  user?: User;
-  pug?: Pug;
-};
+import store, { addGameType, removeGameType, addPug, removePug } from '~store';
+import {
+  formatPugFilledDM,
+  formatJoinStatus,
+  formatLeaveStatus,
+  formatDeadPugs,
+} from '../formatting';
 
 export const handleAddGameType: Handler = async (message, args) => {
   log.info(`Entering handleAddGameType`);
@@ -97,11 +95,16 @@ export const handleDeleteGameType: Handler = async (message, args) => {
   log.info(`Exiting handleDeleteGameType`);
 };
 
-export const handleJoinGameTypes: Handler = async (message, args, user) => {
+export const handleJoinGameTypes: Handler = async (
+  message,
+  args,
+  mentioned
+) => {
   log.info(`Entering handleJoinGameTypes`);
-  const { guild } = message;
+  const { guild, author } = message;
   if (!guild) return;
 
+  const user = mentioned || author;
   const cache = store.getState();
   const { gameTypes, list } = cache.pugs[guild.id];
   const { list: blockedList } = cache.blocks[guild.id];
@@ -142,7 +145,7 @@ export const handleJoinGameTypes: Handler = async (message, args, user) => {
   let toBroadcast: Pug | undefined;
   const joinStatuses = args.map((game): JoinStatus | undefined => {
     if (!toBroadcast) {
-      let result: 'full' | 'present' | 'joined' | 'not-found';
+      let result: JoinStatus['result'];
       const gameType = gameTypes.find((g) => g.name === game);
       if (!gameType) {
         result = 'not-found';
@@ -228,4 +231,74 @@ export const handleJoinGameTypes: Handler = async (message, args, user) => {
   }
 
   log.info(`Exiting handleJoinGameTypes`);
+};
+
+export const handleLeaveGameTypes: Handler = async (
+  message,
+  args,
+  mentioned,
+  returnMsg
+) => {
+  log.info(`Entering handleLeaveGameTypes`);
+  const { guild, author } = message;
+  if (!guild) return;
+
+  const user = mentioned || author;
+  const cache = store.getState();
+  const { gameTypes, list } = cache.pugs[guild.id];
+
+  if (args.length === 0) {
+    message.channel.send(`Invalid, no pugs were mentioned`);
+    return;
+  }
+
+  const leaveStatuses = args.map(
+    (game): LeaveStatus => {
+      let result: LeaveStatus['result'];
+      const gameType = gameTypes.find((g) => g.name === game);
+      if (!gameType) {
+        result = 'not-found';
+        return { name: game, result };
+      }
+
+      const pug = list.find((p) => p.name === game);
+      const isInPug = Boolean(pug && pug.players.find((u) => u.id === user.id));
+      if (pug && isInPug) {
+        pug.removePlayer(user.id);
+        log.info(`Removed user ${user.id} from ${game} in ${guild.id}`);
+        if (pug.isInPickingMode) {
+          pug.stopPug();
+          log.info(`Stopped pug ${game} at ${guild.id}`);
+        }
+        result = 'left';
+      } else {
+        result = 'not-in';
+      }
+
+      return { name: game, result, pug, user };
+    }
+  );
+
+  // Compute dead pugs
+  const deadPugs = leaveStatuses.reduce((acc, { pug, user }) => {
+    if (pug && user) {
+      if (pug.players.length === pug.noOfPlayers - 1) {
+        acc.push({ pug, user });
+      }
+      if (pug.isEmpty()) {
+        store.dispatch(removePug({ guildId: guild.id, name: pug.name }));
+        log.info(
+          `Removed pug ${pug.name} at guild ${guild.id} because there are 0 players in`
+        );
+      }
+    }
+    return acc;
+  }, [] as { pug: Pug; user: User }[]);
+
+  const leaveMessage = formatLeaveStatus(leaveStatuses);
+  message.channel.send(leaveMessage);
+
+  if (deadPugs.length > 0) {
+    message.channel.send(formatDeadPugs(deadPugs));
+  }
 };
