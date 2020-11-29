@@ -57,7 +57,6 @@ export const handleAddGameType: Handler = async (message, args) => {
     noOfTeams,
     pickingOrder,
     isCoinFlipEnabled: false,
-    ja: 5,
   };
   await addGuildGameType(guildId, newGameType);
   log.info(`Added new gametype ${name} to guild ${guildId}`);
@@ -71,9 +70,10 @@ export const handleAddGameType: Handler = async (message, args) => {
 export const handleDeleteGameType: Handler = async (message, args) => {
   log.info(`Entering handleDeleteGameType`);
   const { guild } = message;
-  const guildId = guild?.id as string;
+  if (!guild) return;
+
   const cache = store.getState();
-  const { gameTypes } = cache.pugs[guildId];
+  const { gameTypes } = cache.pugs[guild.id];
 
   const name = args[0].toLowerCase();
 
@@ -88,10 +88,10 @@ export const handleDeleteGameType: Handler = async (message, args) => {
     return;
   }
 
-  await deleteGuildGameType(guildId, name);
-  log.info(`Deleted gametype ${name} from guild ${guildId}`);
+  await deleteGuildGameType(guild.id, name);
+  log.info(`Deleted gametype ${name} from guild ${guild.id}`);
 
-  store.dispatch(removeGameType({ guildId, name }));
+  store.dispatch(removeGameType({ guildId: guild.id, name }));
 
   message.channel.send(`**${name}** has been deleted`);
   log.info(`Exiting handleDeleteGameType`);

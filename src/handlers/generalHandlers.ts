@@ -22,11 +22,11 @@ import store, {
 export const handleRegisterServer: Handler = async (message, _) => {
   log.info(`Entering handleRegisterServer`);
   const { guild } = message;
-  const guildId = guild?.id as string;
+  if (!guild) return;
 
-  const guildExists = await Guilds.findById(guildId);
+  const guildExists = await Guilds.findById(guild.id);
   if (guildExists) {
-    log.debug(`${guildId} (${guild?.name}) is already registered`);
+    log.debug(`${guild.id} (${guild.name}) is already registered`);
     message.channel.send(
       `This discord server is already registered with bBot :wink:`
     );
@@ -34,7 +34,7 @@ export const handleRegisterServer: Handler = async (message, _) => {
   }
 
   await Guilds.create({
-    _id: guildId,
+    _id: guild.id,
     queryChannel: '',
     pugChannel: '',
     gameTypes: [],
@@ -44,18 +44,20 @@ export const handleRegisterServer: Handler = async (message, _) => {
   });
 
   log.info(`Registered new guild ${guild}`);
-  log.debug(`Initializing store for ${guildId}`);
+  log.debug(`Initializing store for ${guild.id}`);
 
-  store.dispatch(initPugs({ guildId, list: [], gameTypes: [], channel: null }));
+  store.dispatch(
+    initPugs({ guildId: guild.id, list: [], gameTypes: [], channel: null })
+  );
   store.dispatch(
     initMisc({
-      guildId,
+      guildId: guild.id,
       cooldowns: {},
       ignoredCommandGroup: [],
     })
   );
-  store.dispatch(initBlocks({ guildId, list: [] }));
-  store.dispatch(initQueries({ guildId, list: [], channel: null }));
+  store.dispatch(initBlocks({ guildId: guild.id, list: [] }));
+  store.dispatch(initQueries({ guildId: guild.id, list: [], channel: null }));
 
   message.channel.send(`**${guild?.name}** has been registered with bBot!`);
   log.info(`Exiting handleRegisterServer`);
@@ -67,13 +69,12 @@ export const handleSetPugChannel: Handler = async (message, _) => {
     channel: { id: channelId },
     guild,
   } = message;
+  if (!guild) return;
 
-  const guildId = guild?.id as string;
+  await updateGuildPugChannel(guild.id, channelId);
+  log.info(`Pug channel updated for guild ${guild.id} to ${channelId}`);
 
-  await updateGuildPugChannel(guildId, channelId);
-  log.info(`Pug channel updated for guild ${guildId} to ${channelId}`);
-
-  store.dispatch(setPugChannel({ guildId, channelId }));
+  store.dispatch(setPugChannel({ guildId: guild.id, channelId }));
 
   message.channel.send(`<#${channelId}> has been set as the pug channel`);
   log.info(`Exiting handleSetPugChannel`);
@@ -85,13 +86,12 @@ export const handleSetQueryChannel: Handler = async (message, _) => {
     channel: { id: channelId },
     guild,
   } = message;
+  if (!guild) return;
 
-  const guildId = guild?.id as string;
+  await updateGuildQueryChannel(guild.id, channelId);
+  log.info(`Query channel updated for guild ${guild.id} to ${channelId}`);
 
-  await updateGuildQueryChannel(guildId, channelId);
-  log.info(`Query channel updated for guild ${guildId} to ${channelId}`);
-
-  store.dispatch(setQueryChannel({ guildId, channelId }));
+  store.dispatch(setQueryChannel({ guildId: guild.id, channelId }));
 
   message.channel.send(`<#${channelId}> has been set as the query channel`);
   log.info(`Exiting handleSetQueryChannel`);
@@ -100,7 +100,8 @@ export const handleSetQueryChannel: Handler = async (message, _) => {
 export const handleSetPrefix: Handler = async (message, args) => {
   log.info(`Entering handleSetPrefix`);
   const { guild } = message;
-  const guildId = guild?.id as string;
+  if (!guild) return;
+
   const [prefix] = args;
 
   if (prefix.length !== 1) {
@@ -108,10 +109,10 @@ export const handleSetPrefix: Handler = async (message, args) => {
     return;
   }
 
-  await updateGuildPrefix(guildId, prefix);
-  log.info(`Prefix for guild ${guildId} set to ${prefix}`);
+  await updateGuildPrefix(guild.id, prefix);
+  log.info(`Prefix for guild ${guild.id} set to ${prefix}`);
 
-  store.dispatch(setPrefix({ guildId, prefix }));
+  store.dispatch(setPrefix({ guildId: guild.id, prefix }));
 
   message.channel.send(`**${prefix}** has been set as the default prefix`);
   log.info(`Exiting handleSetPrefix`);
@@ -120,10 +121,11 @@ export const handleSetPrefix: Handler = async (message, args) => {
 export const handleIgnoreCommandGroup: Handler = async (message, args) => {
   log.info(`Entering handleIgnoreCommandGroup`);
   const { guild } = message;
-  const guildId = guild?.id as string;
+  if (!guild) return;
+
   const group = args[0].toLowerCase();
   const cache = store.getState();
-  const { ignoredCommandGroup } = cache.misc[guildId];
+  const { ignoredCommandGroup } = cache.misc[guild.id];
 
   // TODO: give a list of command groups in the message
   if (!group) {
@@ -137,10 +139,10 @@ export const handleIgnoreCommandGroup: Handler = async (message, args) => {
     return;
   }
 
-  await addGuildIgnoredCommandGroup(guildId, group);
-  log.info(`Added ${group} to guild ${guildId}'s ignored command group`);
+  await addGuildIgnoredCommandGroup(guild.id, group);
+  log.info(`Added ${group} to guild ${guild.id}'s ignored command group`);
 
-  store.dispatch(ignoreCommandGroup({ guildId, group }));
+  store.dispatch(ignoreCommandGroup({ guildId: guild.id, group }));
 
   message.channel.send(
     `Commands under group **${group}** will be ignored from now onwards`
@@ -151,10 +153,11 @@ export const handleIgnoreCommandGroup: Handler = async (message, args) => {
 export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
   log.info(`Entering handleUnIgnoreCommandGroup`);
   const { guild } = message;
-  const guildId = guild?.id as string;
+  if (!guild) return;
+
   const group = args[0].toLowerCase();
   const cache = store.getState();
-  const { ignoredCommandGroup } = cache.misc[guildId];
+  const { ignoredCommandGroup } = cache.misc[guild.id];
 
   // TODO: give a list of command groups in the message
   if (!group) {
@@ -170,10 +173,10 @@ export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
     return;
   }
 
-  await removeGuildIgnoredCommandGroup(guildId, group);
-  log.info(`Removed ${group} from guild ${guildId}'s ignored command group`);
+  await removeGuildIgnoredCommandGroup(guild.id, group);
+  log.info(`Removed ${group} from guild ${guild.id}'s ignored command group`);
 
-  store.dispatch(unIgnoreCommandGroup({ guildId, group }));
+  store.dispatch(unIgnoreCommandGroup({ guildId: guild.id, group }));
 
   message.channel.send(
     `Commands under group **${group}** will not be ignored from now onwards`
