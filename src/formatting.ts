@@ -1,6 +1,6 @@
 import { User } from 'discord.js';
 import { Pug } from '~models';
-import { emojis } from '~utils';
+import { CONSTANTS, emojis } from '~utils';
 
 export const formatPugFilledDM = (pug: Pug, guildName: string) => {
   const DMTitle = `**${pug.name.toUpperCase()}** filled in **${guildName}**`;
@@ -97,4 +97,26 @@ export const formatDeadPugs = (deadPugs: Array<{ pug: Pug; user: User }>) => {
     }** left ${emojis.peepoComfy}`;
     return acc;
   }, ``);
+};
+
+export const formatBroadcastPug = (pug: Pug) => {
+  const title = `${
+    emojis.peepoComfy
+  } :mega: **${pug.name.toUpperCase()}** has been filled!`;
+
+  const body = pug.players.reduce((acc, player) => {
+    acc += `<@${player.id}> `;
+    return acc;
+  }, ``);
+
+  const isDuel = pug.pickingOrder.length === 1 && pug.pickingOrder[0] === -1;
+  const footer = isDuel
+    ? ``
+    : `Type **${
+        CONSTANTS.defaultPrefix
+      }captain** to become a captain for this pug. Random captains will be picked in ${
+        CONSTANTS.autoCaptainPickTimer / 1000
+      } seconds`;
+
+  return `${title}\n${body}\n${footer}\n`;
 };

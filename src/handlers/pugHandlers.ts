@@ -10,6 +10,7 @@ import {
   formatJoinStatus,
   formatLeaveStatus,
   formatDeadPugs,
+  formatBroadcastPug,
 } from '../formatting';
 
 export const handleAddGameType: Handler = async (message, args) => {
@@ -207,17 +208,34 @@ export const handleJoinGameTypes: Handler = async (
   );
 
   if (toBroadcast) {
-    //TODO: compute leave messages
-    // let allLeaveMsgs = ``;
-    // for (let i = 0; i < list.length; i++) {
-    //   const otherPug = list[i];
-    //   if (otherPug.name !== toBroadcast.name) {
-    //     let allPugLeaveMsgs = ``;
-    //     for (let j = 0; j < toBroadcast.players.length; j++) {
-    //       const player = toBroadcast.players[j];
-    //     }
-    //   }
-    // }
+    let allLeaveMsgs = ``;
+    for (let i = 0; i < list.length; i++) {
+      const otherPug = list[i];
+      if (otherPug.name !== toBroadcast.name) {
+        let allPugLeaveMsgs = ``;
+        for (let j = 0; j < toBroadcast.players.length; j++) {
+          const player = toBroadcast.players[j];
+          if (otherPug.players.find((p) => p.id === player.id)) {
+            const user = message.client.users.cache.get(player.id);
+            const msg = await handleLeaveGameTypes(
+              message,
+              [otherPug.name],
+              user,
+              true
+            );
+            allPugLeaveMsgs += `${msg} `;
+          }
+        }
+        allLeaveMsgs += `${allPugLeaveMsgs} \n`;
+      }
+    }
+
+    if (allLeaveMsgs) {
+      message.channel.send(allLeaveMsgs);
+    }
+
+    message.channel.send(formatBroadcastPug(toBroadcast));
+
     /*
      * Send DM to each player that pug fileld
      */
@@ -296,9 +314,13 @@ export const handleLeaveGameTypes: Handler = async (
   }, [] as { pug: Pug; user: User }[]);
 
   const leaveMessage = formatLeaveStatus(leaveStatuses);
-  message.channel.send(leaveMessage);
 
-  if (deadPugs.length > 0) {
-    message.channel.send(formatDeadPugs(deadPugs));
+  if (!returnMsg) {
+    message.channel.send(leaveMessage);
+    deadPugs.length > 0 && message.channel.send(formatDeadPugs(deadPugs));
+  } else {
+    // Displaying dead pug first because we're returning the message after that
+    deadPugs.length > 0 && message.channel.send(formatDeadPugs(deadPugs));
+    return leaveMessage;
   }
 };
