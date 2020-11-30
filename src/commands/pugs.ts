@@ -40,6 +40,14 @@ const pugsCommandList: Command[] = [
     isPrivileged: false,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleListAllCurrentGameTypes',
+    aliases: ['lsa'],
+    type: 'solo',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default pugsCommandList;

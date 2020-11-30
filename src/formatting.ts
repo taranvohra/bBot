@@ -146,3 +146,25 @@ export const formatListGameTypes = (
   }, ``);
   return `${title}\n${body}`;
 };
+
+export const formatListAllCurrentGameTypes = (
+  list: Array<Pug>,
+  guildName: string
+) => {
+  const body = list.reduce((prev, curr) => {
+    const base = `**${curr.name.toUpperCase()}** (${curr.players.length}/${
+      curr.noOfPlayers
+    }) `;
+
+    const players = curr.players.reduce((acc, p) => {
+      acc += `:small_orange_diamond: ${p.name} `;
+      return acc;
+    }, ``);
+    prev += `${base}${players}\n`;
+    return prev;
+  }, ``);
+
+  return body
+    ? `Listing active pugs at **${guildName}**\n${body}`
+    : `There are currently no active pugs, try joining one!`;
+};

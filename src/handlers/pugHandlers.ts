@@ -13,6 +13,7 @@ import {
   formatBroadcastPug,
   formatListGameType,
   formatListGameTypes,
+  formatListAllCurrentGameTypes,
 } from '../formatting';
 
 export const handleAddGameType: Handler = async (message, args) => {
@@ -387,4 +388,17 @@ export const handleListGameTypes: Handler = async (message, args) => {
     message.channel.send(formatListGameTypes(gamesList, guild.name));
   }
   log.info(`Exiting handleListGameTypes`);
+};
+
+export const handleListAllCurrentGameTypes: Handler = async (message, args) => {
+  log.info(`Entering handleListAllCurrentGameTypes`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { list } = cache.pugs[guild.id];
+
+  message.channel.send(formatListAllCurrentGameTypes(list, guild.name));
+
+  log.info(`Exiting handleListAllCurrentGameTypes`);
 };
