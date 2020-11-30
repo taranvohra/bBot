@@ -4,9 +4,9 @@ import { Pug } from '~models';
 declare global {
   export type Command = {
     group: 'general' | 'pugs' | 'queries';
+    type: 'solo' | 'args' | 'both';
     key: string;
     aliases: string[];
-    type: 'noArg' | 'singleArg' | 'multiArg';
     isPrivileged: boolean;
     needsRegisteredGuild: boolean;
   };
@@ -16,7 +16,7 @@ declare global {
     args: string[],
     mentionedUser?: User,
     returnMsg?: boolean
-  ) => Promise<void>;
+  ) => Promise<string | void>;
 
   export type WithGuildID = {
     guildId: string;

@@ -25,12 +25,12 @@ export const onMessage = async (message: Message, client: Client) => {
   if (argsArr.length === 0) return;
 
   const [cmd, ...args] = argsArr;
-  const type =
-    args.length === 0 ? 'noArg' : args.length === 1 ? 'singleArg' : 'multiArg';
+  const type = args.length === 0 ? 'solo' : 'args';
 
-  const foundCommand = commands.find(
-    (command) => command.type === type && command.aliases.includes(cmd)
-  );
+  const foundCommand = commands.find((command) => {
+    if (command.type === 'both') return command.aliases.includes(cmd);
+    else return command.type === type && command.aliases.includes(cmd);
+  });
 
   if (foundCommand) {
     if (foundCommand.needsRegisteredGuild && !isGuildRegistered(guild.id)) {

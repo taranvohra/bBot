@@ -81,7 +81,7 @@ export const formatLeaveStatus = (
 
   return `${
     left.length > 0
-      ? `${username} left ${left} ${
+      ? `${username} left  ${left} ${
           wentOffline ? `because the user went offline` : ``
         }`
       : ``
@@ -119,4 +119,30 @@ export const formatBroadcastPug = (pug: Pug) => {
       } seconds`;
 
   return `${title}\n${body}\n${footer}\n`;
+};
+
+export const formatListGameType = (pug: Pug) => {
+  const title = `**${pug.name.toUpperCase()}** (${pug.players.length}/${
+    pug.noOfPlayers
+  })`;
+  const players = pug.players.reduce((acc, p) => {
+    acc += `:small_orange_diamond: ${p.name} `;
+    return acc;
+  }, ``);
+  return `${title}${players}`;
+};
+
+export const formatListGameTypes = (
+  list: Array<{ name: string; currPlayers: number; maxPlayers: number }>,
+  guildName: string
+) => {
+  const title = `Pugs available at **${guildName}**`;
+  const sortedList = list.sort((a, b) => b.currPlayers - a.currPlayers);
+  const body = sortedList.reduce((acc, curr, i) => {
+    acc += `**${curr.name.toUpperCase()}** (${curr.currPlayers}/${
+      curr.maxPlayers
+    }) ${i === list.length - 1 ? '' : ':small_orange_diamond:'}`;
+    return acc;
+  }, ``);
+  return `${title}\n${body}`;
 };

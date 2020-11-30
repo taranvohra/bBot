@@ -11,6 +11,8 @@ import {
   formatLeaveStatus,
   formatDeadPugs,
   formatBroadcastPug,
+  formatListGameType,
+  formatListGameTypes,
 } from '../formatting';
 
 export const handleAddGameType: Handler = async (message, args) => {
@@ -323,4 +325,56 @@ export const handleLeaveGameTypes: Handler = async (
     deadPugs.length > 0 && message.channel.send(formatDeadPugs(deadPugs));
     return leaveMessage;
   }
+
+  log.info(`Exiting handleLeaveGameTypes`);
+};
+
+export const handleListGameTypes: Handler = async (message, args) => {
+  log.info(`Entering handleListGameTypes`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { gameTypes, list } = cache.pugs[guild.id];
+  const [gameType] = args;
+
+  if (gameType) {
+    const name = gameType.toLowerCase();
+    const validGameType = gameTypes.find((g) => g.name === name);
+    if (!validGameType) {
+      log.debug(`No such gametype ${name} at guild ${guild.id}`);
+      message.channel.send(`There is no such gametype **${name}**`);
+      return;
+    }
+
+    const pug = list.find((p) => p.name === name);
+    if (!pug) {
+      message.channel.send(
+        `**${name.toUpperCase()}** (0/${validGameType.noOfPlayers})`
+      );
+      return;
+    }
+    message.channel.send(formatListGameType(pug));
+  } else {
+    const tempList = gameTypes.map((g) => ({
+      name: g.name,
+      currPlayers: 0,
+      maxPlayers: g.noOfPlayers,
+    }));
+
+    const gamesList = tempList.reduce((acc, curr) => {
+      const existingPug = list.find((p) => p.name === curr.name);
+      if (existingPug) {
+        acc.push({
+          name: existingPug.name,
+          currPlayers: existingPug.players.length,
+          maxPlayers: existingPug.noOfPlayers,
+        });
+      } else acc.push(curr);
+      return acc;
+    }, [] as typeof tempList);
+
+    message.channel.send(formatListGameTypes(gamesList, guild.name));
+  }
+  log.info(`Exiting handleListGameTypes`);
 };

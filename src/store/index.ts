@@ -21,6 +21,15 @@ const store = configureStore({
     queries: queriesReducer,
     pugs: pugsReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      immutableCheck: {
+        ignoredPaths: ['pugs'],
+      },
+      serializableCheck: {
+        ignoredActions: ['pugs/addPug', 'pugs/removePug'],
+      },
+    }),
 });
 
 export default store;
