@@ -97,6 +97,9 @@ export const getRandomInt = (min: number, max: number) =>
 export const shuffle = <T>(arr: Array<T>): Array<T> =>
   arr.slice().sort(() => Math.random() - 0.5);
 
+export const sanitizeName = (name: string) =>
+  name.replace(/(\*|`|:|_|~|\|)/g, (c) => `\\${c}`);
+
 export const emojis = {
   tearddy: '<:tearddy:601092340865564673>',
   smart: '<:smart:601094351770353664>',

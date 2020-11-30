@@ -2,7 +2,7 @@ import log from '../log';
 import { formatDistance } from 'date-fns';
 import { User } from 'discord.js';
 import { Pug, Users } from '~models';
-import { computePickingOrder } from '~utils';
+import { computePickingOrder, sanitizeName } from '~utils';
 import { addGuildGameType, deleteGuildGameType } from '~actions';
 import store, { addGameType, removeGameType, addPug, removePug } from '~store';
 import {
@@ -108,6 +108,7 @@ export const handleJoinGameTypes: Handler = async (
   if (!guild) return;
 
   const user = mentioned || author;
+  user.username = sanitizeName(user.username);
   const cache = store.getState();
   const { gameTypes, list } = cache.pugs[guild.id];
   const { list: blockedList } = cache.blocks[guild.id];
@@ -148,6 +149,10 @@ export const handleJoinGameTypes: Handler = async (
   let toBroadcast: Pug | undefined;
   const joinStatuses = args.map((game): JoinStatus | undefined => {
     if (!toBroadcast) {
+      // Getting fresh cache everytime
+      const cache = store.getState();
+      const { list } = cache.pugs[guild.id];
+
       let result: JoinStatus['result'];
       const gameType = gameTypes.find((g) => g.name === game);
       if (!gameType) {
@@ -264,8 +269,9 @@ export const handleLeaveGameTypes: Handler = async (
   if (!guild) return;
 
   const user = mentioned || author;
+  user.username = sanitizeName(user.username);
   const cache = store.getState();
-  const { gameTypes, list } = cache.pugs[guild.id];
+  const { gameTypes } = cache.pugs[guild.id];
 
   if (args.length === 0) {
     message.channel.send(`Invalid, no pugs were mentioned`);
@@ -274,6 +280,10 @@ export const handleLeaveGameTypes: Handler = async (
 
   const leaveStatuses = args.map(
     (game): LeaveStatus => {
+      // Getting fresh cache everytime
+      const cache = store.getState();
+      const { list } = cache.pugs[guild.id];
+
       let result: LeaveStatus['result'];
       const gameType = gameTypes.find((g) => g.name === game);
       if (!gameType) {
