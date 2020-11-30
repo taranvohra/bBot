@@ -32,7 +32,7 @@ export const formatJoinStatus = (statuses: Array<JoinStatus>) => {
           acc.aj += `**${name.toUpperCase()}** `;
           break;
       }
-      acc.username = user?.username ?? '';
+      acc.username = user?.username ?? acc.username;
       return acc;
     },
     { joined: ``, missed: ``, nf: ``, aj: ``, username: `` }
@@ -68,7 +68,7 @@ export const formatLeaveStatus = (
           acc.nf += `No pug found: **${name.toUpperCase()}**`;
           break;
       }
-      acc.username = user?.username ?? '';
+      acc.username = user?.username ?? acc.username;
       return acc;
     },
     {

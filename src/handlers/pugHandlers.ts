@@ -301,11 +301,11 @@ export const handleLeaveGameTypes: Handler = async (
           log.info(`Stopped pug ${game} at ${guild.id}`);
         }
         result = 'left';
+        return { name: game, result, pug, user };
       } else {
         result = 'not-in';
+        return { name: game, result };
       }
-
-      return { name: game, result, pug, user };
     }
   );
 
