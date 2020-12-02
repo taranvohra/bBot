@@ -1,5 +1,5 @@
 import { Client, Intents } from 'discord.js';
-import { onMessage } from '~handlers';
+import { onMessage, onPresenceUpdate } from '~handlers';
 import { connectDB, hydrateStore } from './setup';
 import log from './log';
 
@@ -36,4 +36,8 @@ bBot.on('ready', () => {
 
 bBot.on('disconnect', () => {});
 
-bBot.on('message', (message) => onMessage(message, bBot));
+bBot.on('message', onMessage);
+
+bBot.on('presenceUpdate', (before, after) =>
+  onPresenceUpdate(before, after, bBot)
+);
