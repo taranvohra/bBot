@@ -1,8 +1,8 @@
 import log from '../log';
 import { formatDistance } from 'date-fns';
-import { User } from 'discord.js';
+import { User, Message } from 'discord.js';
 import { Pug, Users } from '~models';
-import { computePickingOrder, sanitizeName } from '~utils';
+import { computePickingOrder, emojis, sanitizeName } from '~utils';
 import { addGuildGameType, deleteGuildGameType } from '~actions';
 import store, { addGameType, removeGameType, addPug, removePug } from '~store';
 import {
@@ -266,7 +266,7 @@ export const handleLeaveGameTypes: Handler = async (
   returnMsg
 ) => {
   log.info(`Entering handleLeaveGameTypes`);
-  const { guild, author } = message;
+  const { guild, author, content } = message;
   if (!guild) return;
 
   const user = mentioned || author;
@@ -326,7 +326,8 @@ export const handleLeaveGameTypes: Handler = async (
     return acc;
   }, [] as { pug: Pug; user: User }[]);
 
-  const leaveMessage = formatLeaveStatus(leaveStatuses);
+  const wentOffline = content === 'adios'; // 🏃‍♂️ 👋
+  const leaveMessage = formatLeaveStatus(leaveStatuses, wentOffline);
 
   if (!returnMsg) {
     message.channel.send(leaveMessage);
@@ -390,7 +391,7 @@ export const handleListGameTypes: Handler = async (message, args) => {
   log.info(`Exiting handleListGameTypes`);
 };
 
-export const handleListAllCurrentGameTypes: Handler = async (message, args) => {
+export const handleListAllCurrentGameTypes: Handler = async (message) => {
   log.info(`Entering handleListAllCurrentGameTypes`);
   const { guild } = message;
   if (!guild) return;
@@ -401,4 +402,28 @@ export const handleListAllCurrentGameTypes: Handler = async (message, args) => {
   message.channel.send(formatListAllCurrentGameTypes(list, guild.name));
 
   log.info(`Exiting handleListAllCurrentGameTypes`);
+};
+
+export const handleLeaveAllGameTypes: Handler = async (message) => {
+  log.info(`Entering handleLeaveAllGameTypes`);
+  const { guild, author } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { list } = cache.pugs[guild.id];
+  const user = author;
+
+  const listToLeave = list
+    .filter((pug) => pug.players.find((p) => p.id === user.id))
+    .map((pug) => pug.name);
+
+  if (listToLeave.length === 0) {
+    message.channel.send(
+      `Cannot leave pug(s) if you haven't joined any ${emojis.smart}`
+    );
+    return;
+  }
+
+  handleLeaveGameTypes(message, listToLeave);
+  log.info(`Exiting handleLeaveAllGameTypes`);
 };
