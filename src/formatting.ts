@@ -68,7 +68,7 @@ export const formatLeaveStatus = (
           acc.nf += `No pug found: **${name.toUpperCase()}**`;
           break;
       }
-      acc.username = user?.username ?? acc.username;
+      acc.username = user?.username ?? '';
       return acc;
     },
     {

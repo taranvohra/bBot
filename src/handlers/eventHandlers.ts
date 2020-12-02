@@ -1,10 +1,11 @@
-import { Client, Message, Presence, TextChannel } from 'discord.js';
+import { Message, Presence } from 'discord.js';
 import store from '~store';
 import {
   CONSTANTS,
   isMemberPrivileged,
   isGuildRegistered,
   isCommandInValidChannel,
+  sanitizeName,
 } from '~utils';
 import commands from '../commands';
 import * as generalHandlers from './generalHandlers';
@@ -67,8 +68,10 @@ export const onMessage = async (message: Message) => {
       return;
     }
 
+    message.author.username = sanitizeName(message.author.username);
+
     const handler = foundCommand.key as keyof typeof commandHandlers;
-    commandHandlers[handler](message, args, member.user);
+    commandHandlers[handler](message, args);
   } else {
     // TODO send a mesage telling the user type help for list of commands
   }
@@ -76,8 +79,7 @@ export const onMessage = async (message: Message) => {
 
 export const onPresenceUpdate = async (
   _: Presence | undefined,
-  after: Presence,
-  client: Client
+  after: Presence
 ) => {
   const { user, status, guild } = after;
   if (status === 'offline') {
@@ -89,14 +91,18 @@ export const onPresenceUpdate = async (
     list.forEach((pug) => {
       const isInPug = pug.players.find((p) => p.id === user?.id);
       if (isInPug) {
-        const channel = client.channels.cache.get(pugChannel);
+        const channel = guild.channels.cache.get(pugChannel);
         if (!channel) return;
-        const message = new Message(channel.client, {}, new TextChannel(guild));
-        message.content = 'adios';
-        message.author.id = user.id;
-        message.author.username = user.username;
-
-        commandHandlers['handleLeaveAllGameTypes'](message, []);
+        const message = {
+          guild,
+          content: 'adios',
+          author: {
+            id: user.id,
+            username: user.username,
+          },
+          channel,
+        };
+        commandHandlers['handleLeaveAllGameTypes'](message as Message, []);
       }
     });
   }

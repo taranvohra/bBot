@@ -38,6 +38,4 @@ bBot.on('disconnect', () => {});
 
 bBot.on('message', onMessage);
 
-bBot.on('presenceUpdate', (before, after) =>
-  onPresenceUpdate(before, after, bBot)
-);
+bBot.on('presenceUpdate', onPresenceUpdate);

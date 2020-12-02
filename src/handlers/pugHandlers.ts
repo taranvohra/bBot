@@ -1,8 +1,8 @@
 import log from '../log';
 import { formatDistance } from 'date-fns';
-import { User, Message } from 'discord.js';
+import { User } from 'discord.js';
 import { Pug, Users } from '~models';
-import { computePickingOrder, emojis, sanitizeName } from '~utils';
+import { computePickingOrder, emojis } from '~utils';
 import { addGuildGameType, deleteGuildGameType } from '~actions';
 import store, { addGameType, removeGameType, addPug, removePug } from '~store';
 import {
@@ -109,10 +109,15 @@ export const handleJoinGameTypes: Handler = async (
   if (!guild) return;
 
   const user = mentioned || author;
-  user.username = sanitizeName(user.username);
   const cache = store.getState();
   const { gameTypes, list } = cache.pugs[guild.id];
   const { list: blockedList } = cache.blocks[guild.id];
+
+  const isInvisible = message.author.presence.status === 'offline';
+  if (isInvisible) {
+    message.channel.send(`You cannot join pugs while being invisible`);
+    return;
+  }
 
   const block = blockedList.find((b) => b.culprit.id === user.id);
   if (block) {
@@ -270,7 +275,7 @@ export const handleLeaveGameTypes: Handler = async (
   if (!guild) return;
 
   const user = mentioned || author;
-  user.username = sanitizeName(user.username);
+
   const cache = store.getState();
   const { gameTypes } = cache.pugs[guild.id];
 
@@ -302,7 +307,12 @@ export const handleLeaveGameTypes: Handler = async (
           log.info(`Stopped pug ${game} at ${guild.id}`);
         }
         result = 'left';
-        return { name: game, result, pug, user };
+        return {
+          name: game,
+          result,
+          pug,
+          user,
+        };
       } else {
         result = 'not-in';
         return { name: game, result };
@@ -411,10 +421,9 @@ export const handleLeaveAllGameTypes: Handler = async (message) => {
 
   const cache = store.getState();
   const { list } = cache.pugs[guild.id];
-  const user = author;
 
   const listToLeave = list
-    .filter((pug) => pug.players.find((p) => p.id === user.id))
+    .filter((pug) => pug.players.find((p) => p.id === author.id))
     .map((pug) => pug.name);
 
   if (listToLeave.length === 0) {
@@ -424,6 +433,7 @@ export const handleLeaveAllGameTypes: Handler = async (message) => {
     return;
   }
 
+  console.log();
   handleLeaveGameTypes(message, listToLeave);
   log.info(`Exiting handleLeaveAllGameTypes`);
 };
