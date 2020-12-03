@@ -56,6 +56,14 @@ const pugsCommandList: Command[] = [
     isPrivileged: false,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleAdminAddPlayer',
+    aliases: ['add'],
+    type: 'args',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default pugsCommandList;

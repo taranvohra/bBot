@@ -2,7 +2,7 @@ import log from '../log';
 import { formatDistance } from 'date-fns';
 import { User } from 'discord.js';
 import { Pug, Users } from '~models';
-import { computePickingOrder, emojis } from '~utils';
+import { computePickingOrder, emojis, sanitizeName } from '~utils';
 import { addGuildGameType, deleteGuildGameType } from '~actions';
 import store, { addGameType, removeGameType, addPug, removePug } from '~store';
 import {
@@ -436,4 +436,25 @@ export const handleLeaveAllGameTypes: Handler = async (message) => {
   console.log();
   handleLeaveGameTypes(message, listToLeave);
   log.info(`Exiting handleLeaveAllGameTypes`);
+};
+
+/**
+ * ADMIN
+ *  COMMANDS
+ */
+
+export const handleAdminAddPlayer: Handler = async (message, args) => {
+  log.info(`Entering handleAdminAddPlayer`);
+  const { guild, mentions } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+  if (!mentionedUser) {
+    message.channel.send(`No mentioned user`);
+    return;
+  }
+
+  mentionedUser.username = sanitizeName(mentionedUser.username);
+  handleJoinGameTypes(message, args.slice(1), mentionedUser);
+  log.info(`Exiting handleAdminAddPlayer`);
 };
