@@ -34,6 +34,14 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
+    key: 'handleLeaveAllGameTypes',
+    aliases: ['lva'],
+    type: 'solo',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
     key: 'handleListGameTypes',
     aliases: ['ls', 'list'],
     type: 'both',
