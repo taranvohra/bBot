@@ -10,6 +10,9 @@ class GuildPugCount {
   _id!: string;
 
   @prop()
+  total!: Number;
+
+  @prop()
   pugs!: {
     [key: string]: Number;
   };

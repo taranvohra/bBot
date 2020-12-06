@@ -1,5 +1,5 @@
 import { getModelForClass, prop, modelOptions } from '@typegoose/typegoose';
-import { Pug as PugType } from './Pug';
+import { Pug as PugClass } from './Pug';
 
 @modelOptions({
   options: {
@@ -20,10 +20,13 @@ export class PugSchema {
   winner?: Number;
 
   @prop()
-  pug!: PugType;
+  gameSequence!: Number;
 
   @prop()
-  seqNumber!: Number;
+  overallSequence!: Number;
+
+  @prop({ _id: false, type: PugClass })
+  pug!: PugClass;
 }
 
 export const Pugs = getModelForClass(PugSchema);

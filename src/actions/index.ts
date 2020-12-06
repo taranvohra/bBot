@@ -50,7 +50,7 @@ export const deleteGuildGameType = (guildId: string, gameTypeName: string) =>
     $pull: { gameTypes: { name: gameTypeName } },
   }).exec();
 
-export const getNextPugNumber = async (
+export const getNextSequences = async (
   guildId: string,
   gameTypeName: string
 ) => {
@@ -58,12 +58,14 @@ export const getNextPugNumber = async (
     guildId,
     {
       $inc: {
+        total: 1,
         [`pugs.${gameTypeName}`]: 1,
       },
     },
     { new: true }
   ).exec();
+
   if (updated) {
-    return updated.pugs[gameTypeName];
-  } else return 1;
+    return { total: updated.total, current: updated.pugs[gameTypeName] };
+  }
 };

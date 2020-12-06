@@ -48,6 +48,7 @@ export const handleRegisterServer: Handler = async (message, _) => {
   // try to create the pug count anyway but it'll fail so catch it 😇
   await GuildPugCounts.create({
     _id: guild.id,
+    total: 0,
     pugs: {},
   }).catch(() => {});
 

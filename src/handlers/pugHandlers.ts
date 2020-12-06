@@ -11,7 +11,7 @@ import {
 import {
   addGuildGameType,
   deleteGuildGameType,
-  getNextPugNumber,
+  getNextSequences,
 } from '~actions';
 import store, { addGameType, removeGameType, addPug, removePug } from '~store';
 import {
@@ -565,13 +565,20 @@ export const handlePickPlayer: Handler = async (message, [index, ...args]) => {
       );
     }
 
-    const pugNumber = await getNextPugNumber(guild.id, forPug.name);
+    const sequences = await getNextSequences(guild.id, forPug.name);
+    if (!sequences) {
+      throw new Error(
+        `No sequences were returned for ${forPug.name} at ${guild.id}`
+      );
+    }
+
     const savedPug = await Pugs.create({
       guildId: guild.id,
       name: forPug.name,
       timestamp: new Date(),
       pug: forPug,
-      seqNumber: pugNumber,
+      gameSequence: sequences.current,
+      overallSequence: sequences.total,
     });
   }
 
