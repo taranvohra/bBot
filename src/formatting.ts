@@ -196,9 +196,10 @@ export const formatBroadcastCaptainsReady = (pug: Pug) => {
   const turn = `<@${pug.captains[0]}> pick 1 player for **${teams[`team_0`]}**`;
   const nonCaptainPlayers = pug.players.reduce((acc, curr, index) => {
     if (!pug.captains.includes(curr.id)) {
-      const rating = curr.stats[pug.name]
-        ? curr.stats[pug.name].rating.toFixed(2)
-        : 'no rating';
+      const rating =
+        curr.stats[pug.name].rating === 0
+          ? 'no rating'
+          : curr.stats[pug.name].rating.toFixed(2);
       acc += `**${index + 1})** *${curr.name}* (${rating}) ${
         curr.tag ? `[${curr.tag}]` : ``
       }`;
