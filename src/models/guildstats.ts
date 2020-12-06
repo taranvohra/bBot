@@ -5,7 +5,7 @@ import { getModelForClass, prop, modelOptions } from '@typegoose/typegoose';
     allowMixed: 0,
   },
 })
-class GuildPugCount {
+class GuildStat {
   @prop({ type: String })
   _id!: string;
 
@@ -18,4 +18,4 @@ class GuildPugCount {
   };
 }
 
-export const GuildPugCounts = getModelForClass(GuildPugCount);
+export const GuildStats = getModelForClass(GuildStat);

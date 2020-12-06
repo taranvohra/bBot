@@ -1,5 +1,5 @@
 import log from '../log';
-import { GuildPugCounts, Guilds } from '~models';
+import { Guilds, GuildStats } from '~models';
 import {
   updateGuildPugChannel,
   updateGuildQueryChannel,
@@ -44,9 +44,9 @@ export const handleRegisterServer: Handler = async (message, _) => {
     ignoredCommandGroup: [],
   });
 
-  // If guild id de-registered and registered again
-  // try to create the pug count anyway but it'll fail so catch it 😇
-  await GuildPugCounts.create({
+  // If guild is de-registered and registered again
+  // still try to create GuildStats and if it exists will just catch it 😇
+  await GuildStats.create({
     _id: guild.id,
     total: 0,
     pugs: {},

@@ -1,4 +1,4 @@
-import { Guilds, GameType, GuildPugCounts } from '~models';
+import { Guilds, GameType, GuildStats } from '~models';
 
 export const updateGuildPugChannel = (guildId: string, channelId: string) =>
   Guilds.findByIdAndUpdate(guildId, {
@@ -54,7 +54,7 @@ export const getNextSequences = async (
   guildId: string,
   gameTypeName: string
 ) => {
-  const updated = await GuildPugCounts.findByIdAndUpdate(
+  const updated = await GuildStats.findByIdAndUpdate(
     guildId,
     {
       $inc: {
