@@ -1,5 +1,10 @@
-import { getModelForClass, prop, Ref } from '@typegoose/typegoose';
-import { Pug } from './pugs';
+import {
+  getModelForClass,
+  prop,
+  Ref,
+  modelOptions,
+} from '@typegoose/typegoose';
+import { PugSchema as Pug } from './pugs';
 
 class Stat {
   @prop()
@@ -18,6 +23,11 @@ class Stat {
   lost!: number;
 }
 
+@modelOptions({
+  options: {
+    allowMixed: 0,
+  },
+})
 export class User {
   @prop()
   userId!: string;

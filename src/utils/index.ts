@@ -39,13 +39,12 @@ export const isCommandInValidChannel = (
   channelId: string
 ): { valid: boolean; reason: string | undefined } => {
   const cache = store.getState();
-  const pugChannel = cache.pugs[guildId].channel;
-  const queriesChannel = cache.queries[guildId].channel;
   switch (command.group) {
     case 'general':
       return { valid: true, reason: '' };
 
     case 'pugs':
+      const pugChannel = cache.pugs[guildId].channel;
       return pugChannel
         ? pugChannel === channelId
           ? { valid: true, reason: '' }
@@ -53,6 +52,7 @@ export const isCommandInValidChannel = (
         : { valid: false, reason: undefined };
 
     case 'queries':
+      const queriesChannel = cache.queries[guildId].channel;
       return queriesChannel
         ? queriesChannel === channelId
           ? { valid: true, reason: '' }

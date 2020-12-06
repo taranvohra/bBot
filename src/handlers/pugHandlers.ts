@@ -97,6 +97,7 @@ export const handleDeleteGameType: Handler = async (message, args) => {
     return;
   }
 
+  // TODO: prevent deleting it if an active pug (with atleast 1 player in exists)
   if (!gameTypes.some((g) => g.name === name)) {
     log.debug(`Gametype ${name} does not exist`);
     message.channel.send(`Gametype with name ${name} does not exist`);

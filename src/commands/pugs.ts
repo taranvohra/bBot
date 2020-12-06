@@ -66,6 +66,14 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
+    key: 'handlePickPlayer',
+    aliases: ['pick', 'p'],
+    type: 'args',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
     key: 'handleAdminAddPlayer',
     aliases: ['add'],
     type: 'args',

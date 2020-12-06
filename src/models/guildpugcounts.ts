@@ -1,5 +1,10 @@
-import { getModelForClass, prop } from '@typegoose/typegoose';
+import { getModelForClass, prop, modelOptions } from '@typegoose/typegoose';
 
+@modelOptions({
+  options: {
+    allowMixed: 0,
+  },
+})
 class GuildPugCount {
   @prop({ type: String })
   _id!: string;
