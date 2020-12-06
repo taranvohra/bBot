@@ -105,3 +105,21 @@ export const emojis = {
   smart: '<:smart:601094351770353664>',
   peepoComfy: '<:peepoComfy:626060643895607296>',
 };
+
+export const teamEmojis = {
+  team_0: '<:AGONY:610820370617991198>',
+  team_1: '<:FROSTAGONY:610820381778903052>',
+  team_2: '<:DISGUSTAGONY:610820391786774546>',
+  team_3: '<:GOLDENAGONY:610826861165150221>',
+  team_255: '',
+  spec: '',
+};
+
+export const teams = {
+  team_0: 'Red Team',
+  team_1: 'Blue Team',
+  team_2: 'Green Team',
+  team_3: 'Gold Team',
+  team_255: 'Players',
+  spec: 'Spectators',
+};

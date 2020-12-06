@@ -152,8 +152,8 @@ export class Pug {
 
     this.timerFn = setTimeout(() => {
       const remaining = this.noOfPlayers - this.captains.length;
-      const playersNotCaptain = this.players.filter((p) =>
-        Boolean(this.captains.find((c) => p.id === c))
+      const playersNotCaptain = this.players.filter(
+        (p) => !this.captains.find((c) => p.id !== c)
       );
 
       const poolForCaptains = shuffle(playersNotCaptain)

@@ -1,6 +1,6 @@
 import { User } from 'discord.js';
 import { Pug } from '~models';
-import { CONSTANTS, emojis } from '~utils';
+import { CONSTANTS, emojis, teamEmojis, teams } from '~utils';
 
 export const formatPugFilledDM = (pug: Pug, guildName: string) => {
   const DMTitle = `**${pug.name.toUpperCase()}** filled in **${guildName}**`;
@@ -167,4 +167,44 @@ export const formatListAllCurrentGameTypes = (
   return body
     ? `Listing active pugs at **${guildName}**\n${body}`
     : `There are currently no active pugs, try joining one!`;
+};
+
+const getTeamIndex = (index: number) => {
+  switch (index) {
+    case 0:
+      return 'team_0';
+    case 1:
+      return 'team_1';
+    case 2:
+      return 'team_2';
+    case 3:
+      return 'team_3';
+    case 255:
+      return 'team_255';
+    default:
+      return 'spec';
+  }
+};
+
+export const formatBroadcastCaptainsReady = (pug: Pug) => {
+  const pugCaptains = pug.captains.reduce((acc, curr, index) => {
+    const teamIndex = getTeamIndex(index);
+    acc += `<@${curr}> is the captain for ${teamEmojis[teamIndex]} **${teams[teamIndex]}** ${teamEmojis[teamIndex]}\n`;
+    return acc;
+  }, ``);
+
+  const turn = `<@${pug.captains[0]}> pick 1 player for **${teams[`team_0`]}**`;
+  const nonCaptainPlayers = pug.players.reduce((acc, curr, index) => {
+    if (!pug.captains.includes(curr.id)) {
+      const rating = curr.stats[pug.name]
+        ? curr.stats[pug.name].rating.toFixed(2)
+        : 'no rating';
+      acc += `**${index + 1})** *${curr.name}* (${rating}) ${
+        curr.tag ? `[${curr.tag}]` : ``
+      }`;
+    }
+    return acc;
+  }, `Players: `);
+
+  return `${pugCaptains}\n${turn}\n${nonCaptainPlayers}`;
 };

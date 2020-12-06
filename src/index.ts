@@ -1,6 +1,9 @@
-import { Client, Intents } from 'discord.js';
+import { Client, Intents, TextChannel } from 'discord.js';
+import store from '~store';
 import { onMessage, onPresenceUpdate } from '~handlers';
 import { connectDB, hydrateStore } from './setup';
+import { pugPubSub } from './pubsub';
+import { formatBroadcastCaptainsReady } from './formatting';
 import log from './log';
 
 /*
@@ -39,3 +42,15 @@ bBot.on('disconnect', () => {});
 bBot.on('message', onMessage);
 
 bBot.on('presenceUpdate', onPresenceUpdate);
+
+pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
+  const cache = store.getState();
+  const { channel: channelId, list } = cache.pugs[guildId];
+  const pug = list.find((p) => p.name === pugName);
+  if (!pug || !channelId) return;
+
+  const channel = bBot.channels.cache.get(channelId) as TextChannel;
+  if (channel) {
+    channel.send(formatBroadcastCaptainsReady(pug));
+  }
+});
