@@ -468,6 +468,7 @@ export const handleAddCaptain: Handler = async (message) => {
 
   forPug.addCaptain(author.id);
   const assignedTeam = forPug.captains.findIndex((c) => c === author.id);
+  console.log(forPug.captains);
   log.info(
     `Added captain ${author.username} for pug ${forPug.name} at ${guild.id}`
   );

@@ -140,6 +140,10 @@ export class Pug {
     return this.players.length === 0;
   }
 
+  isCaptain(id: string) {
+    return this.captains.includes(id);
+  }
+
   areCaptainsDecided() {
     return this.captains.filter(Boolean).length === this.noOfTeams;
   }
@@ -153,9 +157,10 @@ export class Pug {
     this.timerFn = setTimeout(() => {
       const remaining = this.noOfPlayers - this.captains.length;
       const playersNotCaptain = this.players.filter(
-        (p) => !this.captains.find((c) => p.id !== c)
+        (p) => this.isCaptain(p.id) === false
       );
 
+      console.log(JSON.stringify(playersNotCaptain));
       const poolForCaptains = shuffle(playersNotCaptain)
         .slice(0, remaining * 0.6)
         .sort((a, b) => a.stats[this.name].rating - b.stats[this.name].rating);

@@ -58,6 +58,14 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
+    key: 'handleAddCaptain',
+    aliases: ['captain', 'capt'],
+    type: 'solo',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
     key: 'handleAdminAddPlayer',
     aliases: ['add'],
     type: 'args',
