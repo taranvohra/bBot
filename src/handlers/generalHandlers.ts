@@ -1,5 +1,5 @@
 import log from '../log';
-import { Guilds } from '~models';
+import { GuildPugCounts, Guilds } from '~models';
 import {
   updateGuildPugChannel,
   updateGuildQueryChannel,
@@ -18,6 +18,7 @@ import store, {
   ignoreCommandGroup,
   unIgnoreCommandGroup,
 } from '~store';
+import { error } from 'console';
 
 export const handleRegisterServer: Handler = async (message, _) => {
   log.info(`Entering handleRegisterServer`);
@@ -42,6 +43,13 @@ export const handleRegisterServer: Handler = async (message, _) => {
     blockedUsers: [],
     ignoredCommandGroup: [],
   });
+
+  // If guild id de-registered and registered again
+  // try to create the pug count anyway but it'll fail so catch it 😇
+  await GuildPugCounts.create({
+    _id: guild.id,
+    pugs: {},
+  }).catch(() => {});
 
   log.info(`Registered new guild ${guild}`);
   log.debug(`Initializing store for ${guild.id}`);

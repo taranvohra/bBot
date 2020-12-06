@@ -1,4 +1,5 @@
-import { getModelForClass, prop } from '@typegoose/typegoose';
+import { getModelForClass, prop, Ref } from '@typegoose/typegoose';
+import { Pug } from './pugs';
 
 class Stat {
   @prop()
@@ -35,7 +36,8 @@ export class User {
     [pug: string]: Stat;
   };
 
-  // TODO: Add Ref for lastPug
+  @prop({ ref: 'Pugs' })
+  lastPug!: Ref<Pug>;
 }
 
 export const Users = getModelForClass(User);

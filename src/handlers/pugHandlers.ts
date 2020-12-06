@@ -1,9 +1,18 @@
 import log from '../log';
 import { formatDistance } from 'date-fns';
 import { User } from 'discord.js';
-import { Pug, Users } from '~models';
-import { computePickingOrder, emojis, sanitizeName } from '~utils';
-import { addGuildGameType, deleteGuildGameType } from '~actions';
+import { Pug, Users, Pugs } from '~models';
+import {
+  computePickingOrder,
+  emojis,
+  getRandomInt,
+  sanitizeName,
+} from '~utils';
+import {
+  addGuildGameType,
+  deleteGuildGameType,
+  getNextPugNumber,
+} from '~actions';
 import store, { addGameType, removeGameType, addPug, removePug } from '~store';
 import {
   formatPugFilledDM,
@@ -15,6 +24,8 @@ import {
   formatListGameTypes,
   formatListAllCurrentGameTypes,
   formatAddCaptainStatus,
+  formatPickPlayerStatus,
+  formatCoinFlipMapvoteWinner,
 } from '../formatting';
 import { pugPubSub } from '../pubsub';
 
@@ -487,7 +498,7 @@ export const handlePickPlayer: Handler = async (message, [index, ...args]) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.pugs[guild.id];
+  const { list, gameTypes } = cache.pugs[guild.id];
   const user = author;
 
   const playerIndex = parseInt(index);
@@ -535,6 +546,33 @@ export const handlePickPlayer: Handler = async (message, [index, ...args]) => {
     playerIndex - 1,
     pickingOrder[turn]
   );
+
+  const pickedPlayers = [playerIndex - 1, lastPlayerIndex].filter(
+    (i): i is number => i !== null
+  );
+  message.channel.send(formatPickPlayerStatus(forPug, pickedPlayers) ?? '');
+
+  log.debug(`Saving new pug for ${forPug.name} at ${guild.id} in DB`);
+  if (forPug.isInPickingMode) {
+    const gameType = gameTypes.find((g) => g.name === name);
+    if (!gameType) return;
+
+    const { isCoinFlipEnabled } = gameType;
+    if (isCoinFlipEnabled) {
+      message.channel.send(
+        formatCoinFlipMapvoteWinner(getRandomInt(0, forPug.noOfTeams - 1))
+      );
+    }
+
+    const pugNumber = await getNextPugNumber(guild.id, forPug.name);
+    const savedPug = await Pugs.create({
+      guildId: guild.id,
+      name: forPug.name,
+      timestamp: new Date(),
+      pug: forPug,
+      seqNumber: pugNumber,
+    });
+  }
 
   log.info(`Entering handleAddCaptain`);
 };

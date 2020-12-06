@@ -1,4 +1,4 @@
-import { Guilds, GameType } from '~models';
+import { Guilds, GameType, GuildPugCounts } from '~models';
 
 export const updateGuildPugChannel = (guildId: string, channelId: string) =>
   Guilds.findByIdAndUpdate(guildId, {
@@ -49,3 +49,21 @@ export const deleteGuildGameType = (guildId: string, gameTypeName: string) =>
   Guilds.findByIdAndUpdate(guildId, {
     $pull: { gameTypes: { name: gameTypeName } },
   }).exec();
+
+export const getNextPugNumber = async (
+  guildId: string,
+  gameTypeName: string
+) => {
+  const updated = await GuildPugCounts.findByIdAndUpdate(
+    guildId,
+    {
+      $inc: {
+        [`pugs.${gameTypeName}`]: 1,
+      },
+    },
+    { new: true }
+  ).exec();
+  if (updated) {
+    return updated.pugs[gameTypeName];
+  } else return 1;
+};

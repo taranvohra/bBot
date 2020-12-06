@@ -287,3 +287,12 @@ export const formatPickPlayerStatus = (
     pug.isInPickingMode ? `${players}\n` : ``
   }\n${activeTeams}`;
 };
+
+export const formatCoinFlipMapvoteWinner = (winningTeamIndex: number) => {
+  const head = `---- *mapvote coin flip* ----`;
+  const teamIndex = getTeamIndex(winningTeamIndex);
+  const body = `${teamEmojis[teamIndex]} **${teams[
+    teamIndex
+  ].toUpperCase()}** ${teamEmojis[teamIndex]} won **mapvote**`;
+  return `${head}\n${body}`;
+};
