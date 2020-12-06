@@ -25,8 +25,11 @@ export class PugSchema {
   @prop()
   overallSequence!: Number;
 
-  @prop({ _id: false, type: PugClass })
-  pug!: PugClass;
+  @prop({ _id: false })
+  game!: {
+    pug: PugClass;
+    winner?: Number;
+  };
 }
 
 export const Pugs = getModelForClass(PugSchema);

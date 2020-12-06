@@ -576,9 +576,11 @@ export const handlePickPlayer: Handler = async (message, [index, ...args]) => {
       guildId: guild.id,
       name: forPug.name,
       timestamp: new Date(),
-      pug: forPug,
       gameSequence: sequences.current,
       overallSequence: sequences.total,
+      game: {
+        pug: forPug,
+      },
     });
   }
 
