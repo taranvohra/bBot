@@ -554,7 +554,7 @@ export const handlePickPlayer: Handler = async (message, [index, ...args]) => {
   message.channel.send(formatPickPlayerStatus(forPug, pickedPlayers) ?? '');
 
   log.debug(`Saving new pug for ${forPug.name} at ${guild.id} in DB`);
-  if (forPug.isInPickingMode) {
+  if (!forPug.isInPickingMode) {
     const gameType = gameTypes.find((g) => g.name === name);
     if (!gameType) return;
 
@@ -575,7 +575,7 @@ export const handlePickPlayer: Handler = async (message, [index, ...args]) => {
     });
   }
 
-  log.info(`Entering handleAddCaptain`);
+  log.info(`Entering handlePickPlayer`);
 };
 
 /**

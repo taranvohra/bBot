@@ -232,18 +232,17 @@ export const formatPickPlayerStatus = (
   const next = pug.players.find(
     (p) => p.id === pug.captains[pug.pickingOrder[pug.turn]]
   );
-  if (!next) return;
 
   if (pug.isInPickingMode) {
     for (let i = pug.turn; ; i++) {
-      if (pug.pickingOrder[i] !== next.team) break;
+      if (pug.pickingOrder[i] !== next?.team) break;
       count++;
     }
   }
 
-  const teamIndex = getTeamIndex(next.team as number);
+  const teamIndex = getTeamIndex(next?.team as number);
   const turn = pug.isInPickingMode
-    ? `<@${next.id}> pick ${count} player${count > 1 ? 's' : ''} for **${
+    ? `<@${next?.id}> pick ${count} player${count > 1 ? 's' : ''} for **${
         teams[teamIndex]
       }**`
     : `:fire: **Picking has finished** :fire:`;
