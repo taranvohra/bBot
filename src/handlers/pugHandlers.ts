@@ -14,7 +14,9 @@ import {
   formatListGameType,
   formatListGameTypes,
   formatListAllCurrentGameTypes,
+  formatAddCaptainStatus,
 } from '../formatting';
+import { pugPubSub } from '../pubsub';
 
 export const handleAddGameType: Handler = async (message, args) => {
   log.info(`Entering handleAddGameType`);
@@ -436,6 +438,45 @@ export const handleLeaveAllGameTypes: Handler = async (message) => {
   console.log();
   handleLeaveGameTypes(message, listToLeave);
   log.info(`Exiting handleLeaveAllGameTypes`);
+};
+
+export const handleAddCaptain: Handler = async (message) => {
+  log.info(`Entering handleAddCaptain`);
+  const { guild, author } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { list } = cache.pugs[guild.id];
+
+  const forPug = list.find((pug) => {
+    const isCandidate = pug.isInPickingMode && !pug.areCaptainsDecided();
+    if (isCandidate) {
+      return pug.players.some((p) => p.id === author.id);
+    }
+    return false;
+  });
+
+  if (!forPug) {
+    message.channel.send(`There was no filled pug for which you could captain`);
+    return;
+  }
+
+  if (forPug.captains.includes(author.id)) {
+    message.channel.send(`**${author.username}** is already a captain`);
+    return;
+  }
+
+  forPug.addCaptain(author.id);
+  const assignedTeam = forPug.captains.findIndex((c) => c === author.id);
+  log.info(
+    `Added captain ${author.username} for pug ${forPug.name} at ${guild.id}`
+  );
+
+  message.channel.send(formatAddCaptainStatus(author.username, assignedTeam));
+
+  if (forPug.areCaptainsDecided()) {
+    pugPubSub.emit('captains_ready', guild.id, forPug.name);
+  }
 };
 
 /**

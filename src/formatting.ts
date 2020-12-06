@@ -209,3 +209,10 @@ export const formatBroadcastCaptainsReady = (pug: Pug) => {
 
   return `${pugCaptains}\n${turn}\n${nonCaptainPlayers}`;
 };
+
+export const formatAddCaptainStatus = (username: string, team: number) => {
+  const teamIndex = getTeamIndex(team);
+  return `**${username}** became captain for ${teamEmojis[teamIndex]} **${teams[
+    teamIndex
+  ].toUpperCase()}** ${teamEmojis[teamIndex]}`;
+};
