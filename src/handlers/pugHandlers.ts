@@ -478,6 +478,65 @@ export const handleAddCaptain: Handler = async (message) => {
   if (forPug.areCaptainsDecided()) {
     pugPubSub.emit('captains_ready', guild.id, forPug.name);
   }
+  log.info(`Entering handleAddCaptain`);
+};
+
+export const handlePickPlayer: Handler = async (message, [index, ...args]) => {
+  log.info(`Entering handlePickPlayer`);
+  const { guild, author } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { list } = cache.pugs[guild.id];
+  const user = author;
+
+  const playerIndex = parseInt(index);
+  if (!playerIndex) return;
+
+  const forPug = list.find((pug) => {
+    if (pug.isInPickingMode) {
+      return pug.isCaptain(user.id);
+    }
+    return false;
+  });
+
+  if (!forPug) {
+    message.channel.send(
+      `Cannot pick if you are not a captain in a pug ${emojis.smart}`
+    );
+    return;
+  }
+
+  if (!forPug.areCaptainsDecided()) {
+    message.channel.send(`Please wait until all captains have been decided`);
+    return;
+  }
+
+  const team = forPug.captains.findIndex((u) => u === user.id);
+  const { pickingOrder, turn, name } = forPug;
+
+  if (team !== pickingOrder[turn]) {
+    message.channel.send(`Please wait for your turn :pouting_cat:`);
+    return;
+  }
+
+  if (playerIndex < 1 || playerIndex > forPug.players.length) {
+    message.channel.send(`Invalid pick`);
+    return;
+  }
+
+  if (forPug.players[playerIndex - 1].team !== null) {
+    const alreadyPicked = forPug.players[playerIndex - 1];
+    message.channel.send(`${alreadyPicked.name} is already picked`);
+    return;
+  }
+
+  const { lastPlayerIndex } = forPug.pickPlayer(
+    playerIndex - 1,
+    pickingOrder[turn]
+  );
+
+  log.info(`Entering handleAddCaptain`);
 };
 
 /**

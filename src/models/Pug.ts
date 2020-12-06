@@ -160,7 +160,6 @@ export class Pug {
         (p) => this.isCaptain(p.id) === false
       );
 
-      console.log(JSON.stringify(playersNotCaptain));
       const poolForCaptains = shuffle(playersNotCaptain)
         .slice(0, remaining * 0.6)
         .sort((a, b) => a.stats[this.name].rating - b.stats[this.name].rating);
