@@ -201,7 +201,7 @@ export const formatBroadcastCaptainsReady = (pug: Pug) => {
           ? 'no rating'
           : curr.stats[pug.name].rating.toFixed(2);
       acc += `**${index + 1})** *${curr.name}* (${rating}) ${
-        curr.tag ? `[${curr.tag}]` : ``
+        curr.tag ? `[${curr.tag}] ` : ``
       }`;
     }
     return acc;
@@ -264,7 +264,7 @@ export const formatPickPlayerStatus = (
         curr.stats[pug.name].rating === 0
           ? 'no rating'
           : curr.stats[pug.name].rating.toFixed(2)
-      }) ${curr.tag ? `[${curr.tag}]` : ``}`;
+      }) ${curr.tag ? `[${curr.tag}] ` : ``}`;
     return acc;
   }, `Players: `);
 
@@ -332,7 +332,7 @@ export const formatPugsInPicking = (pugs: Array<Pug>) => {
           curr.stats[pug.name].rating === 0
             ? 'no rating'
             : curr.stats[pug.name].rating.toFixed(2)
-        }) ${curr.tag ? `[${curr.tag}]` : ``}`;
+        }) ${curr.tag ? `[${curr.tag}] ` : ``}`;
       return acc;
     }, `Players: `);
 
