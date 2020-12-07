@@ -27,6 +27,7 @@ import {
   formatAddCaptainStatus,
   formatPickPlayerStatus,
   formatCoinFlipMapvoteWinner,
+  formatPugsInPicking,
 } from '../formatting';
 import { pugPubSub } from '../pubsub';
 
@@ -494,7 +495,7 @@ export const handleAddCaptain: Handler = async (message) => {
   log.info(`Entering handleAddCaptain`);
 };
 
-export const handlePickPlayer: Handler = async (message, [index, ...args]) => {
+export const handlePickPlayer: Handler = async (message, [index]) => {
   log.info(`Entering handlePickPlayer`);
   const { guild, author } = message;
   if (!guild) return;
@@ -593,6 +594,27 @@ export const handlePickPlayer: Handler = async (message, [index, ...args]) => {
   }
 
   log.info(`Exiting handlePickPlayer`);
+};
+
+export const handlePugPicking: Handler = async (message) => {
+  log.info(`Entering handlePugPicking`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { list } = cache.pugs[guild.id];
+
+  const pugsInPicking = list.filter(
+    (pug) => pug.isInPickingMode && pug.areCaptainsDecided()
+  );
+
+  if (pugsInPicking.length === 0) {
+    message.channel.send(`There are no pugs in picking mode`);
+    return;
+  }
+
+  message.channel.send(formatPugsInPicking(pugsInPicking));
+  log.info(`Exiting handlePugPicking`);
 };
 
 /**

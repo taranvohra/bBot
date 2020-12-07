@@ -295,3 +295,62 @@ export const formatCoinFlipMapvoteWinner = (winningTeamIndex: number) => {
   ].toUpperCase()}** ${teamEmojis[teamIndex]} won **mapvote**`;
   return `${head}\n${body}`;
 };
+
+export const formatPugsInPicking = (pugs: Array<Pug>) => {
+  return pugs.reduce((acc, pug) => {
+    let count = 0;
+    const next = pug.players.find(
+      (p) => p.id === pug.captains[pug.pickingOrder[pug.turn]]
+    );
+
+    if (pug.isInPickingMode) {
+      for (let i = pug.turn; ; i++) {
+        if (pug.pickingOrder[i] !== next?.team) break;
+        count++;
+      }
+    }
+
+    const teamIndex = getTeamIndex(next?.team as number);
+    const turn = `<@${next?.id}> pick ${count} player${
+      count > 1 ? 's' : ''
+    } for **${teams[teamIndex]}**`;
+
+    const pugTeams = Array.from(
+      {
+        length: pug.noOfTeams,
+      },
+      (_, i) => i
+    ).reduce((acc, _, i) => {
+      const teamIndex = getTeamIndex(i);
+      acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]}`;
+      return acc;
+    }, {} as { [team: number]: string });
+
+    const players = pug.players.reduce((acc, curr, index) => {
+      if (curr.team === null)
+        acc += `**${index + 1})** *${curr.name}* (${
+          curr.stats[pug.name].rating === 0
+            ? 'no rating'
+            : curr.stats[pug.name].rating.toFixed(2)
+        }) ${curr.tag ? `[${curr.tag}]` : ``}`;
+      return acc;
+    }, `Players: `);
+
+    const currTeams = pug.players
+      .slice()
+      .sort((a, b) => Number(a.pick) - Number(b.pick))
+      .reduce((acc, curr) => {
+        if (curr.team !== null)
+          acc[curr.team] += `*${curr.name}* :small_orange_diamond: `;
+        return acc;
+      }, pugTeams);
+
+    const activeTeams = Object.values(currTeams).reduce((acc, curr) => {
+      acc += `${curr.slice(0, curr.length - 24)}\n`;
+      return acc;
+    }, ``);
+
+    acc += `${turn}\n\n${players}\n\n${activeTeams}\n\n`;
+    return acc;
+  }, ``);
+};
