@@ -1,4 +1,4 @@
-import { Guilds, GameType, GuildStats } from '~models';
+import { Guilds, GameType, GuildStats, Pug, Users } from '~models';
 
 export const updateGuildPugChannel = (guildId: string, channelId: string) =>
   Guilds.findByIdAndUpdate(guildId, {
@@ -68,4 +68,57 @@ export const getNextSequences = async (
   if (updated) {
     return { total: updated.total, current: updated.pugs[gameTypeName] };
   }
+};
+
+export const updateStatsAfterPug = (
+  { players, captains, name }: Pug,
+  savedPugId: string,
+  guildId: string
+) => {
+  const computeNewRating = (
+    existingRating: number,
+    existingTotalPugs: number,
+    existingTotalCaptain: number,
+    pick: number
+  ) => {
+    if (existingTotalPugs === 0) return pick;
+    return (
+      (existingRating * (existingTotalPugs - existingTotalCaptain) + pick) /
+      (existingTotalPugs - existingTotalCaptain + 1)
+    );
+  };
+
+  Users.bulkWrite(
+    players.map((player) => {
+      const { id: userId, name: username, pick, stats } = player;
+      const { rating, totalCaptain, totalPugs } = stats[name];
+      const wasCaptain = captains.includes(userId);
+
+      const updatedTotalCaptain = totalCaptain + Number(wasCaptain);
+      const updatedTotalPugs = totalPugs + 1;
+      const updatedRating = wasCaptain
+        ? rating
+        : computeNewRating(rating, totalPugs, totalCaptain, Number(pick));
+
+      return {
+        updateOne: {
+          filter: {
+            guildId,
+            userId,
+          },
+          update: {
+            $set: {
+              username,
+              lastPug: savedPugId,
+              [`stats.${name}.rating`]: updatedRating,
+              [`stats.${name}.totalCaptain`]: updatedTotalCaptain,
+              [`stats.${name}.totalPugs`]: updatedTotalPugs,
+            },
+          },
+          upsert: true,
+        },
+      };
+    }),
+    { ordered: false }
+  );
 };

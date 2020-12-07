@@ -12,6 +12,7 @@ import {
   addGuildGameType,
   deleteGuildGameType,
   getNextSequences,
+  updateStatsAfterPug,
 } from '~actions';
 import store, { addGameType, removeGameType, addPug, removePug } from '~store';
 import {
@@ -582,9 +583,16 @@ export const handlePickPlayer: Handler = async (message, [index, ...args]) => {
         pug: forPug,
       },
     });
+
+    updateStatsAfterPug(forPug, savedPug.id, guild.id);
+
+    log.debug(`Saved stats for players in pug ${savedPug.id}`);
+    log.debug(`Remove pug ${forPug.name} at guild ${guild.id} from store`);
+
+    store.dispatch(removePug({ guildId: guild.id, name: forPug.name }));
   }
 
-  log.info(`Entering handlePickPlayer`);
+  log.info(`Exiting handlePickPlayer`);
 };
 
 /**
