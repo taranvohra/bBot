@@ -4,6 +4,7 @@ import { User } from 'discord.js';
 import { Pug, Users, Pugs } from '~models';
 import {
   computePickingOrder,
+  CONSTANTS,
   emojis,
   getRandomInt,
   sanitizeName,
@@ -615,6 +616,42 @@ export const handlePugPicking: Handler = async (message) => {
 
   message.channel.send(formatPugsInPicking(pugsInPicking));
   log.info(`Exiting handlePugPicking`);
+};
+
+export const handleAddOrRemoveTag: Handler = async (message, args) => {
+  log.info(`Entering handleAddOrRemoveTag`);
+  const { guild, author } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { list } = cache.pugs[guild.id];
+  const user = author;
+
+  const isAddingTag = Boolean(args[0]);
+
+  if (isAddingTag && args.join(' ').length > CONSTANTS.tagLength) {
+    message.channel.send(
+      `Tags must be shorter than ${CONSTANTS.tagLength} characters`
+    );
+    return;
+  }
+
+  const tag = sanitizeName(args.join(' '));
+  const pugsUserIn = list.filter((pug) =>
+    pug.players.find((p) => p.id === user.id)
+  );
+
+  if (pugsUserIn.length === 0) return;
+
+  pugsUserIn.forEach((pug) => {
+    isAddingTag ? pug.addTag(user.id, tag) : pug.removeTag(user.id);
+  });
+
+  isAddingTag
+    ? message.channel.send(`Your new tag is: **${tag}**`)
+    : message.channel.send(`Your tag has been removed`);
+
+  log.info(`Exiting handleAddOrRemoveTag`);
 };
 
 /**

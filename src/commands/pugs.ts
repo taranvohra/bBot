@@ -82,6 +82,14 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
+    key: 'handleAddOrRemoveTag',
+    aliases: ['tag'],
+    type: 'both',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
     key: 'handleAdminAddPlayer',
     aliases: ['add'],
     type: 'args',
