@@ -1,6 +1,8 @@
 import { User } from 'discord.js';
-import { Pug } from '~models';
-import { CONSTANTS, emojis, teamEmojis, teams } from '~utils';
+import { isDocument } from '@typegoose/typegoose';
+import { Pug, User as PugUser } from '~models';
+import { CONSTANTS, emojis, teamEmojis, teams, isDuelPug } from '~utils';
+import { formatDistanceStrict } from 'date-fns';
 
 export const formatPugFilledDM = (pug: Pug, guildName: string) => {
   const DMTitle = `**${pug.name.toUpperCase()}** filled in **${guildName}**`;
@@ -353,4 +355,94 @@ export const formatPugsInPicking = (pugs: Array<Pug>) => {
     acc += `${turn}\n\n${players}\n\n${activeTeams}\n\n`;
     return acc;
   }, ``);
+};
+
+export const formatUserStats = (user: PugUser) => {
+  if (isDocument(user.lastPug)) {
+    const {
+      lastPug: {
+        game: { pug },
+      },
+    } = user;
+    const { totalPugs, totalCaptain, totalWins, totalLosses } = Object.values(
+      user.stats
+    ).reduce(
+      (acc, curr) => {
+        acc.totalPugs += curr.totalPugs || 0;
+        acc.totalCaptain += curr.totalCaptain || 0;
+        acc.totalWins += curr.won || 0;
+        acc.totalLosses += curr.lost || 0;
+        return acc;
+      },
+      {
+        totalPugs: 0,
+        totalCaptain: 0,
+        totalWins: 0,
+        totalLosses: 0,
+        totalWinRate: 0,
+        totalGameTypes: 0,
+      }
+    );
+    const title = `:pencil: Showing stats for **${user.username}** :pencil:`;
+    const totals = `:video_game: **${totalPugs}** pug${
+      totalPugs !== 1 ? 's' : ''
+    }\t:cop: **${totalCaptain}**\t:trophy: **${totalWins}**\t:x: **${totalLosses}**`;
+    const distance = formatDistanceStrict(new Date(), user.lastPug.timestamp, {
+      addSuffix: true,
+    });
+
+    const pugTeams = !isDuelPug(pug.pickingOrder)
+      ? Array.from({ length: pug.noOfTeams }, (_, i) => i).reduce(
+          (acc, curr, i) => {
+            const teamIndex = getTeamIndex(i);
+            acc[i] = `\t**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
+            return acc;
+          },
+          {} as { [key: string]: string }
+        )
+      : null;
+
+    const currTeams = !isDuelPug(pug.pickingOrder)
+      ? pug.players
+          .slice()
+          .sort((a, b) => Number(a.pick) - Number(b.pick))
+          .reduce((acc, curr) => {
+            if (curr.team !== null)
+              acc![curr.team] += `*${curr.name}* :small_orange_diamond:`;
+            return acc;
+          }, pugTeams)
+      : null;
+
+    const activeTeams = !isDuelPug(pug.pickingOrder)
+      ? Object.values(currTeams!).reduce((acc, curr) => {
+          acc += `${curr.slice(0, curr.length - 24)}\n`;
+          return acc;
+        }, ``)
+      : `${pug.players[0].name} :people_wrestling: ${pug.players[1].name}\n`;
+
+    const lastMetaData = `Last pug played was **${pug.name.toUpperCase()}** (${distance})`;
+    const collectiveStatsTitle = `__**GameTypes**__`;
+    const collectiveStatsBody = Object.entries(user.stats).reduce(
+      (acc, [pugName, pugStats]) => {
+        const won = pugStats.won || 0;
+        const lost = pugStats.lost || 0;
+        const winPercentage = pugStats.won
+          ? pugStats.won / (pugStats.won + pugStats.lost)
+          : 0;
+        acc += `**${pugName.toUpperCase()}**\t**${pugStats.totalPugs}** pug${
+          pugStats.totalPugs !== 1 ? 's' : ''
+        }\t:cop: **${pugStats.totalCaptain}**\t:star: ${
+          pugStats.rating === 0
+            ? `**no rating**`
+            : `**${pugStats.rating.toFixed(2)}**`
+        }\t:trophy: **${won}**\t:x: **${lost}**\t:muscle: **${(
+          winPercentage * 100
+        ).toFixed(2)}%**\n`;
+        return acc;
+      },
+      ``
+    );
+    return `${title}\n\n${totals}\n\n${lastMetaData}\n${activeTeams}\n${collectiveStatsTitle}\n${collectiveStatsBody}`;
+  }
+  return `Not Found`;
 };

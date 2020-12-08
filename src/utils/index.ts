@@ -33,6 +33,9 @@ export const isMemberPrivileged = (member: GuildMember) =>
     CONSTANTS.privilegedRoles.includes(role.name)
   );
 
+export const isDuelPug = (pickingOrder: Array<number>) =>
+  pickingOrder.length === 1 && pickingOrder[0] === -1;
+
 export const isCommandInValidChannel = (
   command: Command,
   guildId: string,

@@ -29,6 +29,7 @@ import {
   formatPickPlayerStatus,
   formatCoinFlipMapvoteWinner,
   formatPugsInPicking,
+  formatUserStats,
 } from '../formatting';
 import { pugPubSub } from '../pubsub';
 
@@ -652,6 +653,34 @@ export const handleAddOrRemoveTag: Handler = async (message, args) => {
     : message.channel.send(`Your tag has been removed`);
 
   log.info(`Exiting handleAddOrRemoveTag`);
+};
+
+export const handleCheckStats: Handler = async (message) => {
+  log.info(`Entering handleCheckStats`);
+  const { guild, author, mentions } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+
+  const user = await Users.findOne({
+    userId: mentionedUser ? mentionedUser.id : author.id,
+    guildId: guild.id,
+  })
+    .populate('lastPug')
+    .lean()
+    .exec();
+
+  if (!user) {
+    message.channel.send(
+      `There are no stats logged for **${
+        mentionedUser ? mentionedUser.username : author.username
+      }**`
+    );
+    return;
+  }
+  message.channel.send(formatUserStats(user));
+
+  log.info(`Exiting handleCheckStats`);
 };
 
 /**
