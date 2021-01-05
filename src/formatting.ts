@@ -393,7 +393,7 @@ export const formatUserStats = (user: PugUser) => {
 
     const pugTeams = !isDuelPug(pug.pickingOrder)
       ? Array.from({ length: pug.noOfTeams }, (_, i) => i).reduce(
-          (acc, curr, i) => {
+          (acc, _, i) => {
             const teamIndex = getTeamIndex(i);
             acc[i] = `\t**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
             return acc;
@@ -421,7 +421,7 @@ export const formatUserStats = (user: PugUser) => {
       : `${pug.players[0].name} :people_wrestling: ${pug.players[1].name}\n`;
 
     const lastMetaData = `Last pug played was **${pug.name.toUpperCase()}** (${distance})`;
-    const collectiveStatsTitle = `__**GameTypes**__`;
+    const collectiveStatsTitle = `**GameTypes**`;
     const collectiveStatsBody = Object.entries(user.stats).reduce(
       (acc, [pugName, pugStats]) => {
         const won = pugStats.won || 0;

@@ -451,7 +451,6 @@ export const handleLeaveAllGameTypes: Handler = async (message) => {
     return;
   }
 
-  console.log();
   handleLeaveGameTypes(message, listToLeave);
   log.info(`Exiting handleLeaveAllGameTypes`);
 };
@@ -667,7 +666,6 @@ export const handleCheckStats: Handler = async (message) => {
     guildId: guild.id,
   })
     .populate('lastPug')
-    .lean()
     .exec();
 
   if (!user) {
