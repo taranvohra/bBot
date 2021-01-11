@@ -1,12 +1,19 @@
 import { Message, Client, User } from 'discord.js';
 import { Pug } from '~models';
 
+declare module 'discord.js' {
+  interface Message {
+    cmd?: string;
+  }
+}
+
 declare global {
   export type Command = {
     group: 'general' | 'pugs' | 'queries';
     type: 'solo' | 'args' | 'both';
     key: string;
     aliases: string[];
+    rgx?: (arg: string) => RegExp;
     isPrivileged: boolean;
     needsRegisteredGuild: boolean;
   };

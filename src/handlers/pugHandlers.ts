@@ -14,6 +14,7 @@ import {
   deleteGuildGameType,
   getNextSequences,
   updateStatsAfterPug,
+  getLastXPug,
 } from '~actions';
 import store, { addGameType, removeGameType, addPug, removePug } from '~store';
 import {
@@ -30,6 +31,7 @@ import {
   formatCoinFlipMapvoteWinner,
   formatPugsInPicking,
   formatUserStats,
+  formatLastPug,
 } from '../formatting';
 import { pugPubSub } from '../pubsub';
 
@@ -679,6 +681,45 @@ export const handleCheckStats: Handler = async (message) => {
   message.channel.send(formatUserStats(user));
 
   log.info(`Exiting handleCheckStats`);
+};
+
+export const handleCheckLastPugs: Handler = async (message, args) => {
+  log.info(`Entering handleCheckLastPugs`);
+  const { guild } = message;
+  if (!guild) return;
+  if (!message.cmd) return;
+
+  const { tCount, digits } = message.cmd.split('').reduce(
+    (acc, curr) => {
+      acc.tCount += curr === 't' ? 1 : 0;
+      acc.digits += curr.match(/\d/g) ? curr : '';
+      return acc;
+    },
+    { tCount: 0, digits: '' }
+  );
+
+  const digitsAfterT = parseInt(digits);
+
+  if (tCount > 1 && digitsAfterT > 0) {
+    message.channel.send(`Invalid command`);
+    return;
+  }
+
+  const howFar = digitsAfterT > 0 ? digitsAfterT : tCount;
+  const gameType = args[0] ? args[0].toLowerCase() : '';
+
+  const thatPug = await getLastXPug(guild.id, howFar, gameType);
+  if (!thatPug) {
+    message.channel.send(
+      `No ${message.cmd} pug found ${
+        gameType ? `for **${gameType.toUpperCase()}**` : ``
+      }`
+    );
+    return;
+  }
+
+  message.channel.send(formatLastPug(thatPug, howFar, guild.name));
+  log.info(`Exiting handleCheckLastPugs`);
 };
 
 /**

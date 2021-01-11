@@ -6,6 +6,7 @@ import {
   isGuildRegistered,
   isCommandInValidChannel,
   sanitizeName,
+  isCommandConstraintSatified,
 } from '~utils';
 import commands from '../commands';
 import * as generalHandlers from './generalHandlers';
@@ -30,8 +31,10 @@ export const onMessage = async (message: Message) => {
   const type = args.length === 0 ? 'solo' : 'args';
 
   const foundCommand = commands.find((command) => {
-    if (command.type === 'both') return command.aliases.includes(cmd);
-    else return command.type === type && command.aliases.includes(cmd);
+    if (command.type === 'both')
+      return isCommandConstraintSatified(command, cmd);
+    else
+      return command.type === type && isCommandConstraintSatified(command, cmd);
   });
 
   if (foundCommand) {
@@ -69,6 +72,7 @@ export const onMessage = async (message: Message) => {
     }
 
     message.author.username = sanitizeName(message.author.username);
+    message.cmd = cmd;
 
     const handler = foundCommand.key as keyof typeof commandHandlers;
     commandHandlers[handler](message, args);

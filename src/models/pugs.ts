@@ -17,18 +17,15 @@ export class PugSchema {
   timestamp!: Date;
 
   @prop()
-  winner?: Number;
+  gameSequence!: number;
 
   @prop()
-  gameSequence!: Number;
-
-  @prop()
-  overallSequence!: Number;
+  overallSequence!: number;
 
   @prop({ _id: false })
   game!: {
     pug: PugClass;
-    winner?: Number;
+    winner?: number;
   };
 }
 

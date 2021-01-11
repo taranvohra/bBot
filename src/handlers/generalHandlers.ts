@@ -18,7 +18,6 @@ import store, {
   ignoreCommandGroup,
   unIgnoreCommandGroup,
 } from '~store';
-import { error } from 'console';
 
 export const handleRegisterServer: Handler = async (message, _) => {
   log.info(`Entering handleRegisterServer`);

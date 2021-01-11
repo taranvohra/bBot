@@ -98,6 +98,15 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
+    key: 'handleCheckLastPugs',
+    aliases: ['last'],
+    rgx: (cmd: string) => RegExp(`^${cmd}(\d|t)*`, 'g'),
+    type: 'both',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
     key: 'handleAdminAddPlayer',
     aliases: ['add'],
     type: 'args',

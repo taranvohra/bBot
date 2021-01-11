@@ -126,3 +126,8 @@ export const teams = {
   team_255: 'Players',
   spec: 'Spectators',
 };
+
+export const isCommandConstraintSatified = (command: Command, cmd: string) =>
+  command.rgx
+    ? command.aliases.some((a) => command.rgx!(a).test(cmd))
+    : command.aliases.includes(cmd);

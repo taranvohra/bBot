@@ -10,11 +10,11 @@ class GuildStat {
   _id!: string;
 
   @prop()
-  total!: Number;
+  total!: number;
 
   @prop()
   pugs!: {
-    [key: string]: Number;
+    [key: string]: number;
   };
 }
 

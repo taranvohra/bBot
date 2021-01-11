@@ -1,6 +1,6 @@
 import { User } from 'discord.js';
 import { isDocument } from '@typegoose/typegoose';
-import { Pug, User as PugUser } from '~models';
+import { Pug, User as PugUser, PugSchema } from '~models';
 import { CONSTANTS, emojis, teamEmojis, teams, isDuelPug } from '~utils';
 import { formatDistanceStrict } from 'date-fns';
 
@@ -445,4 +445,51 @@ export const formatUserStats = (user: PugUser) => {
     return `${title}\n\n${totals}\n\n${lastMetaData}\n${activeTeams}\n${collectiveStatsTitle}\n${collectiveStatsBody}`;
   }
   return `Not Found`;
+};
+
+//TODO: make it usable in other functions
+export const formatLastPug = (
+  lastPug: PugSchema,
+  tCount: number,
+  guildName: string
+) => {
+  const {
+    game: { pug },
+  } = lastPug;
+  const distance = formatDistanceStrict(new Date(), lastPug.timestamp, {
+    addSuffix: true,
+  });
+
+  const title = `Last${
+    tCount > 1 ? tCount : ''
+  } **${pug.name.toUpperCase()}** at **${guildName}** (${distance})`;
+
+  const pugTeams = !isDuelPug(pug.pickingOrder)
+    ? Array.from({ length: pug.noOfTeams }, (_, i) => i).reduce((acc, _, i) => {
+        const teamIndex = getTeamIndex(i);
+        acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
+        return acc;
+      }, {} as { [key: string]: string })
+    : null;
+
+  const currTeams = !isDuelPug(pug.pickingOrder)
+    ? pug.players
+        .slice()
+        .sort((a, b) => Number(a.pick) - Number(b.pick))
+        .reduce((acc, curr) => {
+          if (curr.team !== null)
+            acc![curr.team] += `*${curr.name}* :small_orange_diamond:`;
+          return acc;
+        }, pugTeams)
+    : null;
+
+  const activeTeams = !isDuelPug(pug.pickingOrder)
+    ? Object.values(currTeams!).reduce((acc, curr) => {
+        acc += `${curr.slice(0, curr.length - 23)}\n`;
+        return acc;
+      }, ``)
+    : `${pug.players[0].name} :people_wrestling: ${pug.players[1].name}\n`;
+
+  //TODO: Add coinflip, winner results too (if present)
+  return `${title}\n\n${activeTeams}`;
 };

@@ -1,4 +1,4 @@
-import { Guilds, GameType, GuildStats, Pug, Users } from '~models';
+import { Guilds, GameType, GuildStats, Pug, Users, Pugs } from '~models';
 
 export const updateGuildPugChannel = (guildId: string, channelId: string) =>
   Guilds.findByIdAndUpdate(guildId, {
@@ -121,4 +121,26 @@ export const updateStatsAfterPug = (
     }),
     { ordered: false }
   );
+};
+
+export const getLastXPug = async (
+  guildId: string,
+  howFar: number,
+  gameType?: string
+) => {
+  const guildStats = await GuildStats.findById(guildId).exec();
+  if (gameType) {
+    const totalGamesForGameType = guildStats?.pugs[gameType] ?? 0;
+    return Pugs.findOne({
+      guildId,
+      name: gameType,
+      gameSequence: totalGamesForGameType - howFar - 1,
+    });
+  } else {
+    const totalGamesSoFar = guildStats?.total ?? 0;
+    return Pugs.findOne({
+      guildId,
+      overallSequence: totalGamesSoFar - howFar - 1,
+    });
+  }
 };
