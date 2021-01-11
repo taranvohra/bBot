@@ -131,16 +131,18 @@ export const getLastXPug = async (
   const guildStats = await GuildStats.findById(guildId).exec();
   if (gameType) {
     const totalGamesForGameType = guildStats?.pugs[gameType] ?? 0;
+    const gameSequence = totalGamesForGameType - (howFar - 1);
     return Pugs.findOne({
       guildId,
+      gameSequence,
       name: gameType,
-      gameSequence: totalGamesForGameType - howFar - 1,
     });
   } else {
     const totalGamesSoFar = guildStats?.total ?? 0;
+    const overallSequence = totalGamesSoFar - (howFar - 1);
     return Pugs.findOne({
       guildId,
-      overallSequence: totalGamesSoFar - howFar - 1,
+      overallSequence,
     });
   }
 };
