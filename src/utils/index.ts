@@ -21,6 +21,7 @@ export const CONSTANTS = {
   tagLength: 50,
   autoCaptainPickTimer: 30_000,
   strongPlayersRatingThreshold: 3.75,
+  coolDownSeconds: 120,
 };
 
 export const isGuildRegistered = (guildId: string) => {

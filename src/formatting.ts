@@ -493,3 +493,24 @@ export const formatLastPug = (
   //TODO: Add coinflip, winner results too (if present)
   return `${title}\n\n${activeTeams}`;
 };
+
+export const formatPromoteAvailablePugs = (
+  pugs: Array<Pug>,
+  guildName: string
+) => {
+  const title = `@here in **${guildName}**`;
+  const sortedPugs = pugs.slice().sort((a, b) => {
+    const neededForA = a.noOfPlayers - a.players.length;
+    const neededForB = b.noOfPlayers - b.players.length;
+    return neededForA - neededForB;
+  });
+  const body = sortedPugs.reduce((acc, curr) => {
+    if (!curr.isInPickingMode) {
+      acc += `**${
+        curr.noOfPlayers - curr.players.length
+      }** more needed for **${curr.name.toUpperCase()}**\n`;
+    }
+    return acc;
+  }, ``);
+  return `${title}\n${body}`;
+};

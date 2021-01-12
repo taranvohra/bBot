@@ -4,13 +4,13 @@ type InitPayload = WithGuildID & GuildMiscState;
 type SetPrefixPayload = WithGuildID & Pick<GuildMiscState, 'prefix'>;
 type IgnoreCommandGroupPayload = WithGuildID & { group: string };
 type UnIgnoreCommandGroupPayload = IgnoreCommandGroupPayload;
-type AddCommandCooldown = WithGuildID & { command: string; timestamp: Date };
+type AddCommandCooldown = WithGuildID & { command: string; timestamp: number };
 
 type GuildMiscState = {
   prefix?: string;
   ignoredCommandGroup: Array<string>;
   cooldowns: {
-    [command: string]: Date;
+    [command: string]: number;
   };
 };
 
@@ -60,5 +60,6 @@ export const {
   ignoreCommandGroup,
   setPrefix,
   unIgnoreCommandGroup,
+  addCommandCooldown,
 } = miscSlice.actions;
 export const miscReducer = miscSlice.reducer;

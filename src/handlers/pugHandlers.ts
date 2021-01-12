@@ -16,7 +16,13 @@ import {
   updateStatsAfterPug,
   getLastXPug,
 } from '~actions';
-import store, { addGameType, removeGameType, addPug, removePug } from '~store';
+import store, {
+  addGameType,
+  removeGameType,
+  addPug,
+  removePug,
+  addCommandCooldown,
+} from '~store';
 import {
   formatPugFilledDM,
   formatJoinStatus,
@@ -32,6 +38,7 @@ import {
   formatPugsInPicking,
   formatUserStats,
   formatLastPug,
+  formatPromoteAvailablePugs,
 } from '../formatting';
 import { pugPubSub } from '../pubsub';
 
@@ -720,6 +727,72 @@ export const handleCheckLastPugs: Handler = async (message, args) => {
 
   message.channel.send(formatLastPug(thatPug, howFar, guild.name));
   log.info(`Exiting handleCheckLastPugs`);
+};
+
+export const handlePromoteAvailablePugs: Handler = async (message, args) => {
+  log.info(`Entering handlePromoteAvailablePugs`);
+  const { guild, member } = message;
+  if (!guild || !member) return;
+
+  const cache = store.getState();
+  const { list } = cache.pugs[guild.id];
+
+  const hasCoolDownRole = member.roles.cache.get('COOLDOWN');
+  if (hasCoolDownRole) {
+    const { cooldowns } = cache.misc[guild.id];
+    const cooldownCmd = cooldowns['promote'];
+    if (cooldownCmd) {
+      const timeDiff = cooldownCmd - Date.now();
+      if (timeDiff > 0) {
+        message.channel.send(
+          `COOLDOWN! You will be able to use this command after ${(
+            timeDiff / 1000
+          ).toFixed(0)} second${timeDiff / 1000 > 1 ? 's' : ''}`
+        );
+        return;
+      }
+    }
+  }
+
+  const hasPugMentioned = args[0]
+    ? list.find((p) => p.name === args[0].toLowerCase())
+    : undefined;
+
+  if (
+    hasPugMentioned &&
+    hasPugMentioned.players.length > 0 &&
+    !hasPugMentioned.isInPickingMode
+  ) {
+    message.channel.send(
+      formatPromoteAvailablePugs([hasPugMentioned], guild.name)
+    );
+    return;
+  }
+
+  if (!hasPugMentioned && args.length === 0 && list.length > 0) {
+    message.channel.send(formatPromoteAvailablePugs(list, guild.name));
+  } else {
+    if (args[0])
+      message.channel.send(
+        `There is no such active pug ${args[0]}. Try joining it maybe`
+      );
+    else
+      message.channel.send(
+        `There are no active pugs to promote. Try joining one!`
+      );
+  }
+
+  if (hasCoolDownRole) {
+    store.dispatch(
+      addCommandCooldown({
+        guildId: guild.id,
+        command: 'promote',
+        timestamp: Date.now() + CONSTANTS.coolDownSeconds * 1000,
+      })
+    );
+  }
+
+  log.info(`Exiting handlePromoteAvailablePugs`);
 };
 
 /**

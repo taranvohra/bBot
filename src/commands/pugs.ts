@@ -107,6 +107,14 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
+    key: 'handlePromoteAvailablePugs',
+    aliases: ['promote'],
+    type: 'both',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
     key: 'handleAdminAddPlayer',
     aliases: ['add'],
     type: 'args',
