@@ -1,4 +1,4 @@
-import { Guilds, GameType, GuildStats, Pug, Users, Pugs } from '~models';
+import { Guilds, GameType, GuildStats, Pug, Users, Pugs, Block } from '~models';
 
 export const updateGuildPugChannel = (guildId: string, channelId: string) =>
   Guilds.findByIdAndUpdate(guildId, {
@@ -146,3 +146,10 @@ export const getLastXPug = async (
     });
   }
 };
+
+export const addGuildBlockedUser = async (guildId: string, block: Block) =>
+  Guilds.findByIdAndUpdate(guildId, {
+    $push: {
+      blocks: block,
+    },
+  }).exec();

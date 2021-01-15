@@ -41,7 +41,7 @@ const blocksSlice = createSlice({
     removeBlockedUser(state, action: PayloadAction<RemoveBlockedUserPayload>) {
       const { guildId, id } = action.payload;
       const blockedUserIndex = state[guildId].list.findIndex(
-        (u) => u.id === id
+        (u) => u.culprit.id === id
       );
       state[guildId].list.splice(blockedUserIndex, 1);
     },

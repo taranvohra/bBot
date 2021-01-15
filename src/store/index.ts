@@ -26,9 +26,7 @@ const store = configureStore({
       immutableCheck: {
         ignoredPaths: ['pugs'],
       },
-      serializableCheck: {
-        ignoredActions: ['pugs/addPug', 'pugs/removePug'],
-      },
+      serializableCheck: false,
     }),
 });
 

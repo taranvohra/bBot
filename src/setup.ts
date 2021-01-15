@@ -24,11 +24,11 @@ export const hydrateStore = async () => {
       ignoredCommandGroup,
       gameTypes,
       queryServers,
-      blockedUsers,
+      blocks,
       prefix,
     } = guild;
 
-    store.dispatch(initBlocks({ guildId, list: blockedUsers }));
+    store.dispatch(initBlocks({ guildId, list: blocks }));
     store.dispatch(
       initMisc({
         guildId,

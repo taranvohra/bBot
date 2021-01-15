@@ -108,6 +108,7 @@ export const emojis = {
   tearddy: '<:tearddy:601092340865564673>',
   smart: '<:smart:601094351770353664>',
   peepoComfy: '<:peepoComfy:626060643895607296>',
+  bannechu: '<:bannechu:601092624962682881>',
 };
 
 export const teamEmojis = {
@@ -132,3 +133,14 @@ export const isCommandConstraintSatified = (command: Command, cmd: string) =>
   command.rgx
     ? command.aliases.some((a) => command.rgx!(a).test(cmd))
     : command.aliases.includes(cmd);
+
+export const calculateBlockExpiry = (
+  period: 'm' | 'h' | 'd',
+  length: number
+) => {
+  const expiry = new Date();
+  if (period === 'm') expiry.setMinutes(expiry.getMinutes() + length);
+  else if (period === 'h') expiry.setHours(expiry.getHours() + length);
+  else expiry.setHours(expiry.getHours() + length * 24);
+  return expiry;
+};

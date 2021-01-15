@@ -8,6 +8,7 @@ import {
   emojis,
   getRandomInt,
   sanitizeName,
+  calculateBlockExpiry,
 } from '~utils';
 import {
   addGuildGameType,
@@ -15,6 +16,7 @@ import {
   getNextSequences,
   updateStatsAfterPug,
   getLastXPug,
+  addGuildBlockedUser,
 } from '~actions';
 import store, {
   addGameType,
@@ -22,6 +24,7 @@ import store, {
   addPug,
   removePug,
   addCommandCooldown,
+  addBlockedUser,
 } from '~store';
 import {
   formatPugFilledDM,
@@ -844,4 +847,95 @@ export const handleAdminRemovePlayer: Handler = async (message, args) => {
   mentionedUser.username = sanitizeName(mentionedUser.username);
   handleLeaveGameTypes(message, args.slice(1), mentionedUser);
   log.info(`Exiting handleAdminRemovePlayer`);
+};
+
+export const handleAdminBlockPlayer: Handler = async (message, args) => {
+  log.info(`Entering handleAdminBlockPlayer`);
+  const { guild, mentions } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+  if (!mentionedUser) {
+    message.channel.send(`No mentioned user`);
+    return;
+  }
+
+  const cache = store.getState();
+  const { list: pugList } = cache.pugs[guild.id];
+  const { list } = cache.blocks[guild.id];
+
+  if (list.some((u) => u.culprit.id === mentionedUser.id)) {
+    log.debug(
+      `User ${mentionedUser.username} is already blocked at guild ${guild.id}`
+    );
+    message.channel.send(
+      `**${mentionedUser.username}** is already blocked from pugs`
+    );
+    return;
+  }
+
+  const [timeframe = '', ...reason] = args.slice(1);
+  const [blockLengthString] = timeframe.match(/[0-9]+/g) ?? [];
+  const [blockPeriodString] = timeframe.match(/[m|h|d]/g) ?? [];
+
+  if (!blockLengthString || !blockPeriodString) {
+    message.channel.send(`No duration was provided`);
+    return;
+  }
+
+  const blockLength = parseInt(blockLengthString);
+  if (blockLength <= 0) return;
+
+  const expiry = calculateBlockExpiry(
+    blockPeriodString as 'm' | 'h' | 'd',
+    blockLength
+  );
+
+  const newBlock = {
+    blockedOn: new Date(),
+    by: {
+      id: message.author.id,
+      username: message.author.username,
+    },
+    culprit: {
+      id: mentionedUser.id,
+      username: mentionedUser.username,
+    },
+    expiresAt: expiry,
+    reason: reason.join(' ') || '',
+  };
+
+  await addGuildBlockedUser(guild.id, newBlock);
+
+  log.info(`Blocked user ${mentionedUser.id} at guild ${guild.id}`);
+
+  store.dispatch(
+    addBlockedUser({
+      guildId: guild.id,
+      ...newBlock,
+    })
+  );
+
+  // remove from pugs if joined
+  let removedMsg = ``;
+  let removedPugs = ``;
+  for (let i = 0; i < pugList.length; i++) {
+    if (pugList[i].players.find((p) => p.id === mentionedUser.id)) {
+      const pugName = pugList[i].name;
+      await handleLeaveGameTypes(message, [pugName], mentionedUser, true);
+      removedPugs += `**${pugName.toUpperCase()}** `;
+    }
+  }
+
+  if (removedPugs)
+    removedMsg = `**${mentionedUser.username}** was removed from ${removedPugs}`;
+
+  const finalMsg = `${emojis.bannechu} **${
+    mentionedUser.username
+  }** has been blocked from joining pugs till __**${expiry.toUTCString()}**__ ${
+    emojis.bannechu
+  }\n${removedMsg}`;
+
+  message.channel.send(finalMsg);
+  log.info(`Exiting handleAdminBlockPlayer`);
 };

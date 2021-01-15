@@ -76,7 +76,7 @@ export class Guild {
   queryServers!: QueryServer[];
 
   @prop({ _id: false })
-  blockedUsers!: Block[];
+  blocks!: Block[];
 
   @prop()
   prefix?: string;
