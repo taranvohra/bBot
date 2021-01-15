@@ -829,3 +829,19 @@ export const handleAdminAddPlayer: Handler = async (message, args) => {
   handleJoinGameTypes(message, args.slice(1), mentionedUser);
   log.info(`Exiting handleAdminAddPlayer`);
 };
+
+export const handleAdminRemovePlayer: Handler = async (message, args) => {
+  log.info(`Entering handleAdminRemovePlayer`);
+  const { guild, mentions } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+  if (!mentionedUser) {
+    message.channel.send(`No mentioned user`);
+    return;
+  }
+
+  mentionedUser.username = sanitizeName(mentionedUser.username);
+  handleLeaveGameTypes(message, args.slice(1), mentionedUser);
+  log.info(`Exiting handleAdminRemovePlayer`);
+};

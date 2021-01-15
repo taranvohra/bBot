@@ -129,6 +129,14 @@ const pugsCommandList: Command[] = [
     isPrivileged: true,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleAdminRemovePlayer',
+    aliases: ['remove'],
+    type: 'args',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default pugsCommandList;
