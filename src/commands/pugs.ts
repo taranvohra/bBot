@@ -67,7 +67,7 @@ const pugsCommandList: Command[] = [
   {
     group,
     key: 'handlePickPlayer',
-    aliases: ['pick', 'p'],
+    aliases: ['pick'],
     type: 'args',
     isPrivileged: false,
     needsRegisteredGuild: true,
@@ -109,6 +109,14 @@ const pugsCommandList: Command[] = [
     group,
     key: 'handlePromoteAvailablePugs',
     aliases: ['promote'],
+    type: 'both',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
+    key: 'handleDecidePromoteOrPick',
+    aliases: ['p'],
     type: 'both',
     isPrivileged: false,
     needsRegisteredGuild: true,

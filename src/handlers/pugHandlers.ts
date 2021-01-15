@@ -795,6 +795,20 @@ export const handlePromoteAvailablePugs: Handler = async (message, args) => {
   log.info(`Exiting handlePromoteAvailablePugs`);
 };
 
+export const handleDecidePromoteOrPick: Handler = async (message, args) => {
+  log.info(`Entering handleDecidePromoteOrPick`);
+  const { guild, cmd } = message;
+  if (!guild || !cmd) return;
+
+  // just p or promote
+  if (!args[0]) handlePromoteAvailablePugs(message, args);
+  else {
+    // p 4 or p siege5
+    if (isNaN(parseInt(args[0]))) handlePromoteAvailablePugs(message, args);
+    else handlePickPlayer(message, args);
+  }
+};
+
 /**
  * ADMIN
  *  COMMANDS
