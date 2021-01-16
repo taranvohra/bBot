@@ -6,9 +6,9 @@ type AddQueryServerPayload = WithGuildID & QueryServer;
 type RemoveQueryServerPayload = WithGuildID & { index: number };
 
 type QueryServer = {
+  id: number;
   name: string;
   server: string;
-  timestamp: number;
 };
 
 type GuildQueriesState = {

@@ -19,13 +19,13 @@ export class GameType {
 
 export class QueryServer {
   @prop()
+  id!: number;
+
+  @prop()
   name!: string;
 
   @prop()
   server!: string;
-
-  @prop()
-  timestamp!: number;
 }
 
 class User {

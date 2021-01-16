@@ -206,4 +206,13 @@ export const addGuildQueryServer = async (guildId: string, qs: QueryServer) =>
     $push: {
       queryServers: qs,
     },
-  });
+  }).exec();
+
+export const removeGuildQueryServer = async (guildId: string, id: number) =>
+  Guilds.findByIdAndUpdate(guildId, {
+    $pull: {
+      queryServers: {
+        id,
+      },
+    },
+  }).exec();
