@@ -256,7 +256,7 @@ export const formatPickPlayerStatus = (
     (_, i) => i
   ).reduce((acc, _, i) => {
     const teamIndex = getTeamIndex(i);
-    acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]}`;
+    acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
     return acc;
   }, {} as { [team: number]: string });
 
