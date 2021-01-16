@@ -24,6 +24,14 @@ const queryCommandList: Command[] = [
     isPrivileged: true,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleEditQueryServer',
+    aliases: ['editqueryserver', 'eqs'],
+    type: 'args',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default queryCommandList;

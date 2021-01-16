@@ -25,7 +25,7 @@ export class QueryServer {
   name!: string;
 
   @prop()
-  server!: string;
+  address!: string;
 }
 
 class User {

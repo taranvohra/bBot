@@ -216,3 +216,31 @@ export const removeGuildQueryServer = async (guildId: string, id: number) =>
       },
     },
   }).exec();
+
+export const editGuildQueryServerName = async (
+  guildId: string,
+  id: number,
+  name: string
+) =>
+  Guilds.findOneAndUpdate(
+    { _id: guildId, 'queryServers.id': id },
+    {
+      $set: {
+        'queryServers.$.name': name,
+      },
+    }
+  ).exec();
+
+export const editGuildQueryServerAddress = async (
+  guildId: string,
+  id: number,
+  address: string
+) =>
+  Guilds.findOneAndUpdate(
+    { _id: guildId, 'queryServers.id': id },
+    {
+      $set: {
+        'queryServers.$.address': address,
+      },
+    }
+  ).exec();

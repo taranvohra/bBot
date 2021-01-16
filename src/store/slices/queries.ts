@@ -4,11 +4,16 @@ type InitPayload = WithGuildID & GuildQueriesState;
 type SetQueryChannelPayload = WithGuildID & { channelId: string };
 type AddQueryServerPayload = WithGuildID & QueryServer;
 type RemoveQueryServerPayload = WithGuildID & { index: number };
+type EditQueryServerPayload = WithGuildID & {
+  id: number;
+  attribute: 'name' | 'address';
+  value: string;
+};
 
 type QueryServer = {
   id: number;
   name: string;
-  server: string;
+  address: string;
 };
 
 type GuildQueriesState = {
@@ -41,6 +46,12 @@ const queriesSlice = createSlice({
       const { guildId, index } = action.payload;
       state[guildId].list.splice(index, 1);
     },
+    editQueryServer(state, action: PayloadAction<EditQueryServerPayload>) {
+      const { guildId, attribute, value, id } = action.payload;
+      const { list } = state[guildId];
+      const queryServerIndex = list.findIndex((qs) => qs.id === id);
+      state[guildId].list[queryServerIndex][attribute] = value;
+    },
   },
 });
 
@@ -49,5 +60,6 @@ export const {
   setQueryChannel,
   addQueryServer,
   removeQueryServer,
+  editQueryServer,
 } = queriesSlice.actions;
 export const queriesReducer = queriesSlice.reducer;
