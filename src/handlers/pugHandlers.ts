@@ -976,3 +976,30 @@ export const handleAdminUnblockPlayer: Handler = async (message, _) => {
   message.channel.send(`**${mentionedUser.username}** has been unblocked`);
   log.info(`Exiting handleAdminUnblockPlayer`);
 };
+
+export const handleAdminShowBlockedPlayers: Handler = async (message, _) => {
+  log.info(`Entering handleAdminShowBlockedPlayers`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { list } = cache.blocks[guild.id];
+
+  if (list.length === 0)
+    message.author.send(`There are no blocked users at **${guild.name}**`);
+  else {
+    const msg = list.reduce((acc, curr) => {
+      acc += `**${
+        curr.culprit.username
+      }** • ${curr.expiresAt.toUTCString()} • ${
+        curr.reason || 'no reason'
+      } • by ${curr.by.username}\n`;
+      return acc;
+    }, ``);
+    message.author.send(
+      `${emojis.bannechu} List of Blocked Users at **${guild.name}**${emojis.bannechu}\n\n${msg}`
+    );
+  }
+  message.channel.send(`<@${message.author.id}>, you have received a DM`);
+  log.info(`Exiting handleAdminShowBlockedPlayers`);
+};
