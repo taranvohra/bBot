@@ -1,10 +1,5 @@
-import { getModelForClass, prop, modelOptions } from '@typegoose/typegoose';
+import { getModelForClass, prop } from '@typegoose/typegoose';
 
-@modelOptions({
-  options: {
-    allowMixed: 0,
-  },
-})
 class GuildStat {
   @prop({ type: String })
   _id!: string;
