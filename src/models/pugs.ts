@@ -26,6 +26,7 @@ export class PugSchema {
   game!: {
     pug: PugClass;
     winner?: number;
+    mapvote?: number;
   };
 }
 

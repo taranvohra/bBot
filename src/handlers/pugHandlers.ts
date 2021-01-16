@@ -579,10 +579,9 @@ export const handlePickPlayer: Handler = async (message, [index]) => {
     if (!gameType) return;
 
     const { isCoinFlipEnabled } = gameType;
+    const coinflip = getRandomInt(0, forPug.noOfTeams - 1);
     if (isCoinFlipEnabled) {
-      message.channel.send(
-        formatCoinFlipMapvoteWinner(getRandomInt(0, forPug.noOfTeams - 1))
-      );
+      message.channel.send(formatCoinFlipMapvoteWinner(coinflip));
     }
 
     const sequences = await getNextSequences(guild.id, forPug.name);
@@ -600,6 +599,7 @@ export const handlePickPlayer: Handler = async (message, [index]) => {
       overallSequence: sequences.total,
       game: {
         pug: forPug,
+        mapvote: isCoinFlipEnabled ? coinflip : -1,
       },
     });
 
