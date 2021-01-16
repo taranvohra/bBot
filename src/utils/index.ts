@@ -144,3 +144,31 @@ export const calculateBlockExpiry = (
   else expiry.setHours(expiry.getHours() + length * 24);
   return expiry;
 };
+
+export const getHostPortPasswordFromAddress = (
+  address: string
+): [string, number, string] => {
+  const [stringAfterProtocol] = address.split('unreal://').filter(Boolean);
+  const [
+    stringBeforePassword,
+    stringAfterPassword = '',
+  ] = stringAfterProtocol.split('?');
+  const [hostString, portString] = stringBeforePassword.split(':');
+  const [, password] = stringAfterPassword.split('=');
+  return [hostString, Number(portString) || 7777, password];
+};
+
+export const fizzZoop = <T>(array: T[]) =>
+  array.reduce((acc, curr, i, arr) => {
+    if (i % 2 === 0) {
+      const item = ((curr as unknown) as string).toLowerCase();
+      acc[item] = arr[i + 1];
+    }
+    return acc;
+  }, {} as { [key: string]: T });
+
+export const padNumberWithZeros = (n: number) =>
+  n > -1 && n < 10 ? `0${n}` : `${n}`;
+
+export const getTeamNumericIndex = (teamName: string) =>
+  Object.values(teams).findIndex((t) => t === teamName);

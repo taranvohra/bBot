@@ -11,16 +11,18 @@ import {
   editGuildQueryServerAddress,
   editGuildQueryServerName,
 } from '~actions';
-import { formatQueryServers } from '../formatting';
+import { getHostPortPasswordFromAddress, fizzZoop } from '~utils';
+import { formatQueryServers, formatQueryServerStatus } from '../formatting';
 
-const queryUT99Server = (host: string, port: number) =>
+const queryUT99Server = (host: string, port: number): Promise<string> =>
   new Promise((rs, rj) => {
     try {
       let data = ``;
       const socket = dgram.createSocket('udp4');
       const queryDatagram = '\\status\\XServerQuery';
 
-      socket.send(queryDatagram, port, host, (error) => {
+      // udp port is +1
+      socket.send(queryDatagram, port + 1, host, (error) => {
         if (error) rj(error);
       });
 
@@ -149,4 +151,56 @@ export const handleEditQueryServer: Handler = async (message, args) => {
 
   message.channel.send(`Query server edited`);
   log.info(`Exiting handleEditQueryServer`);
+};
+
+export const handleQueryServer: Handler = async (message, args) => {
+  log.info(`Entering handleQueryServer`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { list } = cache.queries[guild.id];
+
+  const queryServerFromIndex = list[Number(args[0]) - 1];
+
+  // The arg can be either the index or a custom address
+  // We lookup in our cache list to see if it's a valid index
+  // If not then we consider it to be a custom address
+
+  const [host, port, password] = queryServerFromIndex
+    ? getHostPortPasswordFromAddress(queryServerFromIndex.address)
+    : getHostPortPasswordFromAddress(args[0]);
+
+  if (!host) {
+    message.channel.send(`No host found to query`);
+    return;
+  }
+
+  const response = await queryUT99Server(host, port);
+  const queryData = response.split('\\');
+  queryData.shift();
+  queryData.unshift();
+
+  const { info, players } = queryData.reduce(
+    (acc, curr) => {
+      if (curr === 'player_0' || curr === 'Player_0')
+        acc.foundPlayerData = true;
+      acc.foundPlayerData ? acc.players.push(curr) : acc.info.push(curr);
+      return acc;
+    },
+    {
+      info: [],
+      players: [],
+      foundPlayerData: false,
+    } as { info: string[]; players: string[]; foundPlayerData: boolean }
+  );
+
+  const formattedResponse = formatQueryServerStatus(
+    fizzZoop(info),
+    fizzZoop(players),
+    { host, port, password }
+  );
+
+  message.channel.send(formattedResponse);
+  log.info(`Exiting handleQueryServer`);
 };

@@ -1,7 +1,16 @@
 import { User, MessageEmbed } from 'discord.js';
 import { isDocument } from '@typegoose/typegoose';
 import { Pug, User as PugUser, PugSchema, QueryServer } from '~models';
-import { CONSTANTS, emojis, teamEmojis, teams, isDuelPug } from '~utils';
+import {
+  CONSTANTS,
+  emojis,
+  teamEmojis,
+  teams,
+  isDuelPug,
+  sanitizeName,
+  padNumberWithZeros,
+  getTeamNumericIndex,
+} from '~utils';
 import { formatDistanceStrict } from 'date-fns';
 
 const EMBED_COLOR = '#16171A';
@@ -530,6 +539,116 @@ export const formatQueryServers = (list: Array<QueryServer>) => {
     .setColor(EMBED_COLOR)
     .setDescription(description || 'No query servers added yet')
     .setFooter('To query, type: q ip');
+
+  return embed;
+};
+
+export const formatQueryServerStatus = (
+  info: Record<string, string>,
+  players: Record<string, string>,
+  { host, port, password }: { host: string; port: number; password: string }
+) => {
+  const embed = new MessageEmbed();
+
+  const noOfPlayers = parseInt(info.numplayers) || 0;
+  const maxPlayers = parseInt(info.maxplayers);
+  const maxTeams = parseInt(info.maxteams);
+  const timeLimit = parseInt(info.timelimit);
+  const isTeamGame = !!info.maxteams;
+
+  let playerList: Record<string, string[]> = {
+    [teams.team_0]: [],
+    [teams.team_1]: [],
+    [teams.team_2]: [],
+    [teams.team_3]: [],
+    [teams.team_255]: [],
+    [teams.spec]: [],
+  };
+
+  for (let i = 0; i < noOfPlayers; i++) {
+    const playerFlag =
+      players[`countryc_${i}`] && players[`countryc_${i}`] !== 'none'
+        ? `:flag_${players[`countryc_${i}`]}:`
+        : `:flag_white:`;
+
+    const player = `${playerFlag} ${sanitizeName(players[`player_${i}`])}`;
+    if (players[`mesh_${i}`] === 'Spectator') {
+      playerList[teams.spec].push(player);
+      continue;
+    }
+
+    if (isTeamGame) {
+      const team = parseInt(players[`team_${i}`]);
+      playerList[Object.values(teams)[team]].push(player);
+    } else {
+      playerList[teams.team_255].push(player);
+    }
+  }
+
+  let xServerQueryProps: { remainingTime: string; teamScores: string[] } = {
+    remainingTime: ``,
+    teamScores: [],
+  };
+  if (info.xserverquery) {
+    const time = parseInt(info.remainingtime);
+    const seconds = time % 60;
+    const minutes = (time - seconds) / 60;
+
+    let teamScores = {
+      [teams.team_0]: '',
+      [teams.team_1]: '',
+      [teams.team_2]: '',
+      [teams.team_3]: '',
+    };
+
+    for (let i = 0; i < maxTeams; i++)
+      teamScores[Object.values(teams)[i]] = info[`teamscore_${i}`];
+
+    xServerQueryProps.remainingTime = `${
+      (minutes === timeLimit && seconds === 0) || minutes < timeLimit
+        ? '**Remaining Time:**'
+        : '**Overtime:**'
+    } ${padNumberWithZeros(minutes)}:${padNumberWithZeros(seconds)} \n`;
+    xServerQueryProps.teamScores = Object.keys(teamScores).reduce(
+      (acc, curr) => {
+        const index = getTeamNumericIndex(curr);
+        acc[index] = ` • ${teamScores[curr]}`;
+        return acc;
+      },
+      [] as string[]
+    );
+  }
+
+  Object.keys(playerList).forEach((team) => {
+    const teamIndex = getTeamNumericIndex(team);
+    const teamPlayers = playerList[team].reduce((acc, curr) => {
+      if (team === teams.spec) acc += curr + ' • ';
+      else acc += curr + ' ' + '\n';
+      return acc;
+    }, ``);
+
+    playerList[team].length > 0
+      ? embed.addField(
+          team + (xServerQueryProps.teamScores[teamIndex] || ``),
+          teamPlayers,
+          team !== teams.spec
+        )
+      : '';
+  });
+
+  const description = `**Map:** ${
+    info.mapname
+  }\n**Players:** ${noOfPlayers}/${maxPlayers}\n${
+    xServerQueryProps.remainingTime || ''
+  }`;
+  const footer = `unreal://${host}:${port}${
+    password ? `?password=${password}` : ``
+  }`;
+
+  embed.setTitle(info.hostname);
+  embed.setColor(EMBED_COLOR);
+  embed.setDescription(description);
+  embed.setFooter(footer);
 
   return embed;
 };
