@@ -604,11 +604,13 @@ export const formatQueryServerStatus = (
     for (let i = 0; i < maxTeams; i++)
       teamScores[Object.values(teams)[i]] = info[`teamscore_${i}`];
 
-    xServerQueryProps.remainingTime = `${
-      (minutes === timeLimit && seconds === 0) || minutes < timeLimit
-        ? '**Remaining Time:**'
-        : '**Overtime:**'
-    } ${padNumberWithZeros(minutes)}:${padNumberWithZeros(seconds)} \n`;
+    const isNotOverTime =
+      (minutes === timeLimit && seconds === 0) || minutes < timeLimit;
+    xServerQueryProps.remainingTime = `${padNumberWithZeros(
+      minutes
+    )}:${padNumberWithZeros(seconds)} ${
+      isNotOverTime ? 'remaining' : '(overtime)'
+    }\n`;
     xServerQueryProps.teamScores = Object.keys(teamScores).reduce(
       (acc, curr) => {
         const index = getTeamNumericIndex(curr);
@@ -636,9 +638,9 @@ export const formatQueryServerStatus = (
       : '';
   });
 
-  const description = `**Map:** ${
+  const description = `${
     info.mapname
-  }\n**Players:** ${noOfPlayers}/${maxPlayers}\n${
+  } • ${noOfPlayers}/${maxPlayers} players • ${
     xServerQueryProps.remainingTime || ''
   }`;
   const footer = `unreal://${host}:${port}${
