@@ -17,6 +17,7 @@ import {
   updateStatsAfterPug,
   getLastXPug,
   addGuildBlockedUser,
+  removeGuildBlockedUser,
 } from '~actions';
 import store, {
   addGameType,
@@ -25,6 +26,7 @@ import store, {
   removePug,
   addCommandCooldown,
   addBlockedUser,
+  removeBlockedUser,
 } from '~store';
 import {
   formatPugFilledDM,
@@ -938,4 +940,39 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
 
   message.channel.send(finalMsg);
   log.info(`Exiting handleAdminBlockPlayer`);
+};
+
+export const handleAdminUnblockPlayer: Handler = async (message, _) => {
+  log.info(`Entering handleAdminUnblockPlayer`);
+  const { guild, mentions } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+  if (!mentionedUser) {
+    message.channel.send(`No mentioned user`);
+    return;
+  }
+
+  const cache = store.getState();
+  const { list } = cache.blocks[guild.id];
+
+  if (!list.some((u) => u.culprit.id === mentionedUser.id)) {
+    message.channel.send(
+      `Cannot unblock **${mentionedUser.username}** if the user isn't blocked in the first place ${emojis.smart}`
+    );
+    return;
+  }
+
+  await removeGuildBlockedUser(guild.id, mentionedUser.id);
+  log.info(`Unblocked ${mentionedUser.id} at guild ${guild.id}`);
+
+  store.dispatch(
+    removeBlockedUser({
+      guildId: guild.id,
+      id: mentionedUser.id,
+    })
+  );
+
+  message.channel.send(`**${mentionedUser.username}** has been unblocked`);
+  log.info(`Exiting handleAdminUnblockPlayer`);
 };

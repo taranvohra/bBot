@@ -153,3 +153,24 @@ export const addGuildBlockedUser = async (guildId: string, block: Block) =>
       blocks: block,
     },
   }).exec();
+
+export const removeGuildBlockedUser = async (
+  guildId: string,
+  culpritId: string
+) => {
+  const guild = await Guilds.findById(guildId).select('blocks').exec();
+  if (!guild) return;
+
+  const block = guild.blocks.find((b) => b.culprit.id === culpritId);
+  if (!block) return;
+
+  const { culprit } = block;
+
+  return Guilds.findByIdAndUpdate(guildId, {
+    $pull: {
+      blocks: {
+        culprit,
+      },
+    },
+  }).exec();
+};
