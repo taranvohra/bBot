@@ -29,6 +29,7 @@ import store, {
   addBlockedUser,
   removeBlockedUser,
   enableCoinFlip,
+  disableCoinFlip,
 } from '~store';
 import {
   formatPugFilledDM,
@@ -1036,4 +1037,36 @@ export const handleAdminEnableMapvoteCoinFlip: Handler = async (
 
   message.channel.send(`Mapvote coinflip enabled for **${gameType}**`);
   log.info(`Exiting handleAdminEnableMapvoteCoinFlip`);
+};
+
+export const handleAdminDisableMapvoteCoinFlip: Handler = async (
+  message,
+  args
+) => {
+  log.info(`Entering handleAdminDisableMapvoteCoinFlip`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { gameTypes } = cache.pugs[guild.id];
+  const gameType = args[0].toLowerCase();
+
+  if (!gameTypes.some((g) => g.name === gameType)) {
+    log.debug(`Gametype ${gameType} doesnt exist at guild ${guild.id}`);
+    message.channel.send(`${gameType} does not exist`);
+    return;
+  }
+
+  await setGuildGameTypeCoinFlipTo(guild.id, gameType, false);
+  log.info(`Disabled mapvote coin flip for ${guild.id}`);
+
+  store.dispatch(
+    disableCoinFlip({
+      guildId: guild.id,
+      name: gameType,
+    })
+  );
+
+  message.channel.send(`Mapvote coinflip disabled for **${gameType}**`);
+  log.info(`Exiting handleAdminDisableMapvoteCoinFlip`);
 };

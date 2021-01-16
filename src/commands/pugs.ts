@@ -185,6 +185,14 @@ const pugsCommandList: Command[] = [
     isPrivileged: true,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleAdminDisableMapvoteCoinFlip',
+    aliases: ['disablecoinflip'],
+    type: 'args',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default pugsCommandList;
