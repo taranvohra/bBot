@@ -22,16 +22,10 @@ export class QueryServer {
   name!: string;
 
   @prop()
-  host!: string;
+  server!: string;
 
   @prop()
-  port!: number;
-
-  @prop()
-  password?: string;
-
-  @prop()
-  timestamp!: Date;
+  timestamp!: number;
 }
 
 class User {

@@ -1,4 +1,13 @@
-import { Guilds, GameType, GuildStats, Pug, Users, Pugs, Block } from '~models';
+import {
+  Guilds,
+  GameType,
+  GuildStats,
+  Pug,
+  Users,
+  Pugs,
+  Block,
+  QueryServer,
+} from '~models';
 
 export const updateGuildPugChannel = (guildId: string, channelId: string) =>
   Guilds.findByIdAndUpdate(guildId, {
@@ -191,3 +200,10 @@ export const setGuildGameTypeCoinFlipTo = async (
       },
     }
   ).exec();
+
+export const addGuildQueryServer = async (guildId: string, qs: QueryServer) =>
+  Guilds.findByIdAndUpdate(guildId, {
+    $push: {
+      queryServers: qs,
+    },
+  });

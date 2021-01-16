@@ -7,10 +7,8 @@ type RemoveQueryServerPayload = WithGuildID & { index: number };
 
 type QueryServer = {
   name: string;
-  host: string;
-  port: number;
-  password?: string;
-  timestamp: Date;
+  server: string;
+  timestamp: number;
 };
 
 type GuildQueriesState = {

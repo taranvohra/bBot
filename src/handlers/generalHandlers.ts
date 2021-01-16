@@ -39,7 +39,7 @@ export const handleRegisterServer: Handler = async (message, _) => {
     pugChannel: '',
     gameTypes: [],
     queryServers: [],
-    blockedUsers: [],
+    blocks: [],
     ignoredCommandGroup: [],
   });
 

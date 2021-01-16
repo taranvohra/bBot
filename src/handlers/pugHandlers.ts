@@ -716,7 +716,7 @@ export const handleCheckLastPugs: Handler = async (message, args) => {
   const digitsAfterT = parseInt(digits);
 
   if (tCount > 1 && digitsAfterT > 0) {
-    message.channel.send(`Invalid command`);
+    message.channel.send(`Invalid usage of command`);
     return;
   }
 
