@@ -1,3 +1,4 @@
+import dgram from 'dgram';
 import log from '../log';
 import store, {
   addQueryServer,
@@ -11,6 +12,32 @@ import {
   editGuildQueryServerName,
 } from '~actions';
 import { formatQueryServers } from '../formatting';
+
+const queryUT99Server = (host: string, port: number) =>
+  new Promise((rs, rj) => {
+    try {
+      let data = ``;
+      const socket = dgram.createSocket('udp4');
+      const queryDatagram = '\\status\\XServerQuery';
+
+      socket.send(queryDatagram, port, host, (error) => {
+        if (error) rj(error);
+      });
+
+      socket.on('message', (message) => {
+        const unicodeValues = message.toJSON().data;
+        const unicodeString = String.fromCharCode(...unicodeValues);
+        data += unicodeString;
+
+        if (unicodeString.split('\\').some((s) => s === 'final')) {
+          rs(data);
+          socket.close();
+        }
+      });
+    } catch (error) {
+      rj(error);
+    }
+  });
 
 export const handleShowServers: Handler = async (message) => {
   log.info(`Entering handleShowServers`);
