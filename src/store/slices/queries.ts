@@ -9,6 +9,7 @@ type QueryServer = {
   name: string;
   host: string;
   port: number;
+  password?: string;
   timestamp: Date;
 };
 

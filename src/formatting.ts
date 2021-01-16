@@ -1,8 +1,10 @@
-import { User } from 'discord.js';
+import { User, MessageEmbed } from 'discord.js';
 import { isDocument } from '@typegoose/typegoose';
-import { Pug, User as PugUser, PugSchema } from '~models';
+import { Pug, User as PugUser, PugSchema, QueryServer } from '~models';
 import { CONSTANTS, emojis, teamEmojis, teams, isDuelPug } from '~utils';
 import { formatDistanceStrict } from 'date-fns';
+
+const EMBED_COLOR = '#16171A';
 
 export const formatPugFilledDM = (pug: Pug, guildName: string) => {
   const DMTitle = `**${pug.name.toUpperCase()}** filled in **${guildName}**`;
@@ -513,4 +515,21 @@ export const formatPromoteAvailablePugs = (
     return acc;
   }, ``);
   return `${title}\n${body}`;
+};
+
+export const formatQueryServers = (list: Array<QueryServer>) => {
+  const embed = new MessageEmbed();
+
+  const description = list.reduce((acc, curr, i) => {
+    acc += `\`${i + 1}\`\u00A0\u00A0\u00A0${curr.name}\n`;
+    return acc;
+  }, ``);
+
+  embed
+    .setTitle(`IP\u00A0\u00A0\u00A0Name`)
+    .setColor(EMBED_COLOR)
+    .setDescription(description || 'No query servers added yet')
+    .setFooter('To query, type: q ip');
+
+  return embed;
 };

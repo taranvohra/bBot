@@ -28,6 +28,9 @@ export class QueryServer {
   port!: number;
 
   @prop()
+  password?: string;
+
+  @prop()
   timestamp!: Date;
 }
 

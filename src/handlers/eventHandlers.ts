@@ -11,8 +11,13 @@ import {
 import commands from '../commands';
 import * as generalHandlers from './generalHandlers';
 import * as pugHandlers from './pugHandlers';
+import * as queryHandlers from './queryHandlers';
 
-const commandHandlers = { ...generalHandlers, ...pugHandlers };
+const commandHandlers = {
+  ...generalHandlers,
+  ...pugHandlers,
+  ...queryHandlers,
+};
 
 export const onMessage = async (message: Message) => {
   const { author, content, guild, member, channel, client } = message;
