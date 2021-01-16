@@ -161,6 +161,30 @@ const pugsCommandList: Command[] = [
     isPrivileged: true,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleAdminShowBlockedPlayers',
+    aliases: ['showblocked'],
+    type: 'solo',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
+    key: 'handleAdminShowBlockedPlayers',
+    aliases: ['showblocked'],
+    type: 'solo',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
+    key: 'handleAdminEnableMapvoteCoinFlip',
+    aliases: ['enablecoinflip'],
+    type: 'args',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default pugsCommandList;

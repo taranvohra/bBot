@@ -18,6 +18,7 @@ import {
   getLastXPug,
   addGuildBlockedUser,
   removeGuildBlockedUser,
+  setGuildGameTypeCoinFlipTo,
 } from '~actions';
 import store, {
   addGameType,
@@ -27,6 +28,7 @@ import store, {
   addCommandCooldown,
   addBlockedUser,
   removeBlockedUser,
+  enableCoinFlip,
 } from '~store';
 import {
   formatPugFilledDM,
@@ -1002,4 +1004,36 @@ export const handleAdminShowBlockedPlayers: Handler = async (message, _) => {
   }
   message.channel.send(`<@${message.author.id}>, you have received a DM`);
   log.info(`Exiting handleAdminShowBlockedPlayers`);
+};
+
+export const handleAdminEnableMapvoteCoinFlip: Handler = async (
+  message,
+  args
+) => {
+  log.info(`Entering handleAdminEnableMapvoteCoinFlip`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { gameTypes } = cache.pugs[guild.id];
+  const gameType = args[0].toLowerCase();
+
+  if (!gameTypes.some((g) => g.name === gameType)) {
+    log.debug(`Gametype ${gameType} doesnt exist at guild ${guild.id}`);
+    message.channel.send(`${gameType} does not exist`);
+    return;
+  }
+
+  await setGuildGameTypeCoinFlipTo(guild.id, gameType, true);
+  log.info(`Enabled mapvote coin flip for ${guild.id}`);
+
+  store.dispatch(
+    enableCoinFlip({
+      guildId: guild.id,
+      name: gameType,
+    })
+  );
+
+  message.channel.send(`Mapvote coinflip enabled for **${gameType}**`);
+  log.info(`Exiting handleAdminEnableMapvoteCoinFlip`);
 };

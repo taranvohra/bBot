@@ -174,3 +174,20 @@ export const removeGuildBlockedUser = async (
     },
   }).exec();
 };
+
+export const setGuildGameTypeCoinFlipTo = async (
+  guildId: string,
+  gameType: string,
+  to: boolean
+) =>
+  Guilds.findOneAndUpdate(
+    {
+      _id: guildId,
+      'gameTypes.name': gameType,
+    },
+    {
+      $set: {
+        'gameTypes.$.isCoinFlipEnabled': to,
+      },
+    }
+  ).exec();

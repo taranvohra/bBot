@@ -64,15 +64,21 @@ const pugsSlice = createSlice({
     },
     enableCoinFlip(state, action: PayloadAction<EnableCoinFlipPayload>) {
       const { guildId, name } = action.payload;
-      const { gameTypes } = state[guildId];
+      const { gameTypes, list } = state[guildId];
       const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
+      const pugIndex = list.findIndex((pug) => pug.name === name);
       state[guildId].gameTypes[gameTypeIndex].isCoinFlipEnabled = true;
+      if (pugIndex !== -1)
+        state[guildId].list[pugIndex].isCoinFlipEnabled = true;
     },
     disableCoinFlip(state, action: PayloadAction<DisableCoinFlipPayload>) {
       const { guildId, name } = action.payload;
-      const { gameTypes } = state[guildId];
+      const { gameTypes, list } = state[guildId];
       const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
+      const pugIndex = list.findIndex((pug) => pug.name === name);
       state[guildId].gameTypes[gameTypeIndex].isCoinFlipEnabled = false;
+      if (pugIndex !== -1)
+        state[guildId].list[pugIndex].isCoinFlipEnabled = false;
     },
   },
 });
