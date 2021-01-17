@@ -21,25 +21,61 @@ const queryUT99Server = (host: string, port: number): Promise<string> =>
       const socket = dgram.createSocket('udp4');
       const queryDatagram = '\\status\\XServerQuery';
 
+      const handleComplete = () => {
+        clearTimeout(id);
+        rs(data);
+        socket.close();
+      };
+
+      const handleFailed = () => {
+        clearTimeout(id);
+        rj(null);
+      };
+
       // udp port is +1
-      socket.send(queryDatagram, port + 1, host, (error) => {
-        if (error) rj(error);
-      });
+      socket.send(queryDatagram, port + 1, host);
+
+      socket.on('error', handleFailed);
 
       socket.on('message', (message) => {
         const unicodeValues = message.toJSON().data;
         const unicodeString = String.fromCharCode(...unicodeValues);
+
         data += unicodeString;
 
-        if (unicodeString.split('\\').some((s) => s === 'final')) {
-          rs(data);
-          socket.close();
-        }
+        if (unicodeString.split('\\').some((s) => s === 'final'))
+          handleComplete();
       });
+
+      let id = setTimeout(() => {
+        data ? handleComplete() : handleFailed();
+      }, 1000);
     } catch (error) {
       rj(error);
     }
   });
+
+const parseServerResponse = (response: string) => {
+  const queryData = response.split('\\');
+  queryData.shift();
+  queryData.unshift();
+
+  const { info: infoArr, players: playersArr } = queryData.reduce(
+    (acc, curr) => {
+      if (curr === 'player_0' || curr === 'Player_0')
+        acc.foundPlayerData = true;
+      acc.foundPlayerData ? acc.players.push(curr) : acc.info.push(curr);
+      return acc;
+    },
+    {
+      info: [],
+      players: [],
+      foundPlayerData: false,
+    } as { info: string[]; players: string[]; foundPlayerData: boolean }
+  );
+
+  return { info: fizzZoop(infoArr), players: fizzZoop(playersArr) };
+};
 
 export const handleShowServers: Handler = async (message) => {
   log.info(`Entering handleShowServers`);
@@ -51,7 +87,20 @@ export const handleShowServers: Handler = async (message) => {
 
   const sortedList = list.slice().sort((a, b) => a.id - b.id);
 
-  message.channel.send(formatQueryServers(sortedList));
+  const listResponses = await Promise.allSettled(
+    sortedList.map(({ address }) => {
+      const [host, port] = getHostPortPasswordFromAddress(address);
+      return queryUT99Server(host, port);
+    })
+  ).catch(() => {});
+
+  if (!listResponses) return;
+
+  const parsedResponses = listResponses.map((r) => {
+    if (r.status === 'fulfilled') return parseServerResponse(r.value);
+  });
+
+  message.channel.send(formatQueryServers(sortedList, parsedResponses));
   log.info(`Exiting handleShowServers`);
 };
 
@@ -177,29 +226,14 @@ export const handleQueryServer: Handler = async (message, args) => {
   }
 
   const response = await queryUT99Server(host, port);
-  const queryData = response.split('\\');
-  queryData.shift();
-  queryData.unshift();
 
-  const { info, players } = queryData.reduce(
-    (acc, curr) => {
-      if (curr === 'player_0' || curr === 'Player_0')
-        acc.foundPlayerData = true;
-      acc.foundPlayerData ? acc.players.push(curr) : acc.info.push(curr);
-      return acc;
-    },
-    {
-      info: [],
-      players: [],
-      foundPlayerData: false,
-    } as { info: string[]; players: string[]; foundPlayerData: boolean }
-  );
+  const { info, players } = parseServerResponse(response);
 
-  const formattedResponse = formatQueryServerStatus(
-    fizzZoop(info),
-    fizzZoop(players),
-    { host, port, password }
-  );
+  const formattedResponse = formatQueryServerStatus(info, players, {
+    host,
+    port,
+    password,
+  });
 
   message.channel.send(formattedResponse);
   log.info(`Exiting handleQueryServer`);

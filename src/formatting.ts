@@ -526,26 +526,11 @@ export const formatPromoteAvailablePugs = (
   return `${title}\n${body}`;
 };
 
-export const formatQueryServers = (list: Array<QueryServer>) => {
-  const embed = new MessageEmbed();
-
-  const description = list.reduce((acc, curr, i) => {
-    acc += `\`${i + 1}\`\u00A0\u00A0\u00A0${curr.name}\n`;
-    return acc;
-  }, ``);
-
-  embed
-    .setTitle(`IP\u00A0\u00A0\u00A0Name`)
-    .setColor(EMBED_COLOR)
-    .setDescription(description || 'No query servers added yet')
-    .setFooter('To query, type: q ip');
-
-  return embed;
-};
-
+type InfoType = Record<string, string>;
+type PlayersType = Record<string, string>;
 export const formatQueryServerStatus = (
-  info: Record<string, string>,
-  players: Record<string, string>,
+  info: InfoType,
+  players: PlayersType,
   { host, port, password }: { host: string; port: number; password: string }
 ) => {
   const embed = new MessageEmbed();
@@ -651,6 +636,51 @@ export const formatQueryServerStatus = (
   embed.setColor(EMBED_COLOR);
   embed.setDescription(description);
   embed.setFooter(footer);
+
+  return embed;
+};
+
+type Responses = Array<
+  | {
+      info: InfoType;
+      players: PlayersType;
+    }
+  | undefined
+>;
+export const formatQueryServers = (
+  list: Array<QueryServer>,
+  responses: Responses
+) => {
+  const { ip, name, players } = list.reduce(
+    (acc, curr, i) => {
+      const response = responses[i];
+      acc.ip.push(`\`${i + 1}\``);
+      acc.name.push(curr.name);
+      acc.players.push(
+        response
+          ? `\`${response.info.numplayers}/${response.info.maxplayers}\``
+          : '`Timed Out`'
+      );
+      return acc;
+    },
+    {
+      ip: [],
+      name: [],
+      players: [],
+    } as { ip: string[]; name: string[]; players: string[] }
+  );
+
+  const embed = new MessageEmbed();
+  embed.setColor(EMBED_COLOR);
+
+  if (list.length > 0) {
+    embed.addField('IP', ip, true);
+    embed.addField('Name', name, true);
+    embed.addField('Players', players, true);
+    embed.setFooter('To query a server, type .q ip');
+  } else {
+    embed.setDescription('No query servers added yet');
+  }
 
   return embed;
 };
