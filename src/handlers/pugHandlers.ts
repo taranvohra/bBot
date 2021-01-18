@@ -1005,12 +1005,16 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
   log.info(`Exiting handleAdminBlockPlayer`);
 };
 
-export const handleAdminUnblockPlayer: Handler = async (message, _) => {
+export const handleAdminUnblockPlayer: Handler = async (
+  message,
+  _,
+  customMention
+) => {
   log.info(`Entering handleAdminUnblockPlayer`);
   const { guild, mentions } = message;
   if (!guild) return;
 
-  const mentionedUser = mentions.users.first();
+  const mentionedUser = customMention ?? mentions.users.first();
   if (!mentionedUser) {
     message.channel.send(`No mentioned user`);
     return;

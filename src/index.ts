@@ -56,6 +56,7 @@ const monitorUsersForUnblocking = () => {
         const channel = guild.channels.cache.get(channelId);
         list.forEach((user) => {
           const message = {
+            guild,
             channel,
           } as Message;
           const mentionedUser = {
