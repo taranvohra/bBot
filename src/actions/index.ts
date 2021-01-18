@@ -244,3 +244,27 @@ export const editGuildQueryServerAddress = async (
       },
     }
   ).exec();
+
+export const updateGuildUserDefaultJoins = async (
+  guildId: string,
+  userId: string,
+  username: string,
+  defaultJoins: string[]
+) =>
+  Users.findOneAndUpdate(
+    {
+      guildId,
+      userId,
+    },
+    {
+      $set: {
+        guildId,
+        userId,
+        username,
+        defaultJoins,
+      },
+    },
+    {
+      upsert: true,
+    }
+  ).exec();

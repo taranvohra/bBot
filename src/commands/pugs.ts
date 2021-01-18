@@ -18,12 +18,21 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
-    key: 'handleJoinGameTypes',
+    key: 'handleDecideDefaultOrSpecificJoin',
     aliases: ['j', 'join'],
     type: 'both',
     isPrivileged: false,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleSetDefaultJoin',
+    aliases: ['defaultjoin'],
+    type: 'args',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
+
   {
     group,
     key: 'handleLeaveGameTypes',

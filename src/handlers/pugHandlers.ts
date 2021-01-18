@@ -19,6 +19,7 @@ import {
   addGuildBlockedUser,
   removeGuildBlockedUser,
   setGuildGameTypeCoinFlipTo,
+  updateGuildUserDefaultJoins,
 } from '~actions';
 import store, {
   addGameType,
@@ -159,6 +160,36 @@ export const handleDecideDefaultOrSpecificJoin: Handler = async (
     handleJoinGameTypes(message, user.defaultJoins);
   }
   log.info(`Exiting handleDecideDefaultOrSpecificJoin`);
+};
+
+export const handleSetDefaultJoin: Handler = async (message, args) => {
+  log.info(`Entering handleSetDefaultJoin`);
+  const { guild, author } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { gameTypes } = cache.pugs[guild.id];
+
+  const allJoins = args
+    .map((a) => {
+      const game = a.toLowerCase();
+      const gameType = gameTypes.some((g) => g.name === game);
+      if (!gameType) return undefined;
+      return game;
+    })
+    .filter((j): j is string => !!j);
+
+  if (allJoins.length > 0) {
+    await updateGuildUserDefaultJoins(
+      guild.id,
+      author.id,
+      author.username,
+      allJoins
+    );
+    log.info(
+      `Updated default joins for user ${author.id} at guild ${guild.id}`
+    );
+  }
 };
 
 export const handleJoinGameTypes: Handler = async (
