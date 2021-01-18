@@ -189,7 +189,10 @@ export const handleSetDefaultJoin: Handler = async (message, args) => {
     log.info(
       `Updated default joins for user ${author.id} at guild ${guild.id}`
     );
+    message.channel.send(`Default join set!`);
   }
+
+  log.info(`Exiting handleSetDefaultJoin`);
 };
 
 export const handleJoinGameTypes: Handler = async (
