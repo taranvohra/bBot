@@ -134,6 +134,33 @@ export const handleDeleteGameType: Handler = async (message, args) => {
   log.info(`Exiting handleDeleteGameType`);
 };
 
+export const handleDecideDefaultOrSpecificJoin: Handler = async (
+  message,
+  args
+) => {
+  log.info(`Entering handleDecideDefaultOrSpecificJoin`);
+  const { guild, author } = message;
+  if (!guild) return;
+
+  if (args.length > 0) {
+    handleJoinGameTypes(message, args);
+  } else {
+    const user = await Users.findOne({
+      userId: author.id,
+      guildId: guild.id,
+    }).exec();
+
+    if (!user || !user.defaultJoins || user.defaultJoins.length === 0) {
+      message.channel.send(
+        `No defaultjoins set. Type **${CONSTANTS.defaultPrefix}defaultjoin gametypes** to set it!`
+      );
+      return;
+    }
+    handleJoinGameTypes(message, user.defaultJoins);
+  }
+  log.info(`Exiting handleDecideDefaultOrSpecificJoin`);
+};
+
 export const handleJoinGameTypes: Handler = async (
   message,
   args,
