@@ -13,7 +13,7 @@ import * as generalHandlers from './generalHandlers';
 import * as pugHandlers from './pugHandlers';
 import * as queryHandlers from './queryHandlers';
 
-const commandHandlers = {
+export const commandHandlers = {
   ...generalHandlers,
   ...pugHandlers,
   ...queryHandlers,

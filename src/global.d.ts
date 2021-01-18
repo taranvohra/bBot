@@ -21,7 +21,7 @@ declare global {
   export type Handler = (
     message: Message,
     args: string[],
-    mentionedUser?: User,
+    customMentionedUser?: User,
     returnMsg?: boolean
   ) => Promise<string | void>;
 
