@@ -659,7 +659,7 @@ export const handlePickPlayer: Handler = async (message, [index]) => {
       overallSequence: sequences.total,
       game: {
         pug: forPug,
-        mapvote: isCoinFlipEnabled ? coinflip : -1,
+        coinFlipWinner: isCoinFlipEnabled ? coinflip : -1,
       },
     });
 

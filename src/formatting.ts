@@ -14,6 +14,24 @@ import {
 import { formatDistanceStrict } from 'date-fns';
 
 const EMBED_COLOR = '#16171A';
+const edges = [
+  {
+    top: `+----- mapvote ------+`,
+    bottom: `+----------------------+`,
+  },
+  {
+    top: `+------ mapvote ------+`,
+    bottom: `+-----------------------+`,
+  },
+  {
+    top: `+------- mapvote -------+`,
+    bottom: `+-------------------------+`,
+  },
+  {
+    top: `+------- mapvote ------+`,
+    bottom: `+------------------------+`,
+  },
+];
 
 export const formatPugFilledDM = (pug: Pug, guildName: string) => {
   const DMTitle = `**${pug.name.toUpperCase()}** filled in **${guildName}**`;
@@ -465,7 +483,7 @@ export const formatLastPug = (
   guildName: string
 ) => {
   const {
-    game: { pug },
+    game: { pug, coinFlipWinner },
   } = lastPug;
   const distance = formatDistanceStrict(new Date(), lastPug.timestamp, {
     addSuffix: true,
@@ -501,8 +519,17 @@ export const formatLastPug = (
       }, ``)
     : `${pug.players[0].name} :people_wrestling: ${pug.players[1].name}\n`;
 
-  //TODO: Add coinflip, winner results too (if present)
-  return `${title}\n\n${activeTeams}`;
+  const mapvoteWinnerTeam =
+    coinFlipWinner !== undefined ? formatMapvoteWinner(coinFlipWinner) : ``;
+  return `${title}\n\n${activeTeams}\n${mapvoteWinnerTeam}`;
+};
+
+export const formatMapvoteWinner = (team: number) => {
+  const { top, bottom } = edges[team];
+  const winningTeam = teams[getTeamIndex(team)].toUpperCase();
+  const winningTeamEmoji = teamEmojis[getTeamIndex(team)];
+  const mapvoteWinnerTeam = `${winningTeamEmoji} **${winningTeam}** ${winningTeamEmoji}`;
+  return `${top}\n| ${mapvoteWinnerTeam} |\n${bottom}`;
 };
 
 export const formatPromoteAvailablePugs = (
