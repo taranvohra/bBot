@@ -651,11 +651,11 @@ export const formatQueryServers = (
   list: Array<QueryServer>,
   responses: Responses
 ) => {
-  const { ip, name, players } = list.reduce(
+  const { ipname, players } = list.reduce(
     (acc, curr, i) => {
       const response = responses[i];
-      acc.ip.push(`\`${i + 1}\``);
-      acc.name.push(curr.name);
+      acc.ipname.push(`\`${i + 1}\`\u00A0${curr.name}`);
+
       acc.players.push(
         response
           ? `\`${response.info.numplayers}/${response.info.maxplayers}\``
@@ -664,18 +664,16 @@ export const formatQueryServers = (
       return acc;
     },
     {
-      ip: [],
-      name: [],
+      ipname: [],
       players: [],
-    } as { ip: string[]; name: string[]; players: string[] }
+    } as { ipname: string[]; players: string[] }
   );
 
   const embed = new MessageEmbed();
   embed.setColor(EMBED_COLOR);
 
   if (list.length > 0) {
-    embed.addField('IP', ip, true);
-    embed.addField('Name', name, true);
+    embed.addField(`IP\u00A0\u00A0\u00A0Name`, ipname, true);
     embed.addField('Players', players, true);
     embed.setFooter('To query a server, type .q ip');
   } else {
