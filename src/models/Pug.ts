@@ -163,7 +163,6 @@ export class Pug {
       const poolForCaptains = shuffle(playersNotCaptain)
         .slice(0, remaining * 0.6)
         .sort((a, b) => a.stats[this.name].rating - b.stats[this.name].rating);
-      // TODO: when add player, if they have no stats for that pug, do it with some default values
 
       if (this.noOfTeams === 2) {
         if (this.captains.length === 0) {
