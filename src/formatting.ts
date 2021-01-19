@@ -389,6 +389,7 @@ export const formatPugsInPicking = (pugs: Array<Pug>) => {
 export const formatUserStats = (user: PugUser) => {
   if (isDocument(user.lastPug)) {
     const {
+      lastPug,
       lastPug: {
         game: { pug },
       },
@@ -416,40 +417,13 @@ export const formatUserStats = (user: PugUser) => {
     const totals = `:video_game: **${totalPugs}** pug${
       totalPugs !== 1 ? 's' : ''
     }\t:cop: **${totalCaptain}**\t:trophy: **${totalWins}**\t:x: **${totalLosses}**`;
-    const distance = formatDistanceStrict(new Date(), user.lastPug.timestamp, {
+    const distance = formatDistanceStrict(new Date(), lastPug.timestamp, {
       addSuffix: true,
     });
 
-    const pugTeams = !isDuelPug(pug.pickingOrder)
-      ? Array.from({ length: pug.noOfTeams }, (_, i) => i).reduce(
-          (acc, _, i) => {
-            const teamIndex = getTeamIndex(i);
-            acc[i] = `\t**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
-            return acc;
-          },
-          {} as { [key: string]: string }
-        )
-      : null;
+    const lastPugTitle = `Last pug played was **${pug.name.toUpperCase()}** (${distance})`;
+    const lastPugBody = formatLastPug(lastPug, 1, '');
 
-    const currTeams = !isDuelPug(pug.pickingOrder)
-      ? pug.players
-          .slice()
-          .sort((a, b) => Number(a.pick) - Number(b.pick))
-          .reduce((acc, curr) => {
-            if (curr.team !== null)
-              acc![curr.team] += `*${curr.name}* :small_orange_diamond:`;
-            return acc;
-          }, pugTeams)
-      : null;
-
-    const activeTeams = !isDuelPug(pug.pickingOrder)
-      ? Object.values(currTeams!).reduce((acc, curr) => {
-          acc += `${curr.slice(0, curr.length - 24)}\n`;
-          return acc;
-        }, ``)
-      : `${pug.players[0].name} :people_wrestling: ${pug.players[1].name}\n`;
-
-    const lastMetaData = `Last pug played was **${pug.name.toUpperCase()}** (${distance})`;
     const collectiveStatsTitle = `**GameTypes**`;
     const collectiveStatsBody = Object.entries(user.stats).reduce(
       (acc, [pugName, pugStats]) => {
@@ -471,12 +445,11 @@ export const formatUserStats = (user: PugUser) => {
       },
       ``
     );
-    return `${title}\n\n${totals}\n\n${lastMetaData}\n${activeTeams}\n${collectiveStatsTitle}\n${collectiveStatsBody}`;
+    return `${title}\n\n${totals}\n\n${lastPugTitle}\n\n${lastPugBody}\n${collectiveStatsTitle}\n${collectiveStatsBody}`;
   }
   return `Not Found`;
 };
 
-//TODO: make it usable in other functions
 export const formatLastPug = (
   lastPug: PugSchema,
   tCount: number,
@@ -488,10 +461,6 @@ export const formatLastPug = (
   const distance = formatDistanceStrict(new Date(), lastPug.timestamp, {
     addSuffix: true,
   });
-
-  const title = `Last${
-    tCount > 1 ? tCount : ''
-  } **${pug.name.toUpperCase()}** at **${guildName}** (${distance})`;
 
   const pugTeams = !isDuelPug(pug.pickingOrder)
     ? Array.from({ length: pug.noOfTeams }, (_, i) => i).reduce((acc, _, i) => {
@@ -520,8 +489,18 @@ export const formatLastPug = (
     : `${pug.players[0].name} :people_wrestling: ${pug.players[1].name}\n`;
 
   const mapvoteWinnerTeam =
-    coinFlipWinner !== undefined ? formatMapvoteWinner(coinFlipWinner) : ``;
-  return `${title}\n\n${activeTeams}\n${mapvoteWinnerTeam}`;
+    typeof coinFlipWinner === 'number'
+      ? `${formatMapvoteWinner(coinFlipWinner)}\n`
+      : ``;
+
+  if (guildName) {
+    const title = `Last${
+      tCount > 1 ? tCount : ''
+    } **${pug.name.toUpperCase()}** at **${guildName}** (${distance})`;
+    return `${title}\n\n${activeTeams}\n${mapvoteWinnerTeam}`;
+  } else {
+    return `${activeTeams}${mapvoteWinnerTeam}`;
+  }
 };
 
 export const formatMapvoteWinner = (team: number) => {
