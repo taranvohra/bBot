@@ -11,7 +11,7 @@ type PugStat = {
   lost: number;
 };
 
-type PugPlayer = {
+export type PugPlayer = {
   id: string;
   name: string;
   tag: string;

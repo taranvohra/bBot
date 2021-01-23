@@ -10,6 +10,7 @@ import {
   sanitizeName,
   calculateBlockExpiry,
   isDuelPug,
+  getRandomPickIndex,
 } from '~utils';
 import {
   addGuildGameType,
@@ -609,9 +610,6 @@ export const handlePickPlayer: Handler = async (message, [index]) => {
   const { list, gameTypes } = cache.pugs[guild.id];
   const user = author;
 
-  const playerIndex = parseInt(index);
-  if (!playerIndex) return;
-
   const forPug = list.find((pug) => {
     if (pug.isInPickingMode) {
       return pug.isCaptain(user.id);
@@ -638,6 +636,13 @@ export const handlePickPlayer: Handler = async (message, [index]) => {
     message.channel.send(`Please wait for your turn :pouting_cat:`);
     return;
   }
+
+  // +1 because few lines down we're going to subtract -1 so we still gucci 😎
+  const playerIndex =
+    index === 'random'
+      ? getRandomPickIndex(forPug.players) + 1
+      : parseInt(index);
+  if (!playerIndex) return;
 
   if (playerIndex < 1 || playerIndex > forPug.players.length) {
     message.channel.send(`Invalid pick`);
@@ -899,8 +904,9 @@ export const handleDecidePromoteOrPick: Handler = async (message, args) => {
   if (!args[0]) handlePromoteAvailablePugs(message, args);
   else {
     // p 4 or p siege5
-    if (isNaN(parseInt(args[0]))) handlePromoteAvailablePugs(message, args);
-    else handlePickPlayer(message, args);
+    if (!isNaN(parseInt(args[0])) || args[0] === 'random')
+      handlePickPlayer(message, args);
+    else handlePromoteAvailablePugs(message, args);
   }
 };
 

@@ -1,4 +1,5 @@
 import { GuildMember } from 'discord.js';
+import { PugPlayer } from '~models';
 import store from '~store';
 
 export const CONSTANTS = {
@@ -172,3 +173,12 @@ export const padNumberWithZeros = (n: number) =>
 
 export const getTeamNumericIndex = (teamName: string) =>
   Object.values(teams).findIndex((t) => t === teamName);
+
+export const getRandomPickIndex = (players: Array<PugPlayer>) => {
+  const indexes = players.reduce((acc, curr, i) => {
+    if (curr.team === null && curr.pick === null) acc.push(i);
+    return acc;
+  }, [] as number[]);
+
+  return shuffle(indexes)[0];
+};
