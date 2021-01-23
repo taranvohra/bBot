@@ -486,7 +486,7 @@ export const formatLastPug = (
         acc += `${curr.slice(0, curr.length - 23)}\n`;
         return acc;
       }, ``)
-    : `${pug.players[0].name} :people_wrestling: ${pug.players[1].name}\n`;
+    : `**${pug.players[0].name}** :people_wrestling: **${pug.players[1].name}**\n`;
 
   const mapvoteWinnerTeam =
     typeof coinFlipWinner === 'number'

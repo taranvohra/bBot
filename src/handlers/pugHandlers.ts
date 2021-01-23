@@ -9,6 +9,7 @@ import {
   getRandomInt,
   sanitizeName,
   calculateBlockExpiry,
+  isDuelPug,
 } from '~utils';
 import {
   addGuildGameType,
@@ -354,7 +355,33 @@ export const handleJoinGameTypes: Handler = async (
       user?.send(DM);
     });
 
-    // TODO: handle case for 1v1 pug
+    if (isDuelPug(toBroadcast.pickingOrder)) {
+      const sequences = await getNextSequences(guild.id, toBroadcast.name);
+      if (!sequences) {
+        throw new Error(
+          `No sequences were returned for ${toBroadcast.name} at ${guild.id}`
+        );
+      }
+
+      const duelPug = await Pugs.create({
+        guildId: guild.id,
+        name: toBroadcast.name,
+        timestamp: new Date(),
+        gameSequence: sequences.current,
+        overallSequence: sequences.total,
+        game: {
+          pug: toBroadcast,
+        },
+      });
+
+      updateStatsAfterPug(toBroadcast, duelPug.id, guild.id);
+
+      log.debug(`Saved stats for players in pug ${duelPug.id}`);
+      log.debug(
+        `Remove pug ${toBroadcast.name} at guild ${guild.id} from store`
+      );
+      store.dispatch(removePug({ guildId: guild.id, name: toBroadcast.name }));
+    }
   }
 
   log.info(`Exiting handleJoinGameTypes`);
