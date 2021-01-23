@@ -112,7 +112,7 @@ export const handleDeleteGameType: Handler = async (message, args) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { gameTypes } = cache.pugs[guild.id];
+  const { gameTypes, list } = cache.pugs[guild.id];
 
   const name = args[0].toLowerCase();
 
@@ -121,10 +121,20 @@ export const handleDeleteGameType: Handler = async (message, args) => {
     return;
   }
 
-  // TODO: prevent deleting it if an active pug (with atleast 1 player in exists)
   if (!gameTypes.some((g) => g.name === name)) {
     log.debug(`Gametype ${name} does not exist`);
     message.channel.send(`Gametype with name ${name} does not exist`);
+    return;
+  }
+
+  const potentialActivePug = list.find((p) => p.name === name);
+  if (potentialActivePug) {
+    log.debug(
+      `Cannot delete gametype ${name} because there could be a potential pug`
+    );
+    message.channel.send(
+      `Gametype ${name} cannot be deleted. Clear the pug first`
+    );
     return;
   }
 
