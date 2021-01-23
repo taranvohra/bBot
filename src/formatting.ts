@@ -11,7 +11,7 @@ import {
   padNumberWithZeros,
   getTeamNumericIndex,
 } from '~utils';
-import { formatDistanceStrict } from 'date-fns';
+import { formatDistanceToNowStrict } from 'date-fns';
 
 const EMBED_COLOR = '#16171A';
 const edges = [
@@ -417,7 +417,7 @@ export const formatUserStats = (user: PugUser) => {
     const totals = `:video_game: **${totalPugs}** pug${
       totalPugs !== 1 ? 's' : ''
     }\t:cop: **${totalCaptain}**\t:trophy: **${totalWins}**\t:x: **${totalLosses}**`;
-    const distance = formatDistanceStrict(new Date(), lastPug.timestamp, {
+    const distance = formatDistanceToNowStrict(lastPug.timestamp, {
       addSuffix: true,
     });
 
@@ -458,7 +458,7 @@ export const formatLastPug = (
   const {
     game: { pug, coinFlipWinner },
   } = lastPug;
-  const distance = formatDistanceStrict(new Date(), lastPug.timestamp, {
+  const distance = formatDistanceToNowStrict(lastPug.timestamp, {
     addSuffix: true,
   });
 
