@@ -80,7 +80,7 @@ export const formatJoinStatus = (statuses: Array<JoinStatus>) => {
 
 export const formatLeaveStatus = (
   statuses: Array<LeaveStatus>,
-  wentOffline?: boolean
+  reason?: 'offline' | 'left'
 ) => {
   const { left, nf, nj, username } = statuses.reduce(
     (acc, { name, result, pug, user }) => {
@@ -110,13 +110,15 @@ export const formatLeaveStatus = (
     }
   );
 
-  return `${
-    left.length > 0
-      ? `${username} left  ${left} ${
-          wentOffline ? `because the user went offline` : ``
-        }`
-      : ``
-  }${nj.length > 0 ? `\n${nj}` : ``}${nj.length > 0 ? `\n${nf}` : ``}`;
+  let reasonMsg;
+  if (reason === 'offline') reasonMsg = 'because the user went offline';
+  else if (reason === 'left')
+    reasonMsg = 'because the user left this discord server';
+  else reasonMsg = '';
+
+  return `${left.length > 0 ? `${username} left  ${left} ${reasonMsg}` : ``}${
+    nj.length > 0 ? `\n${nj}` : ``
+  }${nj.length > 0 ? `\n${nf}` : ``}`;
 };
 
 export const formatDeadPugs = (deadPugs: Array<{ pug: Pug; user: User }>) => {

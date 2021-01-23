@@ -1,7 +1,12 @@
 import { Client, Intents, TextChannel, Message, User } from 'discord.js';
 import { compareAsc } from 'date-fns';
 import store from '~store';
-import { onMessage, onPresenceUpdate, commandHandlers } from '~handlers';
+import {
+  onMessage,
+  onPresenceUpdate,
+  onGuildMemberRemove,
+  commandHandlers,
+} from '~handlers';
 import { connectDB, hydrateStore } from './setup';
 import { pugPubSub } from './pubsub';
 import { formatBroadcastCaptainsReady } from './formatting';
@@ -29,6 +34,8 @@ bBot.on('disconnect', () => {});
 bBot.on('message', onMessage);
 
 bBot.on('presenceUpdate', onPresenceUpdate);
+
+bBot.on('guildMemberRemove', onGuildMemberRemove);
 
 pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
   const cache = store.getState();

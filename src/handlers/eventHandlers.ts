@@ -1,4 +1,4 @@
-import { Message, Presence } from 'discord.js';
+import { Message, Presence, GuildMember, PartialGuildMember } from 'discord.js';
 import store from '~store';
 import {
   CONSTANTS,
@@ -104,7 +104,7 @@ export const onPresenceUpdate = async (
         if (!channel) return;
         const message = {
           guild,
-          content: 'adios',
+          content: 'zzz',
           author: {
             id: user.id,
             username: user.username,
@@ -115,4 +115,31 @@ export const onPresenceUpdate = async (
       }
     });
   }
+};
+
+export const onGuildMemberRemove = (
+  member: GuildMember | PartialGuildMember
+) => {
+  const { guild, user } = member;
+  const cache = store.getState();
+  const { channel: pugChannel, list } = cache.pugs[guild.id];
+  if (!pugChannel || !user) return;
+
+  list.forEach((pug) => {
+    const isInPug = pug.players.find((p) => p.id === user.id);
+    if (isInPug) {
+      const channel = guild.channels.cache.get(pugChannel);
+      if (!channel) return;
+      const message = {
+        guild,
+        content: 'left',
+        author: {
+          id: user.id,
+          username: user.username,
+        },
+        channel,
+      };
+      commandHandlers['handleLeaveAllGameTypes'](message as Message, []);
+    }
+  });
 };
