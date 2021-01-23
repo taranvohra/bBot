@@ -460,11 +460,10 @@ export const handleLeaveGameTypes: Handler = async (
     return acc;
   }, [] as { pug: Pug; user: User }[]);
 
-  let reason;
-  if (content === 'zzz') reason = 'offline';
-  else if (content === 'left') reason = 'left';
-
-  const leaveMessage = formatLeaveStatus(leaveStatuses, reason);
+  const leaveMessage = formatLeaveStatus(
+    leaveStatuses,
+    content === 'zzz' ? 'offline' : content === 'left' ? 'left' : undefined
+  );
 
   if (!returnMsg) {
     message.channel.send(leaveMessage);
