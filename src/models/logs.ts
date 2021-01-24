@@ -1,6 +1,6 @@
 import { getModelForClass, prop } from '@typegoose/typegoose';
 
-class Log {
+export class Log {
   @prop()
   guildId!: string;
 

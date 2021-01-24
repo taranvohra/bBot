@@ -1,6 +1,6 @@
 import { User, MessageEmbed } from 'discord.js';
 import { isDocument } from '@typegoose/typegoose';
-import { Pug, User as PugUser, PugSchema, QueryServer } from '~models';
+import { Pug, User as PugUser, PugSchema, QueryServer, Log } from '~models';
 import {
   CONSTANTS,
   emojis,
@@ -690,3 +690,9 @@ export const formatQueryServers = (
 
   return embed;
 };
+
+export const formatUserLogs = (logs: Array<Log>) =>
+  logs.reduce((acc, curr) => {
+    acc += `${curr.description} on ${curr.timestamp.toUTCString()}\n`;
+    return acc;
+  }, ``);

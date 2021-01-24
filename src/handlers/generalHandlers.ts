@@ -1,5 +1,6 @@
 import log from '../log';
-import { Guilds, GuildStats } from '~models';
+import { formatUserLogs } from '../formatting';
+import { Guilds, GuildStats, Logs } from '~models';
 import {
   updateGuildPugChannel,
   updateGuildQueryChannel,
@@ -200,7 +201,7 @@ export const handleWarnUser: Handler = async (message, args) => {
 
   const mentionedUser = mentions.users.first();
   if (!mentionedUser) {
-    message.channel.send(`No mentioned user to warn`);
+    message.channel.send(`No user was mentioned`);
     return;
   }
 
@@ -217,4 +218,30 @@ export const handleWarnUser: Handler = async (message, args) => {
     `<@${mentionedUser.id}>, you have been **WARNED** for __${reason}__`
   );
   log.info(`Exiting handleWarnUser`);
+};
+
+export const handleViewUserLogs: Handler = async (message, args) => {
+  log.info(`Entering handleViewUserLogs`);
+  const { guild, mentions } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+  if (!mentionedUser) {
+    message.channel.send(`No user was mentioned`);
+    return;
+  }
+
+  const allUserLogs = await Logs.find({
+    userId: mentionedUser.id,
+    guildId: guild.id,
+  })
+    .sort({ _id: -1 })
+    .limit(10);
+
+  const logsBody = formatUserLogs(allUserLogs);
+  const msg = `:scroll: Showing last 10 logs of **${mentionedUser.username}** :scroll:\n\n${logsBody}`;
+
+  message.author.send(msg);
+  message.channel.send(`<@${message.author.id}>, you have received a DM`);
+  log.info(`Exiting handleViewUserLogs`);
 };

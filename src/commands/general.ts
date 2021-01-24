@@ -56,6 +56,14 @@ const generalCommandList: Command[] = [
     isPrivileged: true,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleViewUserLogs',
+    aliases: ['logs'],
+    type: 'args',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default generalCommandList;

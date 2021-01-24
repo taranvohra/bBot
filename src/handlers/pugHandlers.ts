@@ -1055,7 +1055,7 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
     emojis.bannechu
   } for reason ${reason}\n${removedMsg}`;
 
-  const logDescription = `BLOCKED for reason: ${reason} by <@${message.author.id}>`;
+  const logDescription = `**BLOCKED** for reason: __${reason}__ by <@${message.author.id}>`;
   createNewUserLog(guild.id, mentionedUser.id, logDescription);
 
   message.channel.send(finalMsg);
@@ -1117,11 +1117,11 @@ export const handleAdminShowBlockedPlayers: Handler = async (message, _) => {
         curr.culprit.username
       }** • ${curr.expiresAt.toUTCString()} • ${
         curr.reason || 'no reason'
-      } • by ${curr.by.username}\n`;
+      } • by <@${curr.by.id}>\n`;
       return acc;
     }, ``);
     message.author.send(
-      `${emojis.bannechu} List of Blocked Users at **${guild.name}**${emojis.bannechu}\n\n${msg}`
+      `${emojis.bannechu} List of Blocked Users at **${guild.name}** ${emojis.bannechu}\n\n${msg}`
     );
   }
   message.channel.send(`<@${message.author.id}>, you have received a DM`);
