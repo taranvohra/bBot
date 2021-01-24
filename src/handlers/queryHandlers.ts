@@ -89,7 +89,7 @@ export const handleShowServers: Handler = async (message) => {
 
   const listResponses = await Promise.allSettled(
     sortedList.map(({ address }) => {
-      const [host, port] = getHostPortPasswordFromAddress(address);
+      const { host, port } = getHostPortPasswordFromAddress(address);
       return queryUT99Server(host, port);
     })
   ).catch(() => {});
@@ -216,7 +216,7 @@ export const handleQueryServer: Handler = async (message, args) => {
   // We lookup in our cache list to see if it's a valid index
   // If not then we consider it to be a custom address
 
-  const [host, port, password] = queryServerFromIndex
+  const { host, port, password } = queryServerFromIndex
     ? getHostPortPasswordFromAddress(queryServerFromIndex.address)
     : getHostPortPasswordFromAddress(args[0]);
 
@@ -237,4 +237,31 @@ export const handleQueryServer: Handler = async (message, args) => {
 
   message.channel.send(formattedResponse);
   log.info(`Exiting handleQueryServer`);
+};
+
+export const handleShowIp: Handler = async (message, args) => {
+  log.info(`Entering handleShowIp`);
+  const { guild, cmd } = message;
+  if (!guild || !cmd) return;
+
+  const cache = store.getState();
+  const { list } = cache.queries[guild.id];
+
+  const matchedIndex = args[0] ? [args[0]] : cmd.match(/\d/g);
+  if (!matchedIndex) return;
+
+  const [index] = matchedIndex.map(Number);
+  const queryServer = list[index - 1];
+  if (!queryServer) {
+    message.channel.send(`No query server at ${index}`);
+    return;
+  }
+
+  const { host, port, password } = getHostPortPasswordFromAddress(
+    queryServer.address
+  );
+  message.channel.send(
+    `<unreal://${host}:${port}${password ? `?password=${password}>` : ''}>`
+  );
+  log.info(`Exiting handleShowIp`);
 };

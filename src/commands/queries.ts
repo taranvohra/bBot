@@ -40,6 +40,15 @@ const queryCommandList: Command[] = [
     isPrivileged: false,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleShowIp',
+    aliases: ['ip'],
+    type: 'both',
+    rgx: () => /^ip\s{0,1}/g,
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default queryCommandList;

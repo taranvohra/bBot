@@ -148,7 +148,7 @@ export const calculateBlockExpiry = (
 
 export const getHostPortPasswordFromAddress = (
   address: string
-): [string, number, string] => {
+): { host: string; port: number; password: string } => {
   const [stringAfterProtocol] = address.split('unreal://').filter(Boolean);
   const [
     stringBeforePassword,
@@ -156,7 +156,11 @@ export const getHostPortPasswordFromAddress = (
   ] = stringAfterProtocol.split('?');
   const [hostString, portString] = stringBeforePassword.split(':');
   const [, password] = stringAfterPassword.split('=');
-  return [hostString, Number(portString) || 7777, password];
+  return {
+    host: hostString,
+    port: Number(portString) || 7777,
+    password,
+  };
 };
 
 export const fizzZoop = <T>(array: T[]) =>

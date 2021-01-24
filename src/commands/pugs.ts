@@ -109,7 +109,7 @@ const pugsCommandList: Command[] = [
     group,
     key: 'handleCheckLastPugs',
     aliases: ['last'],
-    rgx: (cmd: string) => RegExp(`^${cmd}(\d|t)*`, 'g'),
+    rgx: (cmd: string) => new RegExp(`^${cmd}(\d|t)*`, 'g'),
     type: 'both',
     isPrivileged: false,
     needsRegisteredGuild: true,

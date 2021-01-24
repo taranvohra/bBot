@@ -80,7 +80,7 @@ export const onMessage = async (message: Message) => {
     message.cmd = cmd;
 
     const handler = foundCommand.key as keyof typeof commandHandlers;
-    commandHandlers[handler](message, args);
+    commandHandlers[handler](message, args.filter(Boolean));
   } else {
     // TODO send a mesage telling the user type help for list of commands
   }
