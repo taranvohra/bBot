@@ -22,6 +22,7 @@ import {
   removeGuildBlockedUser,
   setGuildGameTypeCoinFlipTo,
   updateGuildUserDefaultJoins,
+  createNewUserLog,
 } from '~actions';
 import store, {
   addGameType,
@@ -986,12 +987,18 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
     return;
   }
 
-  const [timeframe = '', ...reason] = args.slice(1);
+  const [timeframe = '', ...reasonText] = args.slice(1);
   const [blockLengthString] = timeframe.match(/[0-9]+/g) ?? [];
   const [blockPeriodString] = timeframe.match(/[m|h|d]/g) ?? [];
 
   if (!blockLengthString || !blockPeriodString) {
     message.channel.send(`No duration was provided`);
+    return;
+  }
+
+  const reason = reasonText.join(' ');
+  if (!reason) {
+    message.channel.send(`Specify the reason for block`);
     return;
   }
 
@@ -1014,7 +1021,7 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
       username: mentionedUser.username,
     },
     expiresAt: expiry,
-    reason: reason.join(' ') || '',
+    reason,
   };
 
   await addGuildBlockedUser(guild.id, newBlock);
@@ -1046,7 +1053,10 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
     mentionedUser.username
   }** has been blocked from joining pugs till __**${expiry.toUTCString()}**__ ${
     emojis.bannechu
-  }\n${removedMsg}`;
+  } for reason ${reason}\n${removedMsg}`;
+
+  const logDescription = `BLOCKED for reason: ${reason} by <@${message.author.id}>`;
+  createNewUserLog(guild.id, mentionedUser.id, logDescription);
 
   message.channel.send(finalMsg);
   log.info(`Exiting handleAdminBlockPlayer`);

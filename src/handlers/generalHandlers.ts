@@ -6,6 +6,7 @@ import {
   updateGuildPrefix,
   addGuildIgnoredCommandGroup,
   removeGuildIgnoredCommandGroup,
+  createNewUserLog,
 } from '~actions';
 import store, {
   initPugs,
@@ -190,4 +191,30 @@ export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
     `Commands under group **${group}** will not be ignored from now onwards`
   );
   log.info(`Exiting handleUnIgnoreCommandGroup`);
+};
+
+export const handleWarnUser: Handler = async (message, args) => {
+  log.info(`Entering handleWarnUser`);
+  const { guild, mentions, author } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+  if (!mentionedUser) {
+    message.channel.send(`No mentioned user to warn`);
+    return;
+  }
+
+  const reason = args.slice(1).join(' ');
+  if (!reason) {
+    message.channel.send(`No reason mentioned`);
+    return;
+  }
+
+  const logDescription = `WARNED for reason: ${reason} by <@${author.id}>`;
+  createNewUserLog(guild.id, mentionedUser.id, logDescription);
+
+  message.channel.send(
+    `<@${mentionedUser.id}>, you have been **WARNED** for __${reason}__`
+  );
+  log.info(`Exiting handleWarnUser`);
 };

@@ -7,6 +7,7 @@ import {
   Pugs,
   Block,
   QueryServer,
+  Logs,
 } from '~models';
 
 export const updateGuildPugChannel = (guildId: string, channelId: string) =>
@@ -268,3 +269,15 @@ export const updateGuildUserDefaultJoins = async (
       upsert: true,
     }
   ).exec();
+
+export const createNewUserLog = (
+  guildId: string,
+  userId: string,
+  description: string
+) =>
+  Logs.create({
+    guildId,
+    userId,
+    description,
+    timestamp: new Date(),
+  });

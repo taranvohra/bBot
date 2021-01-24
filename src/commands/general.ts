@@ -48,6 +48,14 @@ const generalCommandList: Command[] = [
     isPrivileged: true,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleWarnUser',
+    aliases: ['warn'],
+    type: 'args',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default generalCommandList;
