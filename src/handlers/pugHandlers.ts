@@ -849,7 +849,9 @@ export const handlePromoteAvailablePugs: Handler = async (message, args) => {
   const cache = store.getState();
   const { list } = cache.pugs[guild.id];
 
-  const hasCoolDownRole = member.roles.cache.get('COOLDOWN');
+  const hasCoolDownRole = member.roles.cache.some(
+    (role) => role.name === 'COOLDOWN'
+  );
   if (hasCoolDownRole) {
     const { cooldowns } = cache.misc[guild.id];
     const cooldownCmd = cooldowns['promote'];

@@ -5,6 +5,7 @@ import {
   onMessage,
   onPresenceUpdate,
   onGuildMemberRemove,
+  onGuildMemberUpdate,
   commandHandlers,
 } from '~handlers';
 import { connectDB, hydrateStore } from './setup';
@@ -36,6 +37,8 @@ bBot.on('message', onMessage);
 bBot.on('presenceUpdate', onPresenceUpdate);
 
 bBot.on('guildMemberRemove', onGuildMemberRemove);
+
+bBot.on('guildMemberUpdate', onGuildMemberUpdate);
 
 pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
   const cache = store.getState();

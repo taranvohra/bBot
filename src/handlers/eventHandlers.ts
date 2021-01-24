@@ -1,4 +1,10 @@
-import { Message, Presence, GuildMember, PartialGuildMember } from 'discord.js';
+import {
+  Message,
+  Presence,
+  GuildMember,
+  PartialGuildMember,
+  TextChannel,
+} from 'discord.js';
 import store from '~store';
 import {
   CONSTANTS,
@@ -142,4 +148,45 @@ export const onGuildMemberRemove = (
       commandHandlers['handleLeaveAllGameTypes'](message as Message, []);
     }
   });
+};
+
+export const onGuildMemberUpdate = (
+  prev: GuildMember | PartialGuildMember,
+  updated: GuildMember
+) => {
+  console.log('upd');
+  const { roles: prevRoles } = prev;
+  const {
+    roles: newRoles,
+    guild,
+    user: { id },
+  } = updated;
+
+  const cache = store.getState();
+  const { channel: channelId } = cache.pugs[guild.id];
+
+  if (!channelId) return;
+
+  const hadCooldownRoleBefore = prevRoles.cache.some(
+    (role) => role.name === 'COOLDOWN'
+  );
+  const hasCooldownRoleNow = newRoles.cache.some(
+    (role) => role.name === 'COOLDOWN'
+  );
+
+  const channel = guild.channels.cache.get(channelId);
+  if (channel) {
+    let textChannel = channel as TextChannel;
+    if (!hadCooldownRoleBefore && hasCooldownRoleNow) {
+      textChannel.send(
+        `<@${id}>, you have been given the \`COOLDOWN\` role. This is because the staff feel you spam certain bot commands alot. The following commands are part of this restriction:-\n
+        **- Promote**\n\nThis means you & other members part of this restriction will be able to use the aforementioned command(s) \`once\` every ${CONSTANTS.coolDownSeconds} seconds.
+        `
+      );
+    } else if (hadCooldownRoleBefore && !hasCooldownRoleNow) {
+      textChannel.send(
+        `<@${id}>, the \`COOLDOWN\` restriction has been lifted up by the staff. Ensure it doesn't happen again.`
+      );
+    }
+  }
 };
