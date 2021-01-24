@@ -211,7 +211,7 @@ export const handleWarnUser: Handler = async (message, args) => {
     return;
   }
 
-  const logDescription = `WARNED for reason: ${reason} by <@${author.id}>`;
+  const logDescription = `**WARNED** for reason: __${reason}__ by <@${author.id}>`;
   createNewUserLog(guild.id, mentionedUser.id, logDescription);
 
   message.channel.send(
