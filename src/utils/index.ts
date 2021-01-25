@@ -172,9 +172,6 @@ export const fizzZoop = <T>(array: T[]) =>
     return acc;
   }, {} as { [key: string]: T });
 
-export const padNumberWithZeros = (n: number) =>
-  n > -1 && n < 10 ? `0${n}` : `${n}`;
-
 export const getTeamNumericIndex = (teamName: string) =>
   Object.values(teams).findIndex((t) => t === teamName);
 
@@ -186,3 +183,6 @@ export const getRandomPickIndex = (players: Array<PugPlayer>) => {
 
   return shuffle(indexes)[0];
 };
+
+export const secondsToHH_MM_SS = (seconds: number) =>
+  new Date(seconds * 1000).toISOString().substr(11, 8);

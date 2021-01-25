@@ -10,6 +10,7 @@ import {
   sanitizeName,
   padNumberWithZeros,
   getTeamNumericIndex,
+  secondsToHH_MM_SS,
 } from '~utils';
 import { formatDistanceToNowStrict } from 'date-fns';
 
@@ -583,9 +584,10 @@ export const formatQueryServerStatus = (
     teamScores: [],
   };
   if (info.xserverquery) {
-    const time = parseInt(info.remainingtime);
-    const seconds = time % 60;
-    const minutes = (time - seconds) / 60;
+    const remainingSeconds = parseInt(info.remainingtime);
+    const [hh, mm, ss] = secondsToHH_MM_SS(remainingSeconds).split(':');
+    const remainingTimeString =
+      hh === '00' ? `${mm}:${ss}` : `${hh}:${mm}:${ss}`;
 
     let teamScores = {
       [teams.team_0]: '',
@@ -598,10 +600,9 @@ export const formatQueryServerStatus = (
       teamScores[Object.values(teams)[i]] = info[`teamscore_${i}`];
 
     const isNotOverTime =
-      (minutes === timeLimit && seconds === 0) || minutes < timeLimit;
-    xServerQueryProps.remainingTime = `${padNumberWithZeros(
-      minutes
-    )}:${padNumberWithZeros(seconds)} ${
+      (parseInt(mm) === timeLimit && parseInt(ss) === 0) ||
+      parseInt(mm) < timeLimit;
+    xServerQueryProps.remainingTime = `${remainingTimeString} ${
       isNotOverTime ? 'remaining' : '(overtime)'
     }\n`;
     xServerQueryProps.teamScores = Object.keys(teamScores).reduce(
