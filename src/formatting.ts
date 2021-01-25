@@ -585,6 +585,9 @@ export const formatQueryServerStatus = (
   };
   if (info.xserverquery) {
     const remainingSeconds = parseInt(info.remainingtime);
+    const secs = remainingSeconds % 60;
+    const mins = (remainingSeconds - secs) / 60;
+
     const [hh, mm, ss] = secondsToHH_MM_SS(remainingSeconds).split(':');
     const remainingTimeString =
       hh === '00' ? `${mm}:${ss}` : `${hh}:${mm}:${ss}`;
@@ -600,8 +603,7 @@ export const formatQueryServerStatus = (
       teamScores[Object.values(teams)[i]] = info[`teamscore_${i}`];
 
     const isNotOverTime =
-      (parseInt(mm) === timeLimit && parseInt(ss) === 0) ||
-      parseInt(mm) < timeLimit;
+      (mins === timeLimit && secs === 0) || mins < timeLimit;
     xServerQueryProps.remainingTime = `${remainingTimeString} ${
       isNotOverTime ? 'remaining' : '(overtime)'
     }\n`;
