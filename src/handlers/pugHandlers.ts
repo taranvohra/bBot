@@ -969,6 +969,22 @@ export const handleAdminRemovePlayer: Handler = async (message, args) => {
   log.info(`Exiting handleAdminRemovePlayer`);
 };
 
+export const handleAdminPickPlayer: Handler = async (message, args) => {
+  log.info(`Entering handleAdminPickPlayer`);
+  const { guild, mentions } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+  if (!mentionedUser) {
+    message.channel.send(`No mentioned user`);
+    return;
+  }
+
+  mentionedUser.username = sanitizeName(mentionedUser.username);
+  handlePickPlayer(message, args.slice(1), mentionedUser);
+  log.info(`Exiting handleAdminPickPlayer`);
+};
+
 export const handleAdminBlockPlayer: Handler = async (message, args) => {
   log.info(`Entering handleAdminBlockPlayer`);
   const { guild, mentions } = message;
