@@ -74,6 +74,13 @@ export const handleAddGameType: Handler = async (message, args) => {
     return;
   }
 
+  if (noOfTeams < 1 || noOfTeams > 4) {
+    message.channel.send(
+      `No. of teams has to be greater than 0 and less than 5`
+    );
+    return;
+  }
+
   if (gameTypes.some((g) => g.name === name)) {
     log.debug(`Gametype ${name} already exists`);
     message.channel.send(`Gametype with name ${name} already exists`);
