@@ -186,3 +186,17 @@ export const getRandomPickIndex = (players: Array<PugPlayer>) => {
 
 export const secondsToHH_MM_SS = (seconds: number) =>
   new Date(seconds * 1000).toISOString().substr(11, 8);
+
+export const powerSet = <T>(array: T[]) => {
+  const subsets = [];
+  const setSize = array.length;
+  const powerSetSize = 2 ** setSize;
+  for (let i = 0; i < powerSetSize; i++) {
+    const temp = [];
+    for (let j = 0; j < setSize; j++) {
+      if (i & (1 << j)) temp.push(array[j]);
+    }
+    subsets.push(temp);
+  }
+  return subsets;
+};

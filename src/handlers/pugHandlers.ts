@@ -624,14 +624,18 @@ export const handleAddCaptain: Handler = async (message) => {
   log.info(`Entering handleAddCaptain`);
 };
 
-export const handlePickPlayer: Handler = async (message, [index]) => {
+export const handlePickPlayer: Handler = async (
+  message,
+  [index],
+  mentionedUser
+) => {
   log.info(`Entering handlePickPlayer`);
   const { guild, author } = message;
   if (!guild) return;
 
   const cache = store.getState();
   const { list, gameTypes } = cache.pugs[guild.id];
-  const user = author;
+  const user = mentionedUser ? mentionedUser : author;
 
   const forPug = list.find((pug) => {
     if (pug.isInPickingMode) {
@@ -714,7 +718,7 @@ export const handlePickPlayer: Handler = async (message, [index]) => {
       overallSequence: sequences.total,
       game: {
         pug: forPug,
-        coinFlipWinner: isCoinFlipEnabled ? coinflip : -1,
+        coinFlipWinner: isCoinFlipEnabled ? coinflip : undefined,
       },
     });
 

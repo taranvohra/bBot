@@ -1,4 +1,4 @@
-import { getRandomInt, shuffle, CONSTANTS } from '~utils';
+import { getRandomInt, shuffle, CONSTANTS, powerSet } from '~utils';
 import { pugPubSub } from '../pubsub';
 
 type PugUser = Pick<PugPlayer, 'id' | 'name' | 'stats'>;
@@ -144,8 +144,12 @@ export class Pug {
     return this.captains.includes(id);
   }
 
+  getCurrentCaptainCount() {
+    return this.captains.filter(Boolean).length;
+  }
+
   areCaptainsDecided() {
-    return this.captains.filter(Boolean).length === this.noOfTeams;
+    return this.getCurrentCaptainCount() === this.noOfTeams;
   }
 
   fillPug(guildId: string) {
@@ -155,17 +159,17 @@ export class Pug {
     if (this.pickingOrder.length === 1 && this.pickingOrder[0] === -1) return;
 
     this.timerFn = setTimeout(() => {
-      const remaining = this.noOfPlayers - this.captains.length;
       const playersNotCaptain = this.players.filter(
         (p) => this.isCaptain(p.id) === false
       );
+      const remaining = playersNotCaptain.length;
 
       const poolForCaptains = shuffle(playersNotCaptain)
         .slice(0, remaining * 0.6)
         .sort((a, b) => a.stats[this.name].rating - b.stats[this.name].rating);
 
       if (this.noOfTeams === 2) {
-        if (this.captains.length === 0) {
+        if (this.getCurrentCaptainCount() === 0) {
           let leastDiff = Number.MAX_SAFE_INTEGER;
           let pair = [0, 1];
 
@@ -243,23 +247,48 @@ export class Pug {
           this.addCaptain(otherCaptain.id, otherCaptainTeam);
         }
       } else {
-        // More than 2 teams
-        for (let i = 0; i < this.noOfTeams; i++) {
-          if (this.captains[i]) continue;
-          while (1) {
-            const randomPlayerIndex = getRandomInt(
-              0,
-              poolForCaptains.length - 1
-            );
-            const randomPlayer = this.players[randomPlayerIndex];
-            const isRandomPlayerAlreadyCapt = this.captains.some(
-              (c) => c === randomPlayer.id
-            );
-            if (!isRandomPlayerAlreadyCapt) {
-              this.addCaptain(randomPlayer.id, i);
+        const noOfCaptainsToDecide =
+          this.noOfTeams - this.getCurrentCaptainCount();
+        const poolPowerSet = powerSet(poolForCaptains);
+        const focusedSets = poolPowerSet.filter(
+          (s) => s.length === noOfCaptainsToDecide
+        );
+        const existingCapts = this.players.filter(
+          (p) => this.isCaptain(p.id) === true
+        );
+
+        const setsSortedByRatings = focusedSets.reduce((acc, curr) => {
+          const sortedSet = [...curr, ...existingCapts].sort((a, b) => {
+            const aRating = a.stats[this.name].rating;
+            const bRating = b.stats[this.name].rating;
+            return aRating - bRating;
+          });
+          acc.push(sortedSet);
+          return acc;
+        }, [] as typeof focusedSets);
+
+        const [bestSet] = setsSortedByRatings.slice().sort((setA, setB) => {
+          const setAFirst = setA[0].stats[this.name].rating;
+          const setALast = setA[setA.length - 1].stats[this.name].rating;
+          const setBFirst = setB[0].stats[this.name].rating;
+          const setBLast = setB[setB.length - 1].stats[this.name].rating;
+
+          const diffA = setALast - setAFirst;
+          const diffB = setBLast - setBFirst;
+          return diffA - diffB;
+        });
+
+        bestSet.forEach((player) => {
+          if (!this.isCaptain(player.id)) {
+            while (1) {
+              const randomTeamIndex = getRandomInt(0, this.noOfTeams - 1);
+              if (!this.captains[randomTeamIndex]) {
+                this.addCaptain(player.id, randomTeamIndex);
+                break;
+              }
             }
           }
-        }
+        });
       }
 
       pugPubSub.emit('captains_ready', guildId, this.name);
