@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/taranvohra/bBot.ts#readme",
   "devDependencies": {
+    "@types/fontkit": "^1.8.0",
     "@types/mongoose": "^5.10.3",
     "@types/node": "^14.0.27",
     "dotenv": "^8.2.0",
@@ -35,6 +36,8 @@
     "@typegoose/typegoose": "^7.4.7",
     "date-fns": "^2.16.1",
     "discord.js": "^12.5.1",
+    "fontkit": "^1.8.1",
+    "jimp": "^0.16.1",
     "mongoose": "^5.10.18",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0"

@@ -1,4 +1,6 @@
 import log from '../log';
+import fs from 'fs';
+import Jimp from 'jimp';
 import { formatDistance } from 'date-fns';
 import { User } from 'discord.js';
 import { Pug, Users, Pugs } from '~models';
@@ -53,6 +55,7 @@ import {
   formatPromoteAvailablePugs,
 } from '../formatting';
 import { pugPubSub } from '../pubsub';
+import { FONTS } from '../fonts';
 
 export const handleAddGameType: Handler = async (message, args) => {
   log.info(`Entering handleAddGameType`);
@@ -930,6 +933,122 @@ export const handleDecidePromoteOrPick: Handler = async (message, args) => {
       handlePickPlayer(message, args);
     else handlePromoteAvailablePugs(message, args);
   }
+};
+
+export const handleShowTop10Played: Handler = async (message, args) => {
+  log.info(`Entering handleShowTop10Played`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const gameType = args[0].toLowerCase();
+  if (!gameType) {
+    message.channel.send(`No gametype was mentioned`);
+    return;
+  }
+
+  const sortKey = `stats.${gameType}.totalPugs` as const;
+  const top10Data = await Users.find({ guildId: guild.id })
+    .sort({
+      [sortKey]: -1,
+    })
+    .select('username stats')
+    .limit(10)
+    .exec();
+
+  if (top10Data.length === 0) {
+    log.debug(`No top10 played data for ${gameType} at guild ${guild.id}`);
+    message.channel.send(`No data`);
+    return;
+  }
+
+  const top10 = top10Data.map(({ username, stats }) => {
+    const { totalPugs } = stats[gameType];
+    return { username, totalPugs };
+  });
+
+  Jimp.read('assets/top10_played_template.png').then(async (template) => {
+    const { arialFNT, obelixFNT, ubuntuFNT, ubuntuTTF } = await FONTS;
+    let Y = 50;
+    const MAX_HEIGHT = 25;
+
+    template.print(
+      obelixFNT,
+      0,
+      0,
+      {
+        text: `TOP 10 PLAYED ${gameType.toUpperCase()}`,
+        alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
+        alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
+      },
+      200,
+      MAX_HEIGHT
+    );
+
+    top10.forEach((player, i) => {
+      const { username, totalPugs } = player;
+      const name = username.replace(/\\[^\\]/g, (c) => c.substring(1));
+
+      const shouldUseUbuntu = name
+        .split('')
+        .every((_, i) => ubuntuTTF.hasGlyphForCodePoint(name.codePointAt(i)!));
+
+      template.print(
+        obelixFNT,
+        0,
+        Y,
+        {
+          text: (i + 1).toString(),
+          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
+          alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
+        },
+        30,
+        MAX_HEIGHT
+      );
+
+      template.print(
+        shouldUseUbuntu ? ubuntuFNT : arialFNT,
+        30,
+        Y,
+        {
+          text: name.substring(0, 12),
+          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
+          alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
+        },
+        120,
+        MAX_HEIGHT
+      );
+
+      template.print(
+        ubuntuFNT,
+        150,
+        Y,
+        {
+          text: totalPugs.toString(),
+          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
+          alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
+        },
+        50,
+        MAX_HEIGHT
+      );
+
+      Y += 25;
+    });
+
+    const imageName = Date.now();
+    template.write(`generated/${imageName}.png`);
+
+    await message.channel.send('', {
+      files: [`generated/${imageName}.png`],
+    });
+
+    try {
+      fs.unlinkSync(`generated/${imageName}.png`);
+    } catch (error) {
+      log.error(`Unlink error top10played`, error);
+    }
+  });
+
+  log.info(`Exiting handleShowTop10Played`);
 };
 
 /**

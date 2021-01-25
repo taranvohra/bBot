@@ -132,6 +132,14 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
+    key: 'handleShowTop10Played',
+    aliases: ['top10played'],
+    type: 'args',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
     key: 'handleAdminAddPlayer',
     aliases: ['add'],
     type: 'args',
