@@ -7,7 +7,8 @@
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
     "start": "node -r source-map-support/register dist",
-    "dev": "ts-node-dev -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/index.ts"
+    "dev": "ts-node-dev -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/index.ts",
+    "migrate": "ts-node-dev --trace-warnings -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/migrations.ts"
   },
   "repository": {
     "type": "git",
