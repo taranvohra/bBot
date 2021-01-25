@@ -37,7 +37,7 @@ export class User {
   };
 
   @prop({ ref: 'Pugs' })
-  lastPug!: Ref<Pug>;
+  lastPug?: Ref<Pug>;
 }
 
 export const Users = getModelForClass(User);
