@@ -222,7 +222,7 @@ export const handleWarnUser: Handler = async (message, args) => {
   log.info(`Exiting handleWarnUser`);
 };
 
-export const handleViewUserLogs: Handler = async (message, args) => {
+export const handleViewUserLogs: Handler = async (message) => {
   log.info(`Entering handleViewUserLogs`);
   const { guild, mentions } = message;
   if (!guild) return;
