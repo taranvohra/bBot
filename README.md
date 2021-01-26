@@ -2,28 +2,33 @@
   <img width="128" src="https://cdn.discordapp.com/attachments/559049937560797219/803642916303142922/logo.png" />
 </p>
 
-A small, fast and scaleable discord bot for conducting UT99 pugs and query UT99 servers. 
+A small, fast and scaleable discord bot for conducting UT99 pugs and query UT99 servers.
 
 ## Manual Setup 💻
- 1. Create a discord application (bot) from [here](https://discord.com/developers)
- 2. This bot uses mongoDB as it's primary database. Create a free cloud database instance from [here](https://www.mongodb.com/cloud/atlas)
- 3. Install Docker from [here](https://www.docker.com/get-started)
- 4. Create a file locally named `docker-compose.yml` and paste contents from [here](https://github.com/taranvohra/bBot.ts/blob/master/docker-compose.yml)
- 5. In the same folder create a file locally named `.env` and paste contents from [here](https://github.com/taranvohra/bBot.ts/blob/master/.env.sample)
- 6. Copy the **Discord Bot Token** from the bot created at Step 1 and paste it after `=` inside `.env` file
- 7. Copy the **database URI** from the database created from Step 2 and paste it after `=` inside `.env` file
- 8. On your terminal/cmd run `docker-compose up -d` 🎉
+
+1.  Create a discord application (bot) from [here](https://discord.com/developers)
+2.  This bot uses mongoDB as it's primary database. Create a free cloud database instance from [here](https://www.mongodb.com/cloud/atlas)
+3.  Install Docker from [here](https://www.docker.com/get-started)
+4.  Create a file locally named `docker-compose.yml` and paste contents from [here](https://github.com/taranvohra/bBot/blob/master/docker-compose.yml)
+5.  In the same folder create a file locally named `.env` and paste contents from [here](https://github.com/taranvohra/bBot/blob/master/.env.sample)
+6.  Copy the **Discord Bot Token** from the bot created at Step 1 and paste it after `=` inside `.env` file
+7.  Copy the **database URI** from the database created from Step 2 and paste it after `=` inside `.env` file
+8.  On your terminal/cmd run `docker-compose up -d` 🎉
 
 ## Commands 📜
-<u>*Before you continue* 🧐</u>
->Commands denoted by 🐱‍👤 are `privileged` meaning the user must have a role named `bBot` to be able to use that command.
+
+<u>_Before you continue_ 🧐</u>
+
+> Commands denoted by 🐱‍👤 are `privileged` meaning the user must have a role named `bBot` to be able to use that command.
 
 > Commands denoted by 😸 can be used by `everyone`.
+
 ### General
+
 **register** 🐱‍👤<br/>
 `Usage -> .register`
 
-Registers your discord server with bBot. This is the `first` command you should be using after the bot is invited to your discord server. 
+Registers your discord server with bBot. This is the `first` command you should be using after the bot is invited to your discord server.
 
 **setpugchannel** 🐱‍👤<br/>
 `Usage -> .setpugchannel`
@@ -40,7 +45,7 @@ Typing this command in a channel will mark that channel to be used for `query` c
 
 All ignorable commands are classified into 2 **groups**, namely, `pugs` and `queries`. If for instance you do not want query commands from the bot and only care about the rest of it then you can ignore the `queries` group.
 
-**unignorecommandgroup, uigc**  🐱‍👤<br/>
+**unignorecommandgroup, uigc** 🐱‍👤<br/>
 `Usage -> .unignorecommandgroup group`
 
 To unignore a command group which was previously ignored.
@@ -60,9 +65,9 @@ Shows the `last 10` logs of the mentioned user.
 **addgametype, agm** 🐱‍👤<br/>
 `Usage -> .addgametype name totalPlayers totalTeams`
 
-Creates a new gametype which can be now *pugged*. 
+Creates a new gametype which can be now _pugged_.
 
-Note that `totalTeams` must be less than 4 due to UT99 supporting 4 team colors only. 
+Note that `totalTeams` must be less than 4 due to UT99 supporting 4 team colors only.
 
 **deletegametype, dgm** 🐱‍👤<br/>
 `Usage -> .deletegametype name`
@@ -70,7 +75,7 @@ Note that `totalTeams` must be less than 4 due to UT99 supporting 4 team colors 
 Deletes an already present gametype.
 
 Note that if there is atleast `1 user` joined for the gametype then this command will not work until the list is cleared.
- 
+
 **defaultjoin** 😸<br/>
 `Usage -> .defaultjoin gametype1 gametype2 etc`
 
@@ -94,7 +99,7 @@ Shows the list of `all` gametypes with users who present.
 
 There are 2 versions of this command, with gametype and without.
 
- - If gametype is mentioned then it will join that `particular` gametype.
+- If gametype is mentioned then it will join that `particular` gametype.
 - If gametype is `not` mentioned then it will join all gametypes saved in your default join preferences.
 
 **leave, lv, l** 😸<br/>
@@ -111,11 +116,11 @@ Removes yourself from `all` gametypes that you've joined.
 `Usage -> .promote gametype` or `.promote`
 
 There are 2 versions of this command, with gametype and without.
- - If gametype is mentioned then it will promote that `particular` gametype.
- - If gametype is `not` mentioned then it will promote `all` gametypes with atleast 1 user joined *sorted* by the least number of users required to fill that pug.
+
+- If gametype is mentioned then it will promote that `particular` gametype.
+- If gametype is `not` mentioned then it will promote `all` gametypes with atleast 1 user joined _sorted_ by the least number of users required to fill that pug.
 
 Since this command makes use discord's `@here` usage, then in order to counter `spam`, users can be given a **COOLDOWN** role which will prevent them from using the command once every `120 seconds`.
-
 
 **captain, capt** 😸<br/>
 `Usage -> .captain`
@@ -132,10 +137,13 @@ Shows the `current picking` states of filled pug(s).
 
 Picks at the user at the mentioned index and add them to your team.
 
+💲 **Bonus Usage** 💲
+You can do a random pick by typing `random` instead of the index.
+
 **tag** 😸<br/>
 `Usage -> .tag info`
 
-Adds meta information about yourself in all the pugs you've joined. 
+Adds meta information about yourself in all the pugs you've joined.
 
 For example if you have no microphone then you can tag yourself `.tag nomic`. This will help the captains later while picking and making a decision.
 
@@ -143,18 +151,20 @@ For example if you have no microphone then you can tag yourself `.tag nomic`. Th
 `Usage -> .stats` or `.stats @mention#0000`
 
 There are 2 versions of this command, with mentioned user and without.
- - If user is mentioned, then it will show the stats of the mentioned user.
- - If user is `not` mentioned, then it will show your own stats.
+
+- If user is mentioned, then it will show the stats of the mentioned user.
+- If user is `not` mentioned, then it will show your own stats.
 
 **last** 😸<br/>
 `Usage -> .last gametype` or `.last`
 
 There are 2 versions of this command, with gametype and without.
- - If gametype is mentioned, then it will show the last pug played for that specific gametype.
- - If gametype is `not` mentioned, then it will show the last pug played irrespective of any gametype.
+
+- If gametype is mentioned, then it will show the last pug played for that specific gametype.
+- If gametype is `not` mentioned, then it will show the last pug played irrespective of any gametype.
 
 💲 **Bonus Usage** 💲
-You can go beyond *last* by specifying a number after last like `last3` or add that many t characters like `.lasttt`
+You can go beyond _last_ by specifying a number after last like `last3` or add that many t characters like `.lasttt`
 
 **top10played** 😸<br/>
 `Usage -> .top10played gametype`
@@ -181,9 +191,9 @@ Picks the player at the specified index for mentioned user's team.
 
 Blocks the mentioned user from joining pugs for a certain period of time.
 
- ⏲ *Duration Parameters* ⏲ 
- `m` for minutes or `h` for hours or `d` for days. 
- For example, `.block @mention#0000 1d xyz reason` will block the mentioned user for **1 day**.
+⏲ _Duration Parameters_ ⏲
+`m` for minutes or `h` for hours or `d` for days.
+For example, `.block @mention#0000 1d xyz reason` will block the mentioned user for **1 day**.
 
 **unblock** 🐱‍👤<br/>
 `Usage -> .unblock @mention#0000`
@@ -224,8 +234,8 @@ Deletes the query server at the specified index from the list.
 
 Edits the query server at the specified index in the list.
 
-📑 *Attributes* 📑
- `name` for editing name, `address` for editing address.
+📑 _Attributes_ 📑
+`name` for editing name, `address` for editing address.
 
 **servers, server** 😸<br/>
 `Usage -> .servers`
@@ -236,10 +246,11 @@ Shows the list of query servers.
 `Usage -> .query index` or `.query customAddress`
 
 There are 2 versions of this command, with index and with custom address.
+
 - If index is specified, it will query the query server's address at the specified index.
 - If custom address is specified, it will query that specific address.
 
-**ip**  😸<br/>
+**ip** 😸<br/>
 `Usage -> .ip index`
 
 Prints the address of the query server at the specified index in the list.
