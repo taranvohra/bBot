@@ -31,7 +31,7 @@ bBot.on('ready', () => {
   log.info(message);
   const HQChannel = bBot.channels.cache.get('559049937560797219');
   if (HQChannel) {
-    (HQChannel as TextChannel).send(message);
+    (HQChannel as TextChannel).send(`\`\`\`\n${message}\`\`\``);
   }
 });
 
