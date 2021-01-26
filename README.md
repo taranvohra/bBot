@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="128" src="https://cdn.discordapp.com/attachments/559049937560797219/803642916303142922/logo.png" />
+</p>
+
 A small, fast and scaleable discord bot for conducting UT99 pugs and query UT99 servers. 
 
 ## Manual Setup 💻
