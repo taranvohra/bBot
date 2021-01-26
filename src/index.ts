@@ -8,6 +8,7 @@ import {
   onGuildMemberUpdate,
   commandHandlers,
 } from '~handlers';
+import { emojis } from '~utils';
 import { connectDB, hydrateStore } from './setup';
 import { pugPubSub } from './pubsub';
 import { formatBroadcastCaptainsReady } from './formatting';
@@ -52,6 +53,21 @@ pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
   }
 });
 
+const sendRestartMessageToGuilds = () => {
+  const cache = store.getState();
+  bBot.guilds.cache.forEach((guild) => {
+    const { channel: pugChannel } = cache.pugs[guild.id];
+    const { channel: queryChannel } = cache.queries[guild.id];
+    const channelId = pugChannel ? pugChannel : queryChannel;
+    if (channelId) {
+      const channel = guild.channels.cache.get(channelId);
+      if (channel) {
+        (channel as TextChannel).send(`I just restarted ${emojis.yobro}`);
+      }
+    }
+  });
+};
+
 const monitorUsersForUnblocking = () => {
   setInterval(() => {
     const cache = store.getState();
@@ -95,6 +111,7 @@ const monitorUsersForUnblocking = () => {
     log.info(`Hydrated Store`);
 
     await bBot.login(process.env.DISCORD_BOT_TOKEN);
+    sendRestartMessageToGuilds();
     monitorUsersForUnblocking();
   } catch (error) {
     console.log(`Error: ${error}`);

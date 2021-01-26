@@ -113,10 +113,15 @@ export const sanitizeName = (name: string) =>
   name.replace(/(\*|`|:|_|~|\|)/g, (c) => `\\${c}`);
 
 export const emojis = {
+  moskva: '<:moskva:610047429634686976>',
   tearddy: '<:tearddy:601092340865564673>',
   smart: '<:smart:601094351770353664>',
   peepoComfy: '<:peepoComfy:626060643895607296>',
   bannechu: '<:bannechu:601092624962682881>',
+  pupcurn: '<a:pupcurn:610049697402454016>',
+  residentsleeper: '<:residentsleeper:601092229343215646>',
+  crinj: '<:crinj:803669994646011924>',
+  yobro: '<a:yobro:803671837052502027>',
 };
 
 export const teamEmojis = {

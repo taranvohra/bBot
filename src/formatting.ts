@@ -111,7 +111,8 @@ export const formatLeaveStatus = (
   );
 
   let reasonMsg;
-  if (reason === 'offline') reasonMsg = 'because the user went offline';
+  if (reason === 'offline')
+    reasonMsg = `because the user went offline ${emojis.residentsleeper}${emojis.pupcurn}`;
   else if (reason === 'left')
     reasonMsg = 'because the user left this discord server';
   else reasonMsg = '';
@@ -124,17 +125,17 @@ export const formatLeaveStatus = (
 export const formatDeadPugs = (deadPugs: Array<{ pug: Pug; user: User }>) => {
   return deadPugs.reduce((acc, { pug, user }, i) => {
     acc += `${i > 0 ? `\n` : ``} ${
-      emojis.peepoComfy
+      emojis.crinj
     } **${pug.name.toUpperCase()}** was stopped because **${
       user.username
-    }** left ${emojis.peepoComfy}`;
+    }** left ${emojis.crinj}`;
     return acc;
   }, ``);
 };
 
 export const formatBroadcastPug = (pug: Pug) => {
   const title = `${
-    emojis.peepoComfy
+    emojis.moskva
   } :mega: **${pug.name.toUpperCase()}** has been filled!`;
 
   const body = pug.players.reduce((acc, player) => {
