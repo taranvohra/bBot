@@ -951,7 +951,10 @@ export const handleShowTop10Played: Handler = async (message, args) => {
   }
 
   const sortKey = `stats.${gameType}.totalPugs` as const;
-  const top10Data = await Users.find({ guildId: guild.id })
+  const top10Data = await Users.find({
+    guildId: guild.id,
+    [`stats.${gameType}`]: { $exists: true },
+  })
     .sort({
       [sortKey]: -1,
     })
