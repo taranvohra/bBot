@@ -261,7 +261,7 @@ export const handleShowIp: Handler = async (message, args) => {
     queryServer.address
   );
   message.channel.send(
-    `<unreal://${host}:${port}${password ? `?password=${password}>` : ''}>`
+    `<unreal://${host}:${port}${password ? `?password=${password}` : ''}>`
   );
   log.info(`Exiting handleShowIp`);
 };
