@@ -139,9 +139,7 @@ export const handleIgnoreCommandGroup: Handler = async (message, args) => {
   const { ignoredCommandGroup } = cache.misc[guild.id];
 
   if (!group || !CONSTANTS.commandGroups.includes(group)) {
-    message.channel.send(
-      `Please mention a command group, (general, pugs or queries)`
-    );
+    message.channel.send(`Please mention a command group, (pugs or queries)`);
     return;
   }
 
@@ -172,9 +170,7 @@ export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
   const { ignoredCommandGroup } = cache.misc[guild.id];
 
   if (!group || !CONSTANTS.commandGroups.includes(group)) {
-    message.channel.send(
-      `Please mention a command group, (general, pugs or queries)`
-    );
+    message.channel.send(`Please mention a command group, (pugs or queries)`);
     return;
   }
 

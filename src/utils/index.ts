@@ -23,7 +23,7 @@ export const CONSTANTS = {
   autoCaptainPickTimer: 30_000,
   strongPlayersRatingThreshold: 3.75,
   coolDownSeconds: 120,
-  commandGroups: ['general', 'pugs', 'queries'],
+  commandGroups: ['pugs', 'queries'],
 };
 
 export const isGuildRegistered = (guildId: string) => {
