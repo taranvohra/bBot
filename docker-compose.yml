@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  bbot:
+    container_name: bbot
+    image: taranvohra/bbot:latest
+    restart: unless-stopped
+    volumes:
+      - ./logs:/usr/app/bbot/logs
+    env_file:
+      - .env
