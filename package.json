@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
-    "start": "node -r source-map-support/register dist",
+    "start": "node -r ts-node/register/transpile-only -r tsconfig-paths/register dist",
     "dev": "ts-node-dev -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/index.ts",
     "migrate": "ts-node-dev --trace-warnings -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/migrations.ts"
   },
@@ -39,6 +39,7 @@
     "fontkit": "^1.8.1",
     "jimp": "^0.16.1",
     "mongoose": "^5.10.18",
+    "ts-node": "^9.1.1",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0"
   }
