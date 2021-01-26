@@ -20,6 +20,7 @@ import store, {
   ignoreCommandGroup,
   unIgnoreCommandGroup,
 } from '~store';
+import { CONSTANTS } from '~utils';
 
 export const handleRegisterServer: Handler = async (message, _) => {
   log.info(`Entering handleRegisterServer`);
@@ -137,7 +138,7 @@ export const handleIgnoreCommandGroup: Handler = async (message, args) => {
   const cache = store.getState();
   const { ignoredCommandGroup } = cache.misc[guild.id];
 
-  if (!group) {
+  if (!group || !CONSTANTS.commandGroups.includes(group)) {
     message.channel.send(
       `Please mention a command group, (general, pugs or queries)`
     );
@@ -170,7 +171,7 @@ export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
   const cache = store.getState();
   const { ignoredCommandGroup } = cache.misc[guild.id];
 
-  if (!group) {
+  if (!group || !CONSTANTS.commandGroups.includes(group)) {
     message.channel.send(
       `Please mention a command group, (general, pugs or queries)`
     );

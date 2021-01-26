@@ -13,6 +13,7 @@ import {
   isCommandInValidChannel,
   sanitizeName,
   isCommandConstraintSatified,
+  isCommandGroupIgnored,
 } from '~utils';
 import commands from '../commands';
 import * as generalHandlers from './generalHandlers';
@@ -49,6 +50,8 @@ export const onMessage = async (message: Message) => {
   });
 
   if (foundCommand) {
+    if (isCommandGroupIgnored(guild.id, foundCommand.group)) return;
+
     if (foundCommand.needsRegisteredGuild && !isGuildRegistered(guild.id)) {
       message.channel.send(
         `Please register this guild before using any of the other commands`

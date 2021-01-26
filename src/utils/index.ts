@@ -23,6 +23,7 @@ export const CONSTANTS = {
   autoCaptainPickTimer: 30_000,
   strongPlayersRatingThreshold: 3.75,
   coolDownSeconds: 120,
+  commandGroups: ['general', 'pugs', 'queries'],
 };
 
 export const isGuildRegistered = (guildId: string) => {
@@ -64,6 +65,12 @@ export const isCommandInValidChannel = (
           : { valid: false, reason: queriesChannel }
         : { valid: false, reason: undefined };
   }
+};
+
+export const isCommandGroupIgnored = (guildId: string, group: string) => {
+  const cache = store.getState();
+  const { ignoredCommandGroup } = cache.misc[guildId];
+  return ignoredCommandGroup.includes(group);
 };
 
 export const computePickingOrder = (noOfPlayers: number, noOfTeams: number) => {
