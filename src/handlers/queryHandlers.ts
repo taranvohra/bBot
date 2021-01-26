@@ -250,7 +250,7 @@ export const handleShowIp: Handler = async (message, args) => {
   const matchedIndex = args[0] ? [args[0]] : cmd.match(/\d/g);
   if (!matchedIndex) return;
 
-  const [index] = matchedIndex.map(Number);
+  const index = parseInt(matchedIndex.join(''));
   const queryServer = list[index - 1];
   if (!queryServer) {
     message.channel.send(`No query server at ${index}`);
