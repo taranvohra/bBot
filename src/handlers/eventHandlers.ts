@@ -157,7 +157,6 @@ export const onGuildMemberUpdate = (
   prev: GuildMember | PartialGuildMember,
   updated: GuildMember
 ) => {
-  console.log('upd');
   const { roles: prevRoles } = prev;
   const {
     roles: newRoles,

@@ -27,8 +27,12 @@ const bBot = new Client({ ws: { intents } });
  *   E V E N T S
  */
 bBot.on('ready', () => {
-  // TODO: discord channel log
-  log.info(`Bot started running at ${new Date().toUTCString()}`);
+  const message = `Bot started running at ${new Date().toUTCString()}`;
+  log.info(message);
+  const HQChannel = bBot.channels.cache.get('559049937560797219');
+  if (HQChannel) {
+    (HQChannel as TextChannel).send(message);
+  }
 });
 
 bBot.on('disconnect', () => {});
