@@ -668,7 +668,7 @@ export const formatQueryServers = (
       acc.ipname.push(`\`${i + 1}\`\u00A0${curr.name}`);
 
       acc.players.push(
-        response
+        response && response.info.numplayers && response.info.maxplayers
           ? `\`${response.info.numplayers}/${response.info.maxplayers}\``
           : '`Timed Out`'
       );

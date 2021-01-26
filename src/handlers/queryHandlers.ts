@@ -49,7 +49,7 @@ const queryUT99Server = (host: string, port: number): Promise<string> =>
 
       let id = setTimeout(() => {
         data ? handleComplete() : handleFailed();
-      }, 1000);
+      }, 1250);
     } catch (error) {
       rj(error);
     }
