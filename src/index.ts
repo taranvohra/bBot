@@ -33,6 +33,8 @@ bBot.on('ready', () => {
   if (HQChannel) {
     (HQChannel as TextChannel).send(`\`\`\`\n${message}\`\`\``);
   }
+  sendRestartMessageToGuilds();
+  monitorUsersForUnblocking();
 });
 
 bBot.on('disconnect', () => {});
@@ -51,9 +53,9 @@ pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
   const pug = list.find((p) => p.name === pugName);
   if (!pug || !channelId) return;
 
-  const channel = bBot.channels.cache.get(channelId) as TextChannel;
+  const channel = bBot.channels.cache.get(channelId);
   if (channel) {
-    channel.send(formatBroadcastCaptainsReady(pug));
+    (channel as TextChannel).send(formatBroadcastCaptainsReady(pug));
   }
 });
 
@@ -64,7 +66,7 @@ const sendRestartMessageToGuilds = () => {
     const { channel: queryChannel } = cache.queries[guild.id];
     const channelId = pugChannel ? pugChannel : queryChannel;
     if (channelId) {
-      const channel = guild.channels.cache.get(channelId);
+      const channel = bBot.channels.cache.get(channelId);
       if (channel) {
         (channel as TextChannel).send(`I just restarted ${emojis.yobro}`);
       }
@@ -114,9 +116,7 @@ const monitorUsersForUnblocking = () => {
     await hydrateStore();
     log.info(`Hydrated Store`);
 
-    await bBot.login(process.env.DISCORD_BOT_TOKEN);
-    sendRestartMessageToGuilds();
-    monitorUsersForUnblocking();
+    bBot.login(process.env.DISCORD_BOT_TOKEN);
   } catch (error) {
     console.log(`Error: ${error}`);
   }
