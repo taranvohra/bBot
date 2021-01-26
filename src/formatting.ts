@@ -8,7 +8,6 @@ import {
   teams,
   isDuelPug,
   sanitizeName,
-  padNumberWithZeros,
   getTeamNumericIndex,
   secondsToHH_MM_SS,
 } from '~utils';
