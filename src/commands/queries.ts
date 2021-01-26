@@ -19,7 +19,7 @@ const queryCommandList: Command[] = [
   {
     group,
     key: 'handleDeleteQueryServer',
-    aliases: ['delqueryserver', 'dqs'],
+    aliases: ['deletequeryserver', 'dqs'],
     type: 'args',
     isPrivileged: true,
     needsRegisteredGuild: true,
