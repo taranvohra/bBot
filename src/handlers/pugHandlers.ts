@@ -3,7 +3,7 @@ import fs from 'fs';
 import Jimp from 'jimp';
 import { formatDistance } from 'date-fns';
 import { User } from 'discord.js';
-import { Pug, Users, Pugs } from '~models';
+import { Pug, Users, Pugs, GuildStats } from '~models';
 import {
   computePickingOrder,
   CONSTANTS,
@@ -53,6 +53,7 @@ import {
   formatUserStats,
   formatLastPug,
   formatPromoteAvailablePugs,
+  formatPugStats,
 } from '../formatting';
 import { pugPubSub } from '../pubsub';
 import { FONTS } from '../fonts';
@@ -1071,6 +1072,29 @@ export const handleShowTop10Played: Handler = async (message, args) => {
   log.info(`Exiting handleShowTop10Played`);
 };
 
+export const handleShowPugStats: Handler = async (message) => {
+  log.info(`Entering handleShowPugStats`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const guildStats = await GuildStats.findById(guild.id).exec();
+  if (!guildStats) {
+    log.debug(`No guild stats for ${guild.id}`);
+    message.channel.send(`No pug stats found`);
+    return;
+  }
+
+  const firstPug = await Pugs.findOne({
+    guildId: guild.id,
+    overallSequence: 1,
+  }).exec();
+
+  message.channel.send(
+    formatPugStats(guild.name, guildStats, firstPug ?? undefined)
+  );
+
+  log.info(`Exiting handleShowPugStats`);
+};
 /**
  * ADMIN
  *  COMMANDS

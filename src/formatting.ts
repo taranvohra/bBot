@@ -1,6 +1,13 @@
 import { User, MessageEmbed } from 'discord.js';
 import { isDocument } from '@typegoose/typegoose';
-import { Pug, User as PugUser, PugSchema, QueryServer, Log } from '~models';
+import {
+  Pug,
+  User as PugUser,
+  PugSchema,
+  QueryServer,
+  Log,
+  GuildStat,
+} from '~models';
 import {
   CONSTANTS,
   emojis,
@@ -699,3 +706,29 @@ export const formatUserLogs = (logs: Array<Log>) =>
     acc += `${curr.description} on ${curr.timestamp.toUTCString()}\n`;
     return acc;
   }, ``);
+
+export const formatPugStats = (
+  guildName: string,
+  guildStats: GuildStat,
+  firstPug?: PugSchema
+) => {
+  const title = `:bar_chart: Pug stats for **${guildName}** :bar_chart:`;
+  let body = ``;
+  if (firstPug) {
+    const firstPugInfo = `first one was **${firstPug.name.toUpperCase()}** on **${firstPug.timestamp.toUTCString()}**`;
+    const allPugCount = Object.entries(guildStats.pugs).reduce(
+      (acc, [key, value], i, arr) => {
+        acc += `**${key.toUpperCase()}** [${value}] ${
+          i === arr.length - 1 ? '' : ':white_small_square:'
+        } `;
+        return acc;
+      },
+      ``
+    );
+    body = `**${guildStats.total} pugs** played, ${firstPugInfo}\n\n${allPugCount}`;
+  } else {
+    body = `There are no pugs played yet`;
+  }
+
+  return `${title}\n\n${body}`;
+};

@@ -1,6 +1,6 @@
 import { getModelForClass, prop } from '@typegoose/typegoose';
 
-class GuildStat {
+export class GuildStat {
   @prop({ type: String })
   _id!: string;
 
