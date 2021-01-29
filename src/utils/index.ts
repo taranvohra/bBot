@@ -73,11 +73,17 @@ export const isCommandGroupIgnored = (guildId: string, group: string) => {
   return ignoredCommandGroup.includes(group);
 };
 
-export const computePickingOrder = (noOfPlayers: number, noOfTeams: number) => {
+export const computePickingOrder = (
+  noOfPlayers: number,
+  noOfTeams: number,
+  isMix: boolean
+) => {
   let idx = 0,
     remainingPlayers = noOfPlayers - noOfTeams, // because captains
     pickingOrder: Array<number> = [],
     wholeRound: Array<number> = [];
+
+  if (isMix) return []; // No picking order for mix
 
   if (noOfPlayers < noOfTeams || noOfPlayers % noOfTeams !== 0) return null; // Invalid, cannot compute from these params
 

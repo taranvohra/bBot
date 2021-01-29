@@ -33,6 +33,7 @@ export class Pug {
   captains: Array<string>;
   timerFn: ReturnType<typeof setTimeout> | null;
   isCoinFlipEnabled: boolean;
+  isMix: boolean;
 
   constructor({
     name,
@@ -40,12 +41,14 @@ export class Pug {
     noOfTeams,
     pickingOrder,
     isCoinFlipEnabled,
+    isMix,
   }: {
     name: string;
     noOfPlayers: number;
     noOfTeams: number;
     pickingOrder: Array<number>;
     isCoinFlipEnabled: boolean;
+    isMix: boolean;
   }) {
     this.name = name;
     this.noOfPlayers = noOfPlayers;
@@ -57,6 +60,7 @@ export class Pug {
     this.players = [];
     this.captains = [];
     this.timerFn = null;
+    this.isMix = isMix;
   }
 
   addPlayer(user: PugUser) {
@@ -154,6 +158,9 @@ export class Pug {
 
   fillPug(guildId: string) {
     this.isInPickingMode = true;
+
+    // No captain picking for mix mode
+    if (this.isMix) return;
 
     // 1v1 picking order is basically [-1]
     if (this.pickingOrder.length === 1 && this.pickingOrder[0] === -1) return;

@@ -15,6 +15,9 @@ export class GameType {
 
   @prop()
   isCoinFlipEnabled!: boolean;
+
+  @prop()
+  isMix!: boolean;
 }
 
 export class QueryServer {

@@ -67,20 +67,40 @@ export const handleAddGameType: Handler = async (message, args) => {
   const cache = store.getState();
   const { gameTypes } = cache.pugs[guildId];
 
-  const [name, noOfPlayers, noOfTeams] = [
+  let isMix = false;
+  let noOfTeams: number;
+
+  const [name, noOfPlayers, noOfTeamsOrMix] = [
     args[0].toLowerCase(),
     Number(args[1]),
-    Number(args[2]),
+    args[2],
   ];
 
-  if (!name || isNaN(noOfPlayers) || isNaN(noOfTeams)) {
+  console.log({ noOfTeamsOrMix });
+
+  if (!name || isNaN(noOfPlayers) || !noOfTeamsOrMix) {
     message.channel.send(`Invalid usage of command`);
     return;
   }
 
-  if (noOfTeams < 1 || noOfTeams > 4) {
+  if (Number.isInteger(parseInt(noOfTeamsOrMix))) {
+    // Number of teams provided
+    noOfTeams = parseInt(noOfTeamsOrMix);
+    if (noOfTeams < 1 || noOfTeams > 4) {
+      message.channel.send(
+        `No. of teams has to be greater than 0 and less than 5`
+      );
+      return;
+    }
+  } else if (noOfTeamsOrMix === 'mix') {
+    // mix gametype
+    // we set number of teams to 1 because we don't know how many teams there will be
+    // but we will add an additional boolean with the gametype
+    noOfTeams = 1;
+    isMix = true;
+  } else {
     message.channel.send(
-      `No. of teams has to be greater than 0 and less than 5`
+      `Either send number of teams or "mix" (without quotes)`
     );
     return;
   }
@@ -91,7 +111,7 @@ export const handleAddGameType: Handler = async (message, args) => {
     return;
   }
 
-  const pickingOrder = computePickingOrder(noOfPlayers, noOfTeams);
+  const pickingOrder = computePickingOrder(noOfPlayers, noOfTeams, isMix);
   if (pickingOrder === null) {
     log.debug(
       `Picking order cannot be computed from ${noOfPlayers} players and ${noOfTeams} teams`
@@ -108,6 +128,7 @@ export const handleAddGameType: Handler = async (message, args) => {
     noOfTeams,
     pickingOrder,
     isCoinFlipEnabled: false,
+    isMix,
   };
   await addGuildGameType(guildId, newGameType);
   log.info(`Added new gametype ${name} to guild ${guildId}`);
@@ -380,7 +401,9 @@ export const handleJoinGameTypes: Handler = async (
       user?.send(DM);
     });
 
-    if (isDuelPug(toBroadcast.pickingOrder)) {
+    // If 1v1 or mix pug, there wont be live picking
+    // so end the pug and update stats
+    if (isDuelPug(toBroadcast.pickingOrder) || toBroadcast.isMix) {
       const sequences = await getNextSequences(guild.id, toBroadcast.name);
       if (!sequences) {
         throw new Error(
@@ -388,7 +411,7 @@ export const handleJoinGameTypes: Handler = async (
         );
       }
 
-      const duelPug = await Pugs.create({
+      const newPug = await Pugs.create({
         guildId: guild.id,
         name: toBroadcast.name,
         timestamp: new Date(),
@@ -399,9 +422,9 @@ export const handleJoinGameTypes: Handler = async (
         },
       });
 
-      updateStatsAfterPug(toBroadcast, duelPug.id, guild.id);
+      updateStatsAfterPug(toBroadcast, newPug.id, guild.id);
 
-      log.debug(`Saved stats for players in pug ${duelPug.id}`);
+      log.debug(`Saved stats for players in pug ${newPug.id}`);
       log.debug(
         `Remove pug ${toBroadcast.name} at guild ${guild.id} from store`
       );
