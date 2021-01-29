@@ -17,6 +17,7 @@ type GameType = GameTypeName & {
   noOfPlayers: number;
   noOfTeams: number;
   isCoinFlipEnabled: boolean;
+  isMix: boolean;
 };
 
 type GuildPugsState = {

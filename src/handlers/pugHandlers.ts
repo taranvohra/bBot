@@ -3,7 +3,7 @@ import fs from 'fs';
 import Jimp from 'jimp';
 import { formatDistance } from 'date-fns';
 import { User } from 'discord.js';
-import { Pug, Users, Pugs } from '~models';
+import { Pug, Users, Pugs, GuildStats } from '~models';
 import {
   computePickingOrder,
   CONSTANTS,
@@ -53,6 +53,7 @@ import {
   formatUserStats,
   formatLastPug,
   formatPromoteAvailablePugs,
+  formatPugStats,
 } from '../formatting';
 import { pugPubSub } from '../pubsub';
 import { FONTS } from '../fonts';
@@ -66,20 +67,40 @@ export const handleAddGameType: Handler = async (message, args) => {
   const cache = store.getState();
   const { gameTypes } = cache.pugs[guildId];
 
-  const [name, noOfPlayers, noOfTeams] = [
+  let isMix = false;
+  let noOfTeams: number;
+
+  const [name, noOfPlayers, noOfTeamsOrMix] = [
     args[0].toLowerCase(),
     Number(args[1]),
-    Number(args[2]),
+    args[2],
   ];
 
-  if (!name || isNaN(noOfPlayers) || isNaN(noOfTeams)) {
+  console.log({ noOfTeamsOrMix });
+
+  if (!name || isNaN(noOfPlayers) || !noOfTeamsOrMix) {
     message.channel.send(`Invalid usage of command`);
     return;
   }
 
-  if (noOfTeams < 1 || noOfTeams > 4) {
+  if (Number.isInteger(parseInt(noOfTeamsOrMix))) {
+    // Number of teams provided
+    noOfTeams = parseInt(noOfTeamsOrMix);
+    if (noOfTeams < 1 || noOfTeams > 4) {
+      message.channel.send(
+        `No. of teams has to be greater than 0 and less than 5`
+      );
+      return;
+    }
+  } else if (noOfTeamsOrMix === 'mix') {
+    // mix gametype
+    // we set number of teams to 1 because we don't know how many teams there will be
+    // but we will add an additional boolean with the gametype
+    noOfTeams = 1;
+    isMix = true;
+  } else {
     message.channel.send(
-      `No. of teams has to be greater than 0 and less than 5`
+      `Either send number of teams or "mix" (without quotes)`
     );
     return;
   }
@@ -90,7 +111,7 @@ export const handleAddGameType: Handler = async (message, args) => {
     return;
   }
 
-  const pickingOrder = computePickingOrder(noOfPlayers, noOfTeams);
+  const pickingOrder = computePickingOrder(noOfPlayers, noOfTeams, isMix);
   if (pickingOrder === null) {
     log.debug(
       `Picking order cannot be computed from ${noOfPlayers} players and ${noOfTeams} teams`
@@ -107,6 +128,7 @@ export const handleAddGameType: Handler = async (message, args) => {
     noOfTeams,
     pickingOrder,
     isCoinFlipEnabled: false,
+    isMix,
   };
   await addGuildGameType(guildId, newGameType);
   log.info(`Added new gametype ${name} to guild ${guildId}`);
@@ -272,68 +294,70 @@ export const handleJoinGameTypes: Handler = async (
   }).exec();
 
   let toBroadcast: Pug | undefined;
-  const joinStatuses = args.map((game): JoinStatus | undefined => {
-    if (!toBroadcast) {
-      // Getting fresh cache everytime
-      const cache = store.getState();
-      const { list } = cache.pugs[guild.id];
+  const joinStatuses = args
+    .map((a) => a.toLowerCase())
+    .map((game): JoinStatus | undefined => {
+      if (!toBroadcast) {
+        // Getting fresh cache everytime
+        const cache = store.getState();
+        const { list } = cache.pugs[guild.id];
 
-      let result: JoinStatus['result'];
-      const gameType = gameTypes.find((g) => g.name === game);
-      if (!gameType) {
-        result = 'not-found';
-        return { name: game, result };
+        let result: JoinStatus['result'];
+        const gameType = gameTypes.find((g) => g.name === game);
+        if (!gameType) {
+          result = 'not-found';
+          return { name: game, result };
+        }
+
+        const existingPug = list.find((p) => p.name === game);
+        const pug = existingPug ?? new Pug(gameType);
+
+        const pickingStatusBeforeJoining = pug.isInPickingMode;
+
+        if (pug.isInPickingMode) {
+          log.debug(
+            `${user.id} cannot join ${pug.name} on ${guild.id} because it is already filled`
+          );
+          result = 'full';
+        } else if (pug.players.find((p) => p.id === user.id)) {
+          log.debug(
+            `${user.id} cannot join ${pug.name} on ${guild.id} because they are already in`
+          );
+          result = 'present';
+        } else {
+          const gameTypeStats = dbUser?.stats[game] ?? {
+            lost: 0,
+            won: 0,
+            totalPugs: 0,
+            totalCaptain: 0,
+            rating: 0,
+          };
+          pug.addPlayer({
+            id: user.id,
+            name: user.username,
+            stats: { [game]: gameTypeStats },
+          });
+          result = 'joined';
+          log.info(`${user.id} joined ${pug.name} on ${guild.id}`);
+        }
+
+        if (pug.players.length === pug.noOfPlayers && !pug.isInPickingMode) {
+          pug.fillPug(guild.id);
+          log.info(`Filled pug ${pug.name} on ${guild.id}`);
+        }
+
+        const pickingStatusAfterJoining = pug.isInPickingMode;
+        if (!pickingStatusBeforeJoining && pickingStatusAfterJoining) {
+          toBroadcast = pug;
+        }
+
+        if (!existingPug && result === 'joined') {
+          log.debug(`Adding ${pug.name} to store for guild ${guild.id}`);
+          store.dispatch(addPug({ guildId: guild.id, pug }));
+        }
+        return { name: game, user, pug, result };
       }
-
-      const existingPug = list.find((p) => p.name === game);
-      const pug = existingPug ?? new Pug(gameType);
-
-      const pickingStatusBeforeJoining = pug.isInPickingMode;
-
-      if (pug.isInPickingMode) {
-        log.debug(
-          `${user.id} cannot join ${pug.name} on ${guild.id} because it is already filled`
-        );
-        result = 'full';
-      } else if (pug.players.find((p) => p.id === user.id)) {
-        log.debug(
-          `${user.id} cannot join ${pug.name} on ${guild.id} because they are already in`
-        );
-        result = 'present';
-      } else {
-        const gameTypeStats = dbUser?.stats[game] ?? {
-          lost: 0,
-          won: 0,
-          totalPugs: 0,
-          totalCaptain: 0,
-          rating: 0,
-        };
-        pug.addPlayer({
-          id: user.id,
-          name: user.username,
-          stats: { [game]: gameTypeStats },
-        });
-        result = 'joined';
-        log.info(`${user.id} joined ${pug.name} on ${guild.id}`);
-      }
-
-      if (pug.players.length === pug.noOfPlayers && !pug.isInPickingMode) {
-        pug.fillPug(guild.id);
-        log.info(`Filled pug ${pug.name} on ${guild.id}`);
-      }
-
-      const pickingStatusAfterJoining = pug.isInPickingMode;
-      if (!pickingStatusBeforeJoining && pickingStatusAfterJoining) {
-        toBroadcast = pug;
-      }
-
-      if (!existingPug && result === 'joined') {
-        log.debug(`Adding ${pug.name} to store for guild ${guild.id}`);
-        store.dispatch(addPug({ guildId: guild.id, pug }));
-      }
-      return { name: game, user, pug, result };
-    }
-  });
+    });
 
   message.channel.send(
     formatJoinStatus(joinStatuses.filter(Boolean) as JoinStatus[])
@@ -377,7 +401,9 @@ export const handleJoinGameTypes: Handler = async (
       user?.send(DM);
     });
 
-    if (isDuelPug(toBroadcast.pickingOrder)) {
+    // If 1v1 or mix pug, there wont be live picking
+    // so end the pug and update stats
+    if (isDuelPug(toBroadcast.pickingOrder) || toBroadcast.isMix) {
       const sequences = await getNextSequences(guild.id, toBroadcast.name);
       if (!sequences) {
         throw new Error(
@@ -385,7 +411,7 @@ export const handleJoinGameTypes: Handler = async (
         );
       }
 
-      const duelPug = await Pugs.create({
+      const newPug = await Pugs.create({
         guildId: guild.id,
         name: toBroadcast.name,
         timestamp: new Date(),
@@ -396,9 +422,9 @@ export const handleJoinGameTypes: Handler = async (
         },
       });
 
-      updateStatsAfterPug(toBroadcast, duelPug.id, guild.id);
+      updateStatsAfterPug(toBroadcast, newPug.id, guild.id);
 
-      log.debug(`Saved stats for players in pug ${duelPug.id}`);
+      log.debug(`Saved stats for players in pug ${newPug.id}`);
       log.debug(
         `Remove pug ${toBroadcast.name} at guild ${guild.id} from store`
       );
@@ -429,41 +455,45 @@ export const handleLeaveGameTypes: Handler = async (
     return;
   }
 
-  const leaveStatuses = args.map(
-    (game): LeaveStatus => {
-      // Getting fresh cache everytime
-      const cache = store.getState();
-      const { list } = cache.pugs[guild.id];
+  const leaveStatuses = args
+    .map((a) => a.toLowerCase())
+    .map(
+      (game): LeaveStatus => {
+        // Getting fresh cache everytime
+        const cache = store.getState();
+        const { list } = cache.pugs[guild.id];
 
-      let result: LeaveStatus['result'];
-      const gameType = gameTypes.find((g) => g.name === game);
-      if (!gameType) {
-        result = 'not-found';
-        return { name: game, result };
-      }
-
-      const pug = list.find((p) => p.name === game);
-      const isInPug = Boolean(pug && pug.players.find((u) => u.id === user.id));
-      if (pug && isInPug) {
-        pug.removePlayer(user.id);
-        log.info(`Removed user ${user.id} from ${game} in ${guild.id}`);
-        if (pug.isInPickingMode) {
-          pug.stopPug();
-          log.info(`Stopped pug ${game} at ${guild.id}`);
+        let result: LeaveStatus['result'];
+        const gameType = gameTypes.find((g) => g.name === game);
+        if (!gameType) {
+          result = 'not-found';
+          return { name: game, result };
         }
-        result = 'left';
-        return {
-          name: game,
-          result,
-          pug,
-          user,
-        };
-      } else {
-        result = 'not-in';
-        return { name: game, result };
+
+        const pug = list.find((p) => p.name === game);
+        const isInPug = Boolean(
+          pug && pug.players.find((u) => u.id === user.id)
+        );
+        if (pug && isInPug) {
+          pug.removePlayer(user.id);
+          log.info(`Removed user ${user.id} from ${game} in ${guild.id}`);
+          if (pug.isInPickingMode) {
+            pug.stopPug();
+            log.info(`Stopped pug ${game} at ${guild.id}`);
+          }
+          result = 'left';
+          return {
+            name: game,
+            result,
+            pug,
+            user,
+          };
+        } else {
+          result = 'not-in';
+          return { name: game, result };
+        }
       }
-    }
-  );
+    );
 
   // Compute dead pugs
   const deadPugs = leaveStatuses.reduce((acc, { pug, user }) => {
@@ -933,7 +963,14 @@ export const handleDecidePromoteOrPick: Handler = async (message, args) => {
   if (!args[0]) handlePromoteAvailablePugs(message, args);
   else {
     // p 4 or p siege5
-    if (!isNaN(parseInt(args[0])) || args[0] === 'random')
+    const cache = store.getState();
+    const { gameTypes } = cache.pugs[guild.id];
+    const isArgGameType = gameTypes.find(
+      (g) => g.name === args[0].toLowerCase()
+    );
+
+    if (isArgGameType) handlePromoteAvailablePugs(message, args);
+    else if (!isNaN(parseInt(args[0])) || args[0] === 'random')
       handlePickPlayer(message, args);
     else handlePromoteAvailablePugs(message, args);
   }
@@ -1058,6 +1095,29 @@ export const handleShowTop10Played: Handler = async (message, args) => {
   log.info(`Exiting handleShowTop10Played`);
 };
 
+export const handleShowPugStats: Handler = async (message) => {
+  log.info(`Entering handleShowPugStats`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const guildStats = await GuildStats.findById(guild.id).exec();
+  if (!guildStats) {
+    log.debug(`No guild stats for ${guild.id}`);
+    message.channel.send(`No pug stats found`);
+    return;
+  }
+
+  const firstPug = await Pugs.findOne({
+    guildId: guild.id,
+    overallSequence: 1,
+  }).exec();
+
+  message.channel.send(
+    formatPugStats(guild.name, guildStats, firstPug ?? undefined)
+  );
+
+  log.info(`Exiting handleShowPugStats`);
+};
 /**
  * ADMIN
  *  COMMANDS

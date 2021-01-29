@@ -48,14 +48,18 @@ bBot.on('guildMemberRemove', onGuildMemberRemove);
 bBot.on('guildMemberUpdate', onGuildMemberUpdate);
 
 pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
+  log.info(`Captains ready for ${pugName} at guild ${guildId}`);
   const cache = store.getState();
   const { channel: channelId, list } = cache.pugs[guildId];
   const pug = list.find((p) => p.name === pugName);
-  if (!pug || !channelId) return;
+  const guild = bBot.guilds.cache.get(guildId);
+  if (!pug || !channelId || !guild) return;
 
-  const channel = bBot.channels.cache.get(channelId);
+  log.debug(`Getting guild channel ${channelId} to broadcast`);
+  const channel = guild.channels.cache.get(channelId);
   if (channel) {
     (channel as TextChannel).send(formatBroadcastCaptainsReady(pug));
+    log.info(`Broadcasted captains ready for ${pugName} at ${guildId}`);
   }
 });
 

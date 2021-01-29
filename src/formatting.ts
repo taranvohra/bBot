@@ -1,6 +1,13 @@
 import { User, MessageEmbed } from 'discord.js';
 import { isDocument } from '@typegoose/typegoose';
-import { Pug, User as PugUser, PugSchema, QueryServer, Log } from '~models';
+import {
+  Pug,
+  User as PugUser,
+  PugSchema,
+  QueryServer,
+  Log,
+  GuildStat,
+} from '~models';
 import {
   CONSTANTS,
   emojis,
@@ -465,31 +472,45 @@ export const formatLastPug = (
     addSuffix: true,
   });
 
-  const pugTeams = !isDuelPug(pug.pickingOrder)
-    ? Array.from({ length: pug.noOfTeams }, (_, i) => i).reduce((acc, _, i) => {
-        const teamIndex = getTeamIndex(i);
-        acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
-        return acc;
-      }, {} as { [key: string]: string })
-    : null;
+  const pugTeams =
+    isDuelPug(pug.pickingOrder) || pug.isMix
+      ? null
+      : Array.from({ length: pug.noOfTeams }, (_, i) => i).reduce(
+          (acc, _, i) => {
+            const teamIndex = getTeamIndex(i);
+            acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
+            return acc;
+          },
+          {} as { [key: string]: string }
+        );
 
-  const currTeams = !isDuelPug(pug.pickingOrder)
-    ? pug.players
-        .slice()
-        .sort((a, b) => Number(a.pick) - Number(b.pick))
-        .reduce((acc, curr) => {
-          if (curr.team !== null)
-            acc![curr.team] += `*${curr.name}* :small_orange_diamond:`;
-          return acc;
-        }, pugTeams)
-    : null;
+  const currTeams =
+    isDuelPug(pug.pickingOrder) || pug.isMix
+      ? null
+      : pug.players
+          .slice()
+          .sort((a, b) => Number(a.pick) - Number(b.pick))
+          .reduce((acc, curr) => {
+            if (curr.team !== null)
+              acc![curr.team] += `*${curr.name}* :small_orange_diamond:`;
+            return acc;
+          }, pugTeams);
 
-  const activeTeams = !isDuelPug(pug.pickingOrder)
-    ? Object.values(currTeams!).reduce((acc, curr) => {
-        acc += `${curr.slice(0, curr.length - 23)}\n`;
-        return acc;
-      }, ``)
-    : `**${pug.players[0].name}** :people_wrestling: **${pug.players[1].name}**\n`;
+  let activeTeams = ``;
+  if (isDuelPug(pug.pickingOrder)) {
+    activeTeams = `**${pug.players[0].name}** :people_wrestling: **${pug.players[1].name}**\n`;
+  } else if (pug.isMix) {
+    activeTeams = pug.players.reduce((acc, curr, i, arr) => {
+      if (i === 0) acc += `**${curr.name}'s** team\t:vs:\t`;
+      else acc += `**${curr.name}**${i === arr.length - 1 ? '' : ', '}`;
+      return acc;
+    }, ``);
+  } else {
+    activeTeams = Object.values(currTeams!).reduce((acc, curr) => {
+      acc += `${curr.slice(0, curr.length - 23)}\n`;
+      return acc;
+    }, ``);
+  }
 
   const mapvoteWinnerTeam =
     typeof coinFlipWinner === 'number'
@@ -699,3 +720,29 @@ export const formatUserLogs = (logs: Array<Log>) =>
     acc += `${curr.description} on ${curr.timestamp.toUTCString()}\n`;
     return acc;
   }, ``);
+
+export const formatPugStats = (
+  guildName: string,
+  guildStats: GuildStat,
+  firstPug?: PugSchema
+) => {
+  const title = `:bar_chart: Pug stats for **${guildName}** :bar_chart:`;
+  let body = ``;
+  if (firstPug) {
+    const firstPugInfo = `first one was **${firstPug.name.toUpperCase()}** on **${firstPug.timestamp.toUTCString()}**`;
+    const allPugCount = Object.entries(guildStats.pugs).reduce(
+      (acc, [key, value], i, arr) => {
+        acc += `**${key.toUpperCase()}** [${value}] ${
+          i === arr.length - 1 ? '' : ':white_small_square:'
+        } `;
+        return acc;
+      },
+      ``
+    );
+    body = `**${guildStats.total} pugs** played, ${firstPugInfo}\n\n${allPugCount}`;
+  } else {
+    body = `There are no pugs played yet`;
+  }
+
+  return `${title}\n\n${body}`;
+};

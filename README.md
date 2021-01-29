@@ -67,7 +67,7 @@ Shows the `last 10` logs of the mentioned user.
 
 Creates a new gametype which can be now _pugged_.
 
-Note that `totalTeams` must be less than 4 due to UT99 supporting 4 team colors only.
+Note that `totalTeams` must be less than 4 due to UT99 supporting 4 team colors only OR `mix` if it's a mix gamemode
 
 **deletegametype, dgm** 🐱‍👤<br/>
 `Usage -> .deletegametype name`
@@ -170,6 +170,11 @@ You can go beyond _last_ by specifying a number after last like `last3` or add t
 `Usage -> .top10played gametype`
 
 Generates an image of top 10 puggers for the gametype (sorted by most number of pugs played for the gametype).
+
+**pugstats** 😸<br/>
+`Usage -> .pugstats`
+
+Outputs a summary of total number of pugs played, individual pug count(s) and a timestamp when the first pug was played
 
 **add** 🐱‍👤<br/>
 `Usage -> .add @mention#0000 gametype1 gametype2 etc`
