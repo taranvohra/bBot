@@ -272,68 +272,70 @@ export const handleJoinGameTypes: Handler = async (
   }).exec();
 
   let toBroadcast: Pug | undefined;
-  const joinStatuses = args.map((game): JoinStatus | undefined => {
-    if (!toBroadcast) {
-      // Getting fresh cache everytime
-      const cache = store.getState();
-      const { list } = cache.pugs[guild.id];
+  const joinStatuses = args
+    .map((a) => a.toLowerCase())
+    .map((game): JoinStatus | undefined => {
+      if (!toBroadcast) {
+        // Getting fresh cache everytime
+        const cache = store.getState();
+        const { list } = cache.pugs[guild.id];
 
-      let result: JoinStatus['result'];
-      const gameType = gameTypes.find((g) => g.name === game);
-      if (!gameType) {
-        result = 'not-found';
-        return { name: game, result };
+        let result: JoinStatus['result'];
+        const gameType = gameTypes.find((g) => g.name === game);
+        if (!gameType) {
+          result = 'not-found';
+          return { name: game, result };
+        }
+
+        const existingPug = list.find((p) => p.name === game);
+        const pug = existingPug ?? new Pug(gameType);
+
+        const pickingStatusBeforeJoining = pug.isInPickingMode;
+
+        if (pug.isInPickingMode) {
+          log.debug(
+            `${user.id} cannot join ${pug.name} on ${guild.id} because it is already filled`
+          );
+          result = 'full';
+        } else if (pug.players.find((p) => p.id === user.id)) {
+          log.debug(
+            `${user.id} cannot join ${pug.name} on ${guild.id} because they are already in`
+          );
+          result = 'present';
+        } else {
+          const gameTypeStats = dbUser?.stats[game] ?? {
+            lost: 0,
+            won: 0,
+            totalPugs: 0,
+            totalCaptain: 0,
+            rating: 0,
+          };
+          pug.addPlayer({
+            id: user.id,
+            name: user.username,
+            stats: { [game]: gameTypeStats },
+          });
+          result = 'joined';
+          log.info(`${user.id} joined ${pug.name} on ${guild.id}`);
+        }
+
+        if (pug.players.length === pug.noOfPlayers && !pug.isInPickingMode) {
+          pug.fillPug(guild.id);
+          log.info(`Filled pug ${pug.name} on ${guild.id}`);
+        }
+
+        const pickingStatusAfterJoining = pug.isInPickingMode;
+        if (!pickingStatusBeforeJoining && pickingStatusAfterJoining) {
+          toBroadcast = pug;
+        }
+
+        if (!existingPug && result === 'joined') {
+          log.debug(`Adding ${pug.name} to store for guild ${guild.id}`);
+          store.dispatch(addPug({ guildId: guild.id, pug }));
+        }
+        return { name: game, user, pug, result };
       }
-
-      const existingPug = list.find((p) => p.name === game);
-      const pug = existingPug ?? new Pug(gameType);
-
-      const pickingStatusBeforeJoining = pug.isInPickingMode;
-
-      if (pug.isInPickingMode) {
-        log.debug(
-          `${user.id} cannot join ${pug.name} on ${guild.id} because it is already filled`
-        );
-        result = 'full';
-      } else if (pug.players.find((p) => p.id === user.id)) {
-        log.debug(
-          `${user.id} cannot join ${pug.name} on ${guild.id} because they are already in`
-        );
-        result = 'present';
-      } else {
-        const gameTypeStats = dbUser?.stats[game] ?? {
-          lost: 0,
-          won: 0,
-          totalPugs: 0,
-          totalCaptain: 0,
-          rating: 0,
-        };
-        pug.addPlayer({
-          id: user.id,
-          name: user.username,
-          stats: { [game]: gameTypeStats },
-        });
-        result = 'joined';
-        log.info(`${user.id} joined ${pug.name} on ${guild.id}`);
-      }
-
-      if (pug.players.length === pug.noOfPlayers && !pug.isInPickingMode) {
-        pug.fillPug(guild.id);
-        log.info(`Filled pug ${pug.name} on ${guild.id}`);
-      }
-
-      const pickingStatusAfterJoining = pug.isInPickingMode;
-      if (!pickingStatusBeforeJoining && pickingStatusAfterJoining) {
-        toBroadcast = pug;
-      }
-
-      if (!existingPug && result === 'joined') {
-        log.debug(`Adding ${pug.name} to store for guild ${guild.id}`);
-        store.dispatch(addPug({ guildId: guild.id, pug }));
-      }
-      return { name: game, user, pug, result };
-    }
-  });
+    });
 
   message.channel.send(
     formatJoinStatus(joinStatuses.filter(Boolean) as JoinStatus[])
@@ -429,41 +431,45 @@ export const handleLeaveGameTypes: Handler = async (
     return;
   }
 
-  const leaveStatuses = args.map(
-    (game): LeaveStatus => {
-      // Getting fresh cache everytime
-      const cache = store.getState();
-      const { list } = cache.pugs[guild.id];
+  const leaveStatuses = args
+    .map((a) => a.toLowerCase())
+    .map(
+      (game): LeaveStatus => {
+        // Getting fresh cache everytime
+        const cache = store.getState();
+        const { list } = cache.pugs[guild.id];
 
-      let result: LeaveStatus['result'];
-      const gameType = gameTypes.find((g) => g.name === game);
-      if (!gameType) {
-        result = 'not-found';
-        return { name: game, result };
-      }
-
-      const pug = list.find((p) => p.name === game);
-      const isInPug = Boolean(pug && pug.players.find((u) => u.id === user.id));
-      if (pug && isInPug) {
-        pug.removePlayer(user.id);
-        log.info(`Removed user ${user.id} from ${game} in ${guild.id}`);
-        if (pug.isInPickingMode) {
-          pug.stopPug();
-          log.info(`Stopped pug ${game} at ${guild.id}`);
+        let result: LeaveStatus['result'];
+        const gameType = gameTypes.find((g) => g.name === game);
+        if (!gameType) {
+          result = 'not-found';
+          return { name: game, result };
         }
-        result = 'left';
-        return {
-          name: game,
-          result,
-          pug,
-          user,
-        };
-      } else {
-        result = 'not-in';
-        return { name: game, result };
+
+        const pug = list.find((p) => p.name === game);
+        const isInPug = Boolean(
+          pug && pug.players.find((u) => u.id === user.id)
+        );
+        if (pug && isInPug) {
+          pug.removePlayer(user.id);
+          log.info(`Removed user ${user.id} from ${game} in ${guild.id}`);
+          if (pug.isInPickingMode) {
+            pug.stopPug();
+            log.info(`Stopped pug ${game} at ${guild.id}`);
+          }
+          result = 'left';
+          return {
+            name: game,
+            result,
+            pug,
+            user,
+          };
+        } else {
+          result = 'not-in';
+          return { name: game, result };
+        }
       }
-    }
-  );
+    );
 
   // Compute dead pugs
   const deadPugs = leaveStatuses.reduce((acc, { pug, user }) => {
