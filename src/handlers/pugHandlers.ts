@@ -933,7 +933,14 @@ export const handleDecidePromoteOrPick: Handler = async (message, args) => {
   if (!args[0]) handlePromoteAvailablePugs(message, args);
   else {
     // p 4 or p siege5
-    if (!isNaN(parseInt(args[0])) || args[0] === 'random')
+    const cache = store.getState();
+    const { gameTypes } = cache.pugs[guild.id];
+    const isArgGameType = gameTypes.find(
+      (g) => g.name === args[0].toLowerCase()
+    );
+
+    if (isArgGameType) handlePromoteAvailablePugs(message, args);
+    else if (!isNaN(parseInt(args[0])) || args[0] === 'random')
       handlePickPlayer(message, args);
     else handlePromoteAvailablePugs(message, args);
   }
