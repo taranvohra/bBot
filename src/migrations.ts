@@ -67,6 +67,7 @@ async function main() {
         noOfTeams,
         pickingOrder,
         hasCoinFlipMapvoteDecider,
+        isMix,
       } = curr;
       data.push({
         name,
@@ -74,6 +75,7 @@ async function main() {
         noOfTeams,
         pickingOrder,
         isCoinFlipEnabled: Boolean(hasCoinFlipMapvoteDecider),
+        isMix,
       });
     });
 
@@ -145,6 +147,7 @@ async function main() {
       captains,
       turn,
       timer,
+      isMix,
     } = pug;
 
     const seq = await getNextSequences(server_id, name);
@@ -199,6 +202,7 @@ async function main() {
           players: playas,
           timerFn: timer,
           isCoinFlipEnabled: false,
+          isMix: Boolean(isMix),
         },
       },
     });
