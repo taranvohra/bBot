@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc",
-    "start": "node -r ts-node/register/transpile-only -r tsconfig-paths/register dist",
+    "check:ts": "tsc --noEmit",
+    "build:js": "babel src -s -d dist",
+    "build": "npm run clean && npm run check:ts && npm run build:js",
+    "start": "node -r source-map-support/register dist",
     "dev": "ts-node-dev -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/index.ts",
     "migrate": "ts-node-dev --trace-warnings -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/migrations.ts"
   },
@@ -21,6 +23,10 @@
   },
   "homepage": "https://github.com/taranvohra/bBot.ts#readme",
   "devDependencies": {
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "@babel/preset-typescript": "^7.12.7",
     "@types/fontkit": "^1.8.0",
     "@types/mongoose": "^5.10.3",
     "@types/node": "^14.0.27",
