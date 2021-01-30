@@ -734,7 +734,6 @@ export const handlePickPlayer: Handler = async (
   );
   message.channel.send(formatPickPlayerStatus(forPug, pickedPlayers) ?? '');
 
-  log.debug(`Saving new pug for ${forPug.name} at ${guild.id} in DB`);
   if (!forPug.isInPickingMode) {
     const gameType = gameTypes.find((g) => g.name === name);
     if (!gameType) return;
@@ -763,6 +762,7 @@ export const handlePickPlayer: Handler = async (
         coinFlipWinner: isCoinFlipEnabled ? coinflip : undefined,
       },
     });
+    log.debug(`Saved new pug ${savedPug.id} at ${guild.id} in DB`);
 
     updateStatsAfterPug(forPug, savedPug.id, guild.id);
 
