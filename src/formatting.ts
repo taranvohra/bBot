@@ -150,7 +150,7 @@ export const formatBroadcastPug = (pug: Pug) => {
     return acc;
   }, ``);
 
-  const isDuel = pug.pickingOrder.length === 1 && pug.pickingOrder[0] === -1;
+  const isDuel = isDuelPug(pug.pickingOrder);
   const footer =
     isDuel || pug.isMix
       ? ``
