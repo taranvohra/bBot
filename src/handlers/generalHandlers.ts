@@ -1,3 +1,4 @@
+import { GuildChannel } from 'discord.js';
 import log from '../log';
 import { formatUserLogs } from '../formatting';
 import { Guilds, GuildStats, Logs } from '~/models';
@@ -243,4 +244,25 @@ export const handleViewUserLogs: Handler = async (message) => {
   message.author.send(msg);
   message.channel.send(`<@${message.author.id}>, you have received a DM`);
   log.info(`Exiting handleViewUserLogs`);
+};
+
+export const handleGetInvite: Handler = async (message) => {
+  log.info(`Entering handleGetInvite`);
+  const { guild, channel } = message;
+  if (!guild) return;
+
+  try {
+    const invite = await (channel as GuildChannel).createInvite({
+      maxAge: 0,
+      maxUses: 0,
+    });
+    message.channel.send(invite.url);
+  } catch (error) {
+    log.error(`Cannot create invites at guild ${guild.id}`);
+    message.channel.send(
+      `Could not create invite. Make sure \`Create Invite\` permission is ticked for me`
+    );
+  }
+
+  log.info(`Exiting handleGetInvite`);
 };
