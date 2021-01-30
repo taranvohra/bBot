@@ -471,12 +471,24 @@ export const handleLeaveGameTypes: Handler = async (
         }
 
         const pug = list.find((p) => p.name === game);
-        const isInPug = Boolean(
-          pug && pug.players.find((u) => u.id === user.id)
+        if (!pug) return { name: game, result: 'not-found' };
+
+        const indexOfPlayerInPug = pug.players.findIndex(
+          (u) => u.id === user.id
         );
-        if (pug && isInPug) {
+        const isInPug = indexOfPlayerInPug !== -1;
+
+        if (isInPug) {
           pug.removePlayer(user.id);
           log.info(`Removed user ${user.id} from ${game} in ${guild.id}`);
+
+          if (indexOfPlayerInPug === 0 && pug.isMix) {
+            pug.players = [];
+            message.channel.send(
+              `**${pug.name.toUpperCase()}** will be abandoned because the first person in the list left`
+            );
+          }
+
           if (pug.isInPickingMode) {
             pug.stopPug();
             log.info(`Stopped pug ${game} at ${guild.id}`);
