@@ -1,14 +1,14 @@
 import { Client, Intents, TextChannel, Message, User } from 'discord.js';
 import { compareAsc } from 'date-fns';
-import store from '~store';
+import store from '~/store';
 import {
   onMessage,
   onPresenceUpdate,
   onGuildMemberRemove,
   onGuildMemberUpdate,
   commandHandlers,
-} from '~handlers';
-import { emojis } from '~utils';
+} from '~/handlers';
+import { emojis } from '~/utils';
 import { connectDB, hydrateStore } from './setup';
 import { pugPubSub } from './pubsub';
 import { formatBroadcastCaptainsReady } from './formatting';
@@ -55,7 +55,6 @@ pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
   const guild = bBot.guilds.cache.get(guildId);
   if (!pug || !channelId || !guild) return;
 
-  log.debug(`Getting guild channel ${channelId} to broadcast`);
   const channel = guild.channels.cache.get(channelId);
   if (channel) {
     (channel as TextChannel).send(formatBroadcastCaptainsReady(pug));

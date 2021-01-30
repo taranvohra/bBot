@@ -7,7 +7,7 @@ import {
   QueryServer,
   Log,
   GuildStat,
-} from '~models';
+} from '~/models';
 import {
   CONSTANTS,
   emojis,
@@ -17,7 +17,7 @@ import {
   sanitizeName,
   getTeamNumericIndex,
   secondsToHH_MM_SS,
-} from '~utils';
+} from '~/utils';
 import { formatDistanceToNowStrict } from 'date-fns';
 
 const EMBED_COLOR = '#16171A';
@@ -150,14 +150,15 @@ export const formatBroadcastPug = (pug: Pug) => {
     return acc;
   }, ``);
 
-  const isDuel = pug.pickingOrder.length === 1 && pug.pickingOrder[0] === -1;
-  const footer = isDuel
-    ? ``
-    : `Type **${
-        CONSTANTS.defaultPrefix
-      }captain** to become a captain for this pug. Random captains will be picked in ${
-        CONSTANTS.autoCaptainPickTimer / 1000
-      } seconds`;
+  const isDuel = isDuelPug(pug.pickingOrder);
+  const footer =
+    isDuel || pug.isMix
+      ? ``
+      : `Type **${
+          CONSTANTS.defaultPrefix
+        }captain** to become a captain for this pug. Random captains will be picked in ${
+          CONSTANTS.autoCaptainPickTimer / 1000
+        } seconds`;
 
   return `${title}\n${body}\n${footer}\n`;
 };
@@ -165,9 +166,12 @@ export const formatBroadcastPug = (pug: Pug) => {
 export const formatListGameType = (pug: Pug) => {
   const title = `**${pug.name.toUpperCase()}** (${pug.players.length}/${
     pug.noOfPlayers
-  })`;
-  const players = pug.players.reduce((acc, p) => {
-    acc += `:small_orange_diamond: ${p.name} `;
+  }) `;
+  const players = pug.players.reduce((acc, p, i) => {
+    const iMixFormatting = (i === 0 || i === 1) && pug.isMix;
+    acc += `${
+      iMixFormatting ? ':small_blue_diamond:' : ':small_orange_diamond:'
+    } ${p.name} `;
     return acc;
   }, ``);
   return `${title}${players}`;
@@ -180,7 +184,7 @@ export const formatListGameTypes = (
   const title = `Pugs available at **${guildName}**`;
   const sortedList = list.sort((a, b) => b.currPlayers - a.currPlayers);
   const body = sortedList.reduce((acc, curr, i) => {
-    acc += `**${curr.name.toUpperCase()}** (${curr.currPlayers}/${
+    acc += ` **${curr.name.toUpperCase()}** (${curr.currPlayers}/${
       curr.maxPlayers
     }) ${i === list.length - 1 ? '' : ':small_orange_diamond:'}`;
     return acc;
@@ -197,8 +201,11 @@ export const formatListAllCurrentGameTypes = (
       curr.noOfPlayers
     }) `;
 
-    const players = curr.players.reduce((acc, p) => {
-      acc += `:small_orange_diamond: ${p.name} `;
+    const players = curr.players.reduce((acc, p, i) => {
+      const iMixFormatting = (i === 0 || i === 1) && curr.isMix;
+      acc += `${
+        iMixFormatting ? ':small_blue_diamond:' : ':small_orange_diamond:'
+      } ${p.name} `;
       return acc;
     }, ``);
     prev += `${base}${players}\n`;
@@ -502,7 +509,10 @@ export const formatLastPug = (
   } else if (pug.isMix) {
     activeTeams = pug.players.reduce((acc, curr, i, arr) => {
       if (i === 0) acc += `**${curr.name}'s** team\t:vs:\t`;
-      else acc += `**${curr.name}**${i === arr.length - 1 ? '' : ', '}`;
+      else
+        acc += `**${curr.name}**${
+          i === arr.length - 1 ? '\n' : ' :small_orange_diamond: '
+        }`;
       return acc;
     }, ``);
   } else {

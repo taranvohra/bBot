@@ -3,7 +3,7 @@ import fs from 'fs';
 import Jimp from 'jimp';
 import { formatDistance } from 'date-fns';
 import { User } from 'discord.js';
-import { Pug, Users, Pugs, GuildStats } from '~models';
+import { Pug, Users, Pugs, GuildStats } from '~/models';
 import {
   computePickingOrder,
   CONSTANTS,
@@ -13,7 +13,7 @@ import {
   calculateBlockExpiry,
   isDuelPug,
   getRandomPickIndex,
-} from '~utils';
+} from '~/utils';
 import {
   addGuildGameType,
   deleteGuildGameType,
@@ -25,7 +25,7 @@ import {
   setGuildGameTypeCoinFlipTo,
   updateGuildUserDefaultJoins,
   createNewUserLog,
-} from '~actions';
+} from '~/actions';
 import store, {
   addGameType,
   removeGameType,
@@ -36,7 +36,7 @@ import store, {
   removeBlockedUser,
   enableCoinFlip,
   disableCoinFlip,
-} from '~store';
+} from '~/store';
 import {
   formatPugFilledDM,
   formatJoinStatus,
@@ -471,12 +471,24 @@ export const handleLeaveGameTypes: Handler = async (
         }
 
         const pug = list.find((p) => p.name === game);
-        const isInPug = Boolean(
-          pug && pug.players.find((u) => u.id === user.id)
+        if (!pug) return { name: game, result: 'not-found' };
+
+        const indexOfPlayerInPug = pug.players.findIndex(
+          (u) => u.id === user.id
         );
-        if (pug && isInPug) {
+        const isInPug = indexOfPlayerInPug !== -1;
+
+        if (isInPug) {
           pug.removePlayer(user.id);
           log.info(`Removed user ${user.id} from ${game} in ${guild.id}`);
+
+          if (indexOfPlayerInPug === 0 && pug.isMix) {
+            pug.players = [];
+            message.channel.send(
+              `**${pug.name.toUpperCase()}** will be abandoned because the first person in the list left`
+            );
+          }
+
           if (pug.isInPickingMode) {
             pug.stopPug();
             log.info(`Stopped pug ${game} at ${guild.id}`);
@@ -722,7 +734,6 @@ export const handlePickPlayer: Handler = async (
   );
   message.channel.send(formatPickPlayerStatus(forPug, pickedPlayers) ?? '');
 
-  log.debug(`Saving new pug for ${forPug.name} at ${guild.id} in DB`);
   if (!forPug.isInPickingMode) {
     const gameType = gameTypes.find((g) => g.name === name);
     if (!gameType) return;
@@ -751,6 +762,7 @@ export const handlePickPlayer: Handler = async (
         coinFlipWinner: isCoinFlipEnabled ? coinflip : undefined,
       },
     });
+    log.debug(`Saved new pug ${savedPug.id} at ${guild.id} in DB`);
 
     updateStatsAfterPug(forPug, savedPug.id, guild.id);
 

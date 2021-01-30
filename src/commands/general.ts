@@ -64,6 +64,14 @@ const generalCommandList: Command[] = [
     isPrivileged: true,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleGetInvite',
+    aliases: ['invite'],
+    type: 'solo',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default generalCommandList;

@@ -1,4 +1,4 @@
-import { getRandomInt, shuffle, CONSTANTS, powerSet } from '~utils';
+import { getRandomInt, shuffle, CONSTANTS, powerSet } from '~/utils';
 import { pugPubSub } from '../pubsub';
 
 type PugUser = Pick<PugPlayer, 'id' | 'name' | 'stats'>;

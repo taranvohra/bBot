@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc",
-    "start": "node -r ts-node/register/transpile-only -r tsconfig-paths/register dist",
+    "check:ts": "tsc --noEmit",
+    "build:js": "babel src -s -d dist --extensions '.ts'",
+    "build": "npm run clean && npm run check:ts && npm run build:js",
+    "start": "node -r source-map-support/register dist",
     "dev": "ts-node-dev -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/index.ts",
     "migrate": "ts-node-dev --trace-warnings -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/migrations.ts"
   },
@@ -21,9 +23,19 @@
   },
   "homepage": "https://github.com/taranvohra/bBot.ts#readme",
   "devDependencies": {
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-proposal-decorators": "^7.12.12",
+    "@babel/plugin-transform-runtime": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "@babel/preset-typescript": "^7.12.7",
+    "@babel/runtime": "^7.12.5",
     "@types/fontkit": "^1.8.0",
     "@types/mongoose": "^5.10.3",
     "@types/node": "^14.0.27",
+    "babel-plugin-module-resolver": "^4.1.0",
+    "babel-plugin-transform-typescript-metadata": "^0.3.1",
     "dotenv": "^8.2.0",
     "rimraf": "^3.0.2",
     "source-map-support": "^0.5.19",
@@ -39,7 +51,6 @@
     "fontkit": "^1.8.1",
     "jimp": "^0.16.1",
     "mongoose": "^5.10.18",
-    "ts-node": "^9.1.1",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0"
   }

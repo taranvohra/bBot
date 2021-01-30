@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Pug } from '~models';
+import { Pug } from '~/models';
 
 type InitPayload = WithGuildID & GuildPugsState;
 type SetPugChannelPayload = WithGuildID & { channelId: string };
