@@ -60,7 +60,7 @@ Warns an user. Simultaneously, creates a log entry for auditing purposes.
 
 Shows the `last 10` logs of the mentioned user.
 
-**invite** 🐱‍👤<br/>
+**invite** 😸<br/>
 `Usage -> .invite`
 
 Generates an `invite` for your server with no expiry and unlimited uses. If such an invite already exists, it re-uses that.
