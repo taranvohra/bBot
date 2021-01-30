@@ -509,7 +509,10 @@ export const formatLastPug = (
   } else if (pug.isMix) {
     activeTeams = pug.players.reduce((acc, curr, i, arr) => {
       if (i === 0) acc += `**${curr.name}'s** team\t:vs:\t`;
-      else acc += `**${curr.name}**${i === arr.length - 1 ? '\n' : ', '}`;
+      else
+        acc += `**${curr.name}**${
+          i === arr.length - 1 ? '\n' : ' :small_orange_diamond: '
+        }`;
       return acc;
     }, ``);
   } else {
