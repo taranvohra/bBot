@@ -6,8 +6,8 @@ import {
   QueryServer,
   Users,
   Pugs,
-} from '~models';
-import { getNextSequences } from '~actions';
+} from '~/models';
+import { getNextSequences } from '~/actions';
 import mongoose from 'mongoose';
 
 const source = mongoose.createConnection(

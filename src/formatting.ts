@@ -7,7 +7,7 @@ import {
   QueryServer,
   Log,
   GuildStat,
-} from '~models';
+} from '~/models';
 import {
   CONSTANTS,
   emojis,
@@ -17,7 +17,7 @@ import {
   sanitizeName,
   getTeamNumericIndex,
   secondsToHH_MM_SS,
-} from '~utils';
+} from '~/utils';
 import { formatDistanceToNowStrict } from 'date-fns';
 
 const EMBED_COLOR = '#16171A';

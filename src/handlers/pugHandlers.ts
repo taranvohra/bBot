@@ -3,7 +3,7 @@ import fs from 'fs';
 import Jimp from 'jimp';
 import { formatDistance } from 'date-fns';
 import { User } from 'discord.js';
-import { Pug, Users, Pugs, GuildStats } from '~models';
+import { Pug, Users, Pugs, GuildStats } from '~/models';
 import {
   computePickingOrder,
   CONSTANTS,
@@ -13,7 +13,7 @@ import {
   calculateBlockExpiry,
   isDuelPug,
   getRandomPickIndex,
-} from '~utils';
+} from '~/utils';
 import {
   addGuildGameType,
   deleteGuildGameType,
@@ -25,7 +25,7 @@ import {
   setGuildGameTypeCoinFlipTo,
   updateGuildUserDefaultJoins,
   createNewUserLog,
-} from '~actions';
+} from '~/actions';
 import store, {
   addGameType,
   removeGameType,
@@ -36,7 +36,7 @@ import store, {
   removeBlockedUser,
   enableCoinFlip,
   disableCoinFlip,
-} from '~store';
+} from '~/store';
 import {
   formatPugFilledDM,
   formatJoinStatus,

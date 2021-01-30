@@ -8,7 +8,7 @@ import {
   Block,
   QueryServer,
   Logs,
-} from '~models';
+} from '~/models';
 
 export const updateGuildPugChannel = (guildId: string, channelId: string) =>
   Guilds.findByIdAndUpdate(guildId, {

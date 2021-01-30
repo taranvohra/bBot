@@ -1,5 +1,5 @@
 import { Message, Client, User } from 'discord.js';
-import { Pug } from '~models';
+import { Pug } from '~/models';
 
 declare module 'discord.js' {
   interface Message {

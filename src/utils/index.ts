@@ -1,6 +1,6 @@
 import { GuildMember } from 'discord.js';
-import { PugPlayer } from '~models';
-import store from '~store';
+import { PugPlayer } from '~/models';
+import store from '~/store';
 
 export const CONSTANTS = {
   defaultPrefix: '.',

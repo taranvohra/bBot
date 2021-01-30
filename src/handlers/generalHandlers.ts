@@ -1,6 +1,6 @@
 import log from '../log';
 import { formatUserLogs } from '../formatting';
-import { Guilds, GuildStats, Logs } from '~models';
+import { Guilds, GuildStats, Logs } from '~/models';
 import {
   updateGuildPugChannel,
   updateGuildQueryChannel,
@@ -8,7 +8,7 @@ import {
   addGuildIgnoredCommandGroup,
   removeGuildIgnoredCommandGroup,
   createNewUserLog,
-} from '~actions';
+} from '~/actions';
 import store, {
   initPugs,
   initMisc,
@@ -19,8 +19,8 @@ import store, {
   setPrefix,
   ignoreCommandGroup,
   unIgnoreCommandGroup,
-} from '~store';
-import { CONSTANTS } from '~utils';
+} from '~/store';
+import { CONSTANTS } from '~/utils';
 
 export const handleRegisterServer: Handler = async (message, _) => {
   log.info(`Entering handleRegisterServer`);

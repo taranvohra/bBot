@@ -4,14 +4,14 @@ import store, {
   addQueryServer,
   removeQueryServer,
   editQueryServer,
-} from '~store';
+} from '~/store';
 import {
   addGuildQueryServer,
   removeGuildQueryServer,
   editGuildQueryServerAddress,
   editGuildQueryServerName,
-} from '~actions';
-import { getHostPortPasswordFromAddress, fizzZoop } from '~utils';
+} from '~/actions';
+import { getHostPortPasswordFromAddress, fizzZoop } from '~/utils';
 import { formatQueryServers, formatQueryServerStatus } from '../formatting';
 
 const queryUT99Server = (host: string, port: number): Promise<string> =>

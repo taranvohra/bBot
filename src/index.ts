@@ -1,14 +1,14 @@
 import { Client, Intents, TextChannel, Message, User } from 'discord.js';
 import { compareAsc } from 'date-fns';
-import store from '~store';
+import store from '~/store';
 import {
   onMessage,
   onPresenceUpdate,
   onGuildMemberRemove,
   onGuildMemberUpdate,
   commandHandlers,
-} from '~handlers';
-import { emojis } from '~utils';
+} from '~/handlers';
+import { emojis } from '~/utils';
 import { connectDB, hydrateStore } from './setup';
 import { pugPubSub } from './pubsub';
 import { formatBroadcastCaptainsReady } from './formatting';

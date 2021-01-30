@@ -5,7 +5,7 @@ import {
   PartialGuildMember,
   TextChannel,
 } from 'discord.js';
-import store from '~store';
+import store from '~/store';
 import {
   CONSTANTS,
   isMemberPrivileged,
@@ -14,7 +14,7 @@ import {
   sanitizeName,
   isCommandConstraintSatified,
   isCommandGroupIgnored,
-} from '~utils';
+} from '~/utils';
 import commands from '../commands';
 import * as generalHandlers from './generalHandlers';
 import * as pugHandlers from './pugHandlers';
