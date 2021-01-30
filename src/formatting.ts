@@ -151,13 +151,14 @@ export const formatBroadcastPug = (pug: Pug) => {
   }, ``);
 
   const isDuel = pug.pickingOrder.length === 1 && pug.pickingOrder[0] === -1;
-  const footer = isDuel
-    ? ``
-    : `Type **${
-        CONSTANTS.defaultPrefix
-      }captain** to become a captain for this pug. Random captains will be picked in ${
-        CONSTANTS.autoCaptainPickTimer / 1000
-      } seconds`;
+  const footer =
+    isDuel || pug.isMix
+      ? ``
+      : `Type **${
+          CONSTANTS.defaultPrefix
+        }captain** to become a captain for this pug. Random captains will be picked in ${
+          CONSTANTS.autoCaptainPickTimer / 1000
+        } seconds`;
 
   return `${title}\n${body}\n${footer}\n`;
 };
@@ -508,7 +509,7 @@ export const formatLastPug = (
   } else if (pug.isMix) {
     activeTeams = pug.players.reduce((acc, curr, i, arr) => {
       if (i === 0) acc += `**${curr.name}'s** team\t:vs:\t`;
-      else acc += `**${curr.name}**${i === arr.length - 1 ? '' : ', '}`;
+      else acc += `**${curr.name}**${i === arr.length - 1 ? '\n' : ', '}`;
       return acc;
     }, ``);
   } else {
