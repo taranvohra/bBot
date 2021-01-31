@@ -68,6 +68,8 @@ export const isCommandInValidChannel = (
 };
 
 export const isCommandGroupIgnored = (guildId: string, group: string) => {
+  if (!CONSTANTS.commandGroups.includes(group)) return false;
+
   const cache = store.getState();
   const { ignoredCommandGroup } = cache.misc[guildId];
   return ignoredCommandGroup.includes(group);
