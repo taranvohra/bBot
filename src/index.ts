@@ -8,7 +8,7 @@ import {
   onGuildMemberUpdate,
   commandHandlers,
 } from '~/handlers';
-import { emojis } from '~/utils';
+import { emojis, isGuildRegistered } from '~/utils';
 import { connectDB, hydrateStore } from './setup';
 import { pugPubSub } from './pubsub';
 import { formatBroadcastCaptainsReady } from './formatting';
@@ -65,6 +65,8 @@ pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
 const sendRestartMessageToGuilds = () => {
   const cache = store.getState();
   bBot.guilds.cache.forEach((guild) => {
+    if (!isGuildRegistered(guild.id)) return;
+
     const { channel: pugChannel } = cache.pugs[guild.id];
     const { channel: queryChannel } = cache.queries[guild.id];
     const channelId = pugChannel ? pugChannel : queryChannel;
