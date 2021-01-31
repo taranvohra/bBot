@@ -325,7 +325,7 @@ export const handleJoinGameTypes: Handler = async (
           );
           result = 'present';
         } else {
-          const gameTypeStats = dbUser?.stats[game] ?? {
+          const gameTypeStats = dbUser?.stats?.[game] ?? {
             lost: 0,
             won: 0,
             totalPugs: 0,
