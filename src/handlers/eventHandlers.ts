@@ -30,8 +30,7 @@ export const onMessage = async (message: Message) => {
   const { author, content, guild, member, channel, client } = message;
 
   if (author.id === client.user?.id) return;
-  if (!guild) return;
-  if (!member) return;
+  if (!guild || !member) return;
 
   const prefix = CONSTANTS.defaultPrefix; // TODO add option to pick guild specific prefix
   if (!content.startsWith(prefix)) return;
