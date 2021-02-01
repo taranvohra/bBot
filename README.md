@@ -196,6 +196,11 @@ Removes the mentioned user from the list of specified gametypes.
 
 Picks the player at the specified index for mentioned user's team.
 
+**reset** 🐱‍👤<br/>
+`Usage -> .reset pugname`
+
+Resets the pug back into picking mode if it was filled.
+
 **block** 🐱‍👤<br/>
 `Usage -> .block @mention#0000 duration reason`
 
