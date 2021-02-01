@@ -1183,6 +1183,40 @@ export const handleAdminPickPlayer: Handler = async (message, args) => {
   log.info(`Exiting handleAdminPickPlayer`);
 };
 
+export const handleAdminResetPug: Handler = async (message, args) => {
+  log.info(`Entering handleAdminResetPug`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { list } = cache.pugs[guild.id];
+
+  const pugName = args[0].toLowerCase();
+  const pug = list.find((p) => p.name === pugName);
+  if (!pug) {
+    log.debug(
+      `${pugName} could not be reset at guild ${guild.id} as it could not be found`
+    );
+    message.channel.send(`Cannot reset. Pug not found`);
+    return;
+  }
+
+  if (!pug.isInPickingMode) {
+    log.debug(
+      `${pugName} could not be reset at guild ${guild.id} as it is not in picking mode yet`
+    );
+    message.channel.send(
+      `**${pug.name.toUpperCase()}** is not in picking mode yet`
+    );
+    return;
+  }
+
+  pug.resetPug(guild.id);
+  message.channel.send(formatBroadcastPug(pug));
+
+  log.info(`Exiting handleAdminResetPug`);
+};
+
 export const handleAdminBlockPlayer: Handler = async (message, args) => {
   log.info(`Entering handleAdminBlockPlayer`);
   const { guild, mentions } = message;

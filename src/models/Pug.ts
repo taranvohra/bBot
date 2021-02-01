@@ -140,6 +140,11 @@ export class Pug {
     });
   }
 
+  resetPug(guildId: string) {
+    this.stopPug();
+    this.fillPug(guildId);
+  }
+
   isEmpty() {
     return this.players.length === 0;
   }
