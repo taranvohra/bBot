@@ -39,7 +39,8 @@ export const onMessage = async (message: Message) => {
   const argsArr = content.substring(prefix.length).split(' ');
   if (argsArr.length === 0) return;
 
-  const [cmd, ...args] = argsArr;
+  const cmd = argsArr[0].toLowerCase();
+  const args = argsArr.slice(1);
   const type = args.length === 0 ? 'solo' : 'args';
 
   const foundCommand = commands.find((command) => {
