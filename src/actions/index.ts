@@ -281,3 +281,20 @@ export const createNewUserLog = (
     description,
     timestamp: new Date(),
   });
+
+export const updateGuildGameTypeTeamEmojis = (
+  guildId: string,
+  gameType: string,
+  teamEmojis: TeamEmojis
+) =>
+  Guilds.findOneAndUpdate(
+    {
+      _id: guildId,
+      'gameTypes.name': gameType,
+    },
+    {
+      $set: {
+        'gameTypes.$.teamEmojis': teamEmojis,
+      },
+    }
+  ).exec();

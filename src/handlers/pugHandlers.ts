@@ -26,6 +26,7 @@ import {
   setGuildGameTypeCoinFlipTo,
   updateGuildUserDefaultJoins,
   createNewUserLog,
+  updateGuildGameTypeTeamEmojis,
 } from '~/actions';
 import store, {
   addGameType,
@@ -1474,12 +1475,14 @@ export const handleAdminUpdateTeamEmojis: Handler = async (message, args) => {
     ? gameTypes.map((g) => g.name)
     : [args[1].toLowerCase()];
 
-  gameTypeNames.forEach((name) => {
+  const teamEmojis = emoji as TeamEmojis;
+  gameTypeNames.forEach(async (name) => {
+    await updateGuildGameTypeTeamEmojis(guild.id, name, teamEmojis);
     store.dispatch(
       updateTeamEmojis({
-        name,
         guildId: guild.id,
-        teamEmojis: emoji as TeamEmojis,
+        name,
+        teamEmojis,
       })
     );
     log.info(
