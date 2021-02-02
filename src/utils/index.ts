@@ -132,6 +132,12 @@ export const emojis = {
   yobro: '<a:yobro:803671837052502027>',
 };
 
+export const teamEmojiTypes: Record<TeamEmojis, true> = {
+  agonies: true,
+  cores: true,
+  logos: true,
+} as const;
+
 export const teamEmojis = {
   team_0: '<:AGONY:610820370617991198>',
   team_1: '<:FROSTAGONY:610820381778903052>',

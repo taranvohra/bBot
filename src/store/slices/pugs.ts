@@ -9,6 +9,8 @@ type AddPugPayload = WithGuildID & { pug: Pug };
 type RemovePugPayload = WithGuildID & GameTypeName;
 type EnableCoinFlipPayload = WithGuildID & GameTypeName;
 type DisableCoinFlipPayload = WithGuildID & GameTypeName;
+type UpdateTeamEmojiPayload = WithGuildID &
+  GameTypeName & { teamEmojis: TeamEmojis };
 
 type GameTypeName = { name: string };
 
@@ -18,6 +20,7 @@ type GameType = GameTypeName & {
   noOfTeams: number;
   isCoinFlipEnabled: boolean;
   isMix: boolean;
+  teamEmojis?: TeamEmojis;
 };
 
 type GuildPugsState = {
@@ -81,6 +84,15 @@ const pugsSlice = createSlice({
       if (pugIndex !== -1)
         state[guildId].list[pugIndex].isCoinFlipEnabled = false;
     },
+    updateTeamEmojis(state, action: PayloadAction<UpdateTeamEmojiPayload>) {
+      const { guildId, name, teamEmojis } = action.payload;
+      const { gameTypes, list } = state[guildId];
+      const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
+      const pugIndex = list.findIndex((pug) => pug.name === name);
+      state[guildId].gameTypes[gameTypeIndex].teamEmojis = teamEmojis;
+      if (pugIndex !== -1)
+        state[guildId].list[pugIndex].teamEmojis = teamEmojis;
+    },
   },
 });
 
@@ -93,5 +105,6 @@ export const {
   enableCoinFlip,
   disableCoinFlip,
   setPugChannel,
+  updateTeamEmojis,
 } = pugsSlice.actions;
 export const pugsReducer = pugsSlice.reducer;

@@ -18,6 +18,9 @@ export class GameType {
 
   @prop()
   isMix!: boolean;
+
+  @prop()
+  teamEmojis?: TeamEmojis;
 }
 
 export class QueryServer {

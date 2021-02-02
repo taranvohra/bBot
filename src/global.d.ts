@@ -42,4 +42,6 @@ declare global {
     user?: User;
     pug?: Pug;
   };
+
+  export type TeamEmojis = 'agonies' | 'cores' | 'logos';
 }

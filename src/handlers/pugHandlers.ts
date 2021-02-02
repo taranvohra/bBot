@@ -13,6 +13,7 @@ import {
   calculateBlockExpiry,
   isDuelPug,
   getRandomPickIndex,
+  teamEmojiTypes,
 } from '~/utils';
 import {
   addGuildGameType,
@@ -36,6 +37,7 @@ import store, {
   removeBlockedUser,
   enableCoinFlip,
   disableCoinFlip,
+  updateTeamEmojis,
 } from '~/store';
 import {
   formatPugFilledDM,
@@ -129,7 +131,9 @@ export const handleAddGameType: Handler = async (message, args) => {
     pickingOrder,
     isCoinFlipEnabled: false,
     isMix,
-  };
+    teamEmojis: 'logos',
+  } as const;
+
   await addGuildGameType(guildId, newGameType);
   log.info(`Added new gametype ${name} to guild ${guildId}`);
 
@@ -1445,4 +1449,46 @@ export const handleAdminDisableMapvoteCoinFlip: Handler = async (
 
   message.channel.send(`Mapvote coinflip disabled for **${gameType}**`);
   log.info(`Exiting handleAdminDisableMapvoteCoinFlip`);
+};
+
+export const handleAdminUpdateTeamEmojis: Handler = async (message, args) => {
+  log.info(`Entering handleAdminUpdateTeamEmojis`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { gameTypes } = cache.pugs[guild.id];
+
+  const emoji = args[0].toLowerCase();
+  if (!(emoji in teamEmojiTypes)) {
+    message.channel.send(
+      `Invalid emoji type! Choose one of agonies, cores or logos`
+    );
+    return;
+  }
+
+  const forAllGameTypes = args[1] === undefined;
+  const gameTypeNames = forAllGameTypes
+    ? gameTypes.map((g) => g.name)
+    : [args[1].toLowerCase()];
+
+  gameTypeNames.forEach((name) => {
+    store.dispatch(
+      updateTeamEmojis({
+        name,
+        guildId: guild.id,
+        teamEmojis: emoji as TeamEmojis,
+      })
+    );
+    log.info(
+      `Updated team emoji preference for gametype ${name} at guild ${guild.id}`
+    );
+  });
+
+  message.channel.send(
+    `Team Emojis have been changed to **${emoji}** for **${
+      forAllGameTypes ? 'all gametypes' : `${args[1].toUpperCase()}`
+    }**`
+  );
+  log.info(`Exiting handleAdminUpdateTeamEmojis`);
 };
