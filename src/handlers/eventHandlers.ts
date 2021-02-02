@@ -30,8 +30,7 @@ export const onMessage = async (message: Message) => {
   const { author, content, guild, member, channel, client } = message;
 
   if (author.id === client.user?.id) return;
-  if (!guild) return;
-  if (!member) return;
+  if (!guild || !member) return;
 
   const prefix = CONSTANTS.defaultPrefix; // TODO add option to pick guild specific prefix
   if (!content.startsWith(prefix)) return;
@@ -39,7 +38,8 @@ export const onMessage = async (message: Message) => {
   const argsArr = content.substring(prefix.length).split(' ');
   if (argsArr.length === 0) return;
 
-  const [cmd, ...args] = argsArr;
+  const cmd = argsArr[0].toLowerCase();
+  const args = argsArr.slice(1);
   const type = args.length === 0 ? 'solo' : 'args';
 
   const foundCommand = commands.find((command) => {

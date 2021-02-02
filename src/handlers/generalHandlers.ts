@@ -266,3 +266,15 @@ export const handleGetInvite: Handler = async (message) => {
 
   log.info(`Exiting handleGetInvite`);
 };
+
+export const handleGetHelp: Handler = async (message) => {
+  log.info(`Entering handleGetHelp`);
+  const { author } = message;
+
+  const body = `
+    Hey :wave:,\n\nYou can find the list of commands and other documentation for this bot at https://github.com/taranvohra/bBot
+  `;
+
+  author.send(body);
+  log.info(`Exiting handleGetHelp`);
+};

@@ -172,6 +172,14 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
+    key: 'handleAdminResetPug',
+    aliases: ['reset'],
+    type: 'args',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
     key: 'handleAdminBlockPlayer',
     aliases: ['block'],
     type: 'args',
