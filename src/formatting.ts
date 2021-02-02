@@ -235,7 +235,7 @@ const getTeamIndex = (index: number) => {
 };
 
 const getTeamEmojis = (emoji?: TeamEmojis) => {
-  if (!emoji) return allTeamEmojis['logos'];
+  if (!emoji) return allTeamEmojis['agonies'];
   return allTeamEmojis[emoji];
 };
 
