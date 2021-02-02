@@ -662,7 +662,9 @@ export const handleAddCaptain: Handler = async (message) => {
     `Added captain ${author.username} for pug ${forPug.name} at ${guild.id}`
   );
 
-  message.channel.send(formatAddCaptainStatus(author.username, assignedTeam));
+  message.channel.send(
+    formatAddCaptainStatus(author.username, assignedTeam, forPug)
+  );
 
   if (forPug.areCaptainsDecided()) {
     pugPubSub.emit('captains_ready', guild.id, forPug.name);
@@ -745,7 +747,7 @@ export const handlePickPlayer: Handler = async (
     const { isCoinFlipEnabled } = gameType;
     const coinflip = getRandomInt(0, forPug.noOfTeams - 1);
     if (isCoinFlipEnabled) {
-      message.channel.send(formatCoinFlipMapvoteWinner(coinflip));
+      message.channel.send(formatCoinFlipMapvoteWinner(coinflip, forPug));
     }
 
     const sequences = await getNextSequences(guild.id, forPug.name);

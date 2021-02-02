@@ -132,21 +132,6 @@ export const emojis = {
   yobro: '<a:yobro:803671837052502027>',
 };
 
-export const teamEmojiTypes: Record<TeamEmojis, true> = {
-  agonies: true,
-  cores: true,
-  logos: true,
-} as const;
-
-export const teamEmojis = {
-  team_0: '<:AGONY:610820370617991198>',
-  team_1: '<:FROSTAGONY:610820381778903052>',
-  team_2: '<:DISGUSTAGONY:610820391786774546>',
-  team_3: '<:GOLDENAGONY:610826861165150221>',
-  team_255: '',
-  spec: '',
-};
-
 export const teams = {
   team_0: 'Red Team',
   team_1: 'Blue Team',
@@ -154,6 +139,39 @@ export const teams = {
   team_3: 'Gold Team',
   team_255: 'Players',
   spec: 'Spectators',
+};
+
+export const teamEmojiTypes: Record<TeamEmojis, true> = {
+  agonies: true,
+  cores: true,
+  logos: true,
+} as const;
+
+export const allTeamEmojis: Record<TeamEmojis, typeof teams> = {
+  agonies: {
+    team_0: '<:AGONY:610820370617991198>',
+    team_1: '<:FROSTAGONY:610820381778903052>',
+    team_2: '<:DISGUSTAGONY:610820391786774546>',
+    team_3: '<:GOLDENAGONY:610826861165150221>',
+    team_255: '',
+    spec: '',
+  },
+  cores: {
+    team_0: '<:red_core:806233999230894082>',
+    team_1: '<:blue_core:806233999181348905>',
+    team_2: '<:green_core:806234000163209257>',
+    team_3: '<:gold_core:806233999428157511>',
+    team_255: '',
+    spec: '',
+  },
+  logos: {
+    team_0: '<:red_team:806233999768027187>',
+    team_1: '<:blue_team:806233999101263932>',
+    team_2: '<:green_team:806233999054733323>',
+    team_3: '<:gold_team:806233999236005949>',
+    team_255: '',
+    spec: '',
+  },
 };
 
 export const isCommandConstraintSatified = (command: Command, cmd: string) =>

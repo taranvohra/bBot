@@ -11,7 +11,7 @@ import {
 import {
   CONSTANTS,
   emojis,
-  teamEmojis,
+  allTeamEmojis,
   teams,
   isDuelPug,
   sanitizeName,
@@ -234,9 +234,15 @@ const getTeamIndex = (index: number) => {
   }
 };
 
+const getTeamEmojis = (emoji?: TeamEmojis) => {
+  if (!emoji) return allTeamEmojis['logos'];
+  return allTeamEmojis[emoji];
+};
+
 export const formatBroadcastCaptainsReady = (pug: Pug) => {
   const pugCaptains = pug.captains.reduce((acc, curr, index) => {
     const teamIndex = getTeamIndex(index);
+    const teamEmojis = getTeamEmojis(pug.teamEmojis);
     acc += `<@${curr}> is the captain for ${teamEmojis[teamIndex]} **${teams[teamIndex]}** ${teamEmojis[teamIndex]}\n`;
     return acc;
   }, ``);
@@ -258,8 +264,13 @@ export const formatBroadcastCaptainsReady = (pug: Pug) => {
   return `${pugCaptains}\n${turn}\n${nonCaptainPlayers}`;
 };
 
-export const formatAddCaptainStatus = (username: string, team: number) => {
+export const formatAddCaptainStatus = (
+  username: string,
+  team: number,
+  pug: Pug
+) => {
   const teamIndex = getTeamIndex(team);
+  const teamEmojis = getTeamEmojis(pug.teamEmojis);
   return `**${username}** became captain for ${teamEmojis[teamIndex]} **${teams[
     teamIndex
   ].toUpperCase()}** ${teamEmojis[teamIndex]}`;
@@ -302,6 +313,7 @@ export const formatPickPlayerStatus = (
     (_, i) => i
   ).reduce((acc, _, i) => {
     const teamIndex = getTeamIndex(i);
+    const teamEmojis = getTeamEmojis(pug.teamEmojis);
     acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
     return acc;
   }, {} as { [team: number]: string });
@@ -335,9 +347,13 @@ export const formatPickPlayerStatus = (
   }\n${activeTeams}`;
 };
 
-export const formatCoinFlipMapvoteWinner = (winningTeamIndex: number) => {
+export const formatCoinFlipMapvoteWinner = (
+  winningTeamIndex: number,
+  pug: Pug
+) => {
   const head = `---- *mapvote coin flip* ----`;
   const teamIndex = getTeamIndex(winningTeamIndex);
+  const teamEmojis = getTeamEmojis(pug.teamEmojis);
   const body = `${teamEmojis[teamIndex]} **${teams[
     teamIndex
   ].toUpperCase()}** ${teamEmojis[teamIndex]} won **mapvote**`;
@@ -370,6 +386,7 @@ export const formatPugsInPicking = (pugs: Array<Pug>) => {
       (_, i) => i
     ).reduce((acc, _, i) => {
       const teamIndex = getTeamIndex(i);
+      const teamEmojis = getTeamEmojis(pug.teamEmojis);
       acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]}`;
       return acc;
     }, {} as { [team: number]: string });
@@ -485,6 +502,7 @@ export const formatLastPug = (
       : Array.from({ length: pug.noOfTeams }, (_, i) => i).reduce(
           (acc, _, i) => {
             const teamIndex = getTeamIndex(i);
+            const teamEmojis = getTeamEmojis(pug.teamEmojis);
             acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
             return acc;
           },
@@ -524,7 +542,7 @@ export const formatLastPug = (
 
   const mapvoteWinnerTeam =
     typeof coinFlipWinner === 'number'
-      ? `${formatMapvoteWinner(coinFlipWinner)}\n`
+      ? `${formatMapvoteWinner(coinFlipWinner, pug)}\n`
       : ``;
 
   if (guildName) {
@@ -537,9 +555,10 @@ export const formatLastPug = (
   }
 };
 
-export const formatMapvoteWinner = (team: number) => {
+export const formatMapvoteWinner = (team: number, pug: Pug) => {
   const { top, bottom } = edges[team];
   const winningTeam = teams[getTeamIndex(team)].toUpperCase();
+  const teamEmojis = getTeamEmojis(pug.teamEmojis);
   const winningTeamEmoji = teamEmojis[getTeamIndex(team)];
   const mapvoteWinnerTeam = `${winningTeamEmoji} **${winningTeam}** ${winningTeamEmoji}`;
   return `${top}\n| ${mapvoteWinnerTeam} |\n${bottom}`;
