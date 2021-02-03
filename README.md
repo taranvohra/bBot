@@ -232,6 +232,13 @@ When the picking finishes, it will randomly decide which team won mapvote.
 
 Disabled coin flip feature for the specified gametype.
 
+**teamemojis** 🐱‍👤<br/>
+`Usage -> .teameojis emoji gametype`
+
+Sets the preferred teamemoji for the gametype. `emoji` can be one of `agonies`, `cores` or `logos`.
+
+Note that if `gametype` is omitted then the default is change it for **ALL** gametypes.
+
 ### Queries
 
 **addqueryserver, aqs** 🐱‍👤<br/>

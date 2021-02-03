@@ -34,6 +34,7 @@ export class Pug {
   timerFn: ReturnType<typeof setTimeout> | null;
   isCoinFlipEnabled: boolean;
   isMix: boolean;
+  teamEmojis?: TeamEmojis;
 
   constructor({
     name,
@@ -42,6 +43,7 @@ export class Pug {
     pickingOrder,
     isCoinFlipEnabled,
     isMix,
+    teamEmojis,
   }: {
     name: string;
     noOfPlayers: number;
@@ -49,6 +51,7 @@ export class Pug {
     pickingOrder: Array<number>;
     isCoinFlipEnabled: boolean;
     isMix: boolean;
+    teamEmojis?: TeamEmojis;
   }) {
     this.name = name;
     this.noOfPlayers = noOfPlayers;
@@ -61,6 +64,7 @@ export class Pug {
     this.captains = [];
     this.timerFn = null;
     this.isMix = isMix;
+    this.teamEmojis = teamEmojis;
   }
 
   addPlayer(user: PugUser) {

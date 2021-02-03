@@ -13,6 +13,7 @@ import {
   calculateBlockExpiry,
   isDuelPug,
   getRandomPickIndex,
+  teamEmojiTypes,
 } from '~/utils';
 import {
   addGuildGameType,
@@ -25,6 +26,7 @@ import {
   setGuildGameTypeCoinFlipTo,
   updateGuildUserDefaultJoins,
   createNewUserLog,
+  updateGuildGameTypeTeamEmojis,
 } from '~/actions';
 import store, {
   addGameType,
@@ -36,6 +38,7 @@ import store, {
   removeBlockedUser,
   enableCoinFlip,
   disableCoinFlip,
+  updateTeamEmojis,
 } from '~/store';
 import {
   formatPugFilledDM,
@@ -129,7 +132,9 @@ export const handleAddGameType: Handler = async (message, args) => {
     pickingOrder,
     isCoinFlipEnabled: false,
     isMix,
-  };
+    teamEmojis: 'logos',
+  } as const;
+
   await addGuildGameType(guildId, newGameType);
   log.info(`Added new gametype ${name} to guild ${guildId}`);
 
@@ -658,7 +663,9 @@ export const handleAddCaptain: Handler = async (message) => {
     `Added captain ${author.username} for pug ${forPug.name} at ${guild.id}`
   );
 
-  message.channel.send(formatAddCaptainStatus(author.username, assignedTeam));
+  message.channel.send(
+    formatAddCaptainStatus(author.username, assignedTeam, forPug)
+  );
 
   if (forPug.areCaptainsDecided()) {
     pugPubSub.emit('captains_ready', guild.id, forPug.name);
@@ -741,7 +748,7 @@ export const handlePickPlayer: Handler = async (
     const { isCoinFlipEnabled } = gameType;
     const coinflip = getRandomInt(0, forPug.noOfTeams - 1);
     if (isCoinFlipEnabled) {
-      message.channel.send(formatCoinFlipMapvoteWinner(coinflip));
+      message.channel.send(formatCoinFlipMapvoteWinner(coinflip, forPug));
     }
 
     const sequences = await getNextSequences(guild.id, forPug.name);
@@ -1445,4 +1452,48 @@ export const handleAdminDisableMapvoteCoinFlip: Handler = async (
 
   message.channel.send(`Mapvote coinflip disabled for **${gameType}**`);
   log.info(`Exiting handleAdminDisableMapvoteCoinFlip`);
+};
+
+export const handleAdminUpdateTeamEmojis: Handler = async (message, args) => {
+  log.info(`Entering handleAdminUpdateTeamEmojis`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const { gameTypes } = cache.pugs[guild.id];
+
+  const emoji = args[0].toLowerCase();
+  if (!(emoji in teamEmojiTypes)) {
+    message.channel.send(
+      `Invalid emoji type! Choose one of agonies, cores or logos`
+    );
+    return;
+  }
+
+  const forAllGameTypes = args[1] === undefined;
+  const gameTypeNames = forAllGameTypes
+    ? gameTypes.map((g) => g.name)
+    : [args[1].toLowerCase()];
+
+  const teamEmojis = emoji as TeamEmojis;
+  gameTypeNames.forEach(async (name) => {
+    await updateGuildGameTypeTeamEmojis(guild.id, name, teamEmojis);
+    store.dispatch(
+      updateTeamEmojis({
+        guildId: guild.id,
+        name,
+        teamEmojis,
+      })
+    );
+    log.info(
+      `Updated team emoji preference for gametype ${name} at guild ${guild.id}`
+    );
+  });
+
+  message.channel.send(
+    `Team Emojis have been changed to **${emoji}** for **${
+      forAllGameTypes ? 'all gametypes' : `${args[1].toUpperCase()}`
+    }**`
+  );
+  log.info(`Exiting handleAdminUpdateTeamEmojis`);
 };
