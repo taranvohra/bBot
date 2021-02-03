@@ -118,7 +118,7 @@ export const shuffle = <T>(arr: Array<T>): Array<T> =>
   arr.slice().sort(() => Math.random() - 0.5);
 
 export const sanitizeName = (name: string) =>
-  name.replace(/(\*|`|:|_|~|\|)/g, (c) => `\\${c}`);
+  name.replace(/(\*|`|:|_|~|\||\\)/g, (c) => `\\${c}`);
 
 export const emojis = {
   moskva: '<:moskva:610047429634686976>',
