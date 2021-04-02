@@ -138,9 +138,9 @@ Adds you to the list of captains of the filled pug. Team color is RNG.
 Shows the `current picking` states of filled pug(s).
 
 **pick, p** 😸<br/>
-`Usage -> .pick index`
+`Usage -> .pick index index2(?)`
 
-Picks at the user at the mentioned index and add them to your team.
+Picks at the user at the mentioned index and add them to your team. `index2` **can** be specified if bot asks you to pick 2 players.
 
 💲 **Bonus Usage** 💲
 You can do a random pick by typing `random` instead of the index.

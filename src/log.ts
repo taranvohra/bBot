@@ -1,7 +1,7 @@
 import { createLogger, format, transports } from 'winston';
 import 'winston-daily-rotate-file';
 
-const { combine, timestamp, prettyPrint, printf, colorize } = format;
+const { combine, timestamp, printf, colorize } = format;
 const errorStackFormat = format((info) => {
   if (info instanceof Error) {
     return Object.assign({}, info, {
