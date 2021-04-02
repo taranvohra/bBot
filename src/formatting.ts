@@ -587,10 +587,16 @@ export const formatPromoteAvailablePugs = (
 
 type InfoType = Record<string, string>;
 type PlayersType = Record<string, string>;
+type ServerAddressInfo = {
+  host: string;
+  port: number;
+  password: string;
+  country?: string;
+};
 export const formatQueryServerStatus = (
   info: InfoType,
   players: PlayersType,
-  { host, port, password }: { host: string; port: number; password: string }
+  { host, port, password, country }: ServerAddressInfo
 ) => {
   const embed = new MessageEmbed();
 
@@ -693,7 +699,7 @@ export const formatQueryServerStatus = (
     password ? `?password=${password}` : ``
   }`;
 
-  embed.setTitle(info.hostname);
+  embed.setTitle(`${country ? `:flag_${country}:` : ``} ${info.hostname}`);
   embed.setColor(EMBED_COLOR);
   embed.setDescription(description);
   embed.setFooter(footer);
