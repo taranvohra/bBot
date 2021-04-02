@@ -675,7 +675,7 @@ export const handleAddCaptain: Handler = async (message) => {
 
 export const handlePickPlayer: Handler = async (
   message,
-  [index],
+  [index, index2],
   mentionedUser
 ) => {
   log.info(`Entering handlePickPlayer`);
@@ -713,6 +713,11 @@ export const handlePickPlayer: Handler = async (
     return;
   }
 
+  let pick1: number, pick2: number | undefined;
+  let lastPickedPlayerIndex: number | null;
+
+  const canPickTwice = pickingOrder[turn + 1] === team; // next turn is same team pick
+
   // +1 because few lines down we're going to subtract -1 so we still gucci 😎
   const playerIndex =
     index === 'random'
@@ -735,10 +740,47 @@ export const handlePickPlayer: Handler = async (
     playerIndex - 1,
     pickingOrder[turn]
   );
+  pick1 = playerIndex - 1;
+  lastPickedPlayerIndex = lastPlayerIndex;
 
-  const pickedPlayers = [playerIndex - 1, lastPlayerIndex].filter(
-    (i): i is number => i !== null
-  );
+  /**
+   * Situation when captain picks two in a row
+   */
+  const playerIndex2 =
+    index2 === 'random'
+      ? getRandomPickIndex(forPug.players) + 1
+      : parseInt(index2);
+
+  if (canPickTwice && playerIndex2) {
+    let if1 = true,
+      if2 = true;
+
+    if (playerIndex2 < 1 || playerIndex2 > forPug.players.length) {
+      message.channel.send(`Invalid second pick`);
+      if1 = false;
+    }
+
+    if (if1 && forPug.players[playerIndex2 - 1].team !== null) {
+      const alreadyPicked = forPug.players[playerIndex2 - 1];
+      message.channel.send(`${alreadyPicked.name} is already picked`);
+      if2 = false;
+    }
+
+    if (if1 && if2) {
+      const { lastPlayerIndex } = forPug.pickPlayer(
+        playerIndex2 - 1,
+        pickingOrder[turn]
+      );
+      pick2 = playerIndex2 - 1;
+      lastPickedPlayerIndex = lastPlayerIndex;
+    }
+  }
+
+  const pickedPlayers = [
+    pick1,
+    pick2,
+    lastPickedPlayerIndex,
+  ].filter((i): i is number => Number.isInteger(i));
   message.channel.send(formatPickPlayerStatus(forPug, pickedPlayers) ?? '');
 
   if (!forPug.isInPickingMode) {

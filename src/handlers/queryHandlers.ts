@@ -13,17 +13,24 @@ import {
 } from '~/actions';
 import { getHostPortPasswordFromAddress, fizzZoop } from '~/utils';
 import { formatQueryServers, formatQueryServerStatus } from '../formatting';
+import geoip from 'geoip-country';
 
-const queryUT99Server = (host: string, port: number): Promise<string> =>
+interface UTQuery {
+  data: string;
+  address: string;
+}
+
+const queryUT99Server = (host: string, port: number): Promise<UTQuery> =>
   new Promise((rs, rj) => {
     try {
+      let address = ``;
       let data = ``;
       const socket = dgram.createSocket('udp4');
       const queryDatagram = '\\status\\XServerQuery';
 
       const handleComplete = () => {
         clearTimeout(id);
-        rs(data);
+        rs({ data, address });
         socket.close();
       };
 
@@ -37,11 +44,12 @@ const queryUT99Server = (host: string, port: number): Promise<string> =>
 
       socket.on('error', handleFailed);
 
-      socket.on('message', (message) => {
+      socket.on('message', (message, rinfo) => {
         const unicodeValues = message.toJSON().data;
         const unicodeString = String.fromCharCode(...unicodeValues);
 
         data += unicodeString;
+        address = rinfo.address;
 
         if (unicodeString.split('\\').some((s) => s === 'final'))
           handleComplete();
@@ -97,7 +105,7 @@ export const handleShowServers: Handler = async (message) => {
   if (!listResponses) return;
 
   const parsedResponses = listResponses.map((r) => {
-    if (r.status === 'fulfilled') return parseServerResponse(r.value);
+    if (r.status === 'fulfilled') return parseServerResponse(r.value.data);
   });
 
   message.channel.send(formatQueryServers(sortedList, parsedResponses));
@@ -227,12 +235,15 @@ export const handleQueryServer: Handler = async (message, args) => {
 
   const response = await queryUT99Server(host, port);
 
-  const { info, players } = parseServerResponse(response);
+  const { info, players } = parseServerResponse(response.data);
+  const geo = geoip.lookup(response.address);
+  const country = geo ? geo.country.toLowerCase() : '';
 
   const formattedResponse = formatQueryServerStatus(info, players, {
     host,
     port,
     password,
+    country,
   });
 
   message.channel.send(formattedResponse);
