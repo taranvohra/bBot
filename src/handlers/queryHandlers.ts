@@ -91,7 +91,10 @@ export const handleShowServers: Handler = async (message) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.queries[guild.id];
+  const queries = cache.queries[guild.id];
+  if (!queries) return;
+
+  const { list } = queries;
 
   const sortedList = list.slice().sort((a, b) => a.id - b.id);
 
@@ -153,7 +156,10 @@ export const handleDeleteQueryServer: Handler = async (message, args) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.queries[guild.id];
+  const queries = cache.queries[guild.id];
+  if (!queries) return;
+
+  const { list } = queries;
 
   const originalIndex = Number(args[0]);
   const index = originalIndex - 1;
@@ -180,7 +186,10 @@ export const handleEditQueryServer: Handler = async (message, args) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.queries[guild.id];
+  const queries = cache.queries[guild.id];
+  if (!queries) return;
+
+  const { list } = queries;
 
   const [idx, attribute, ...rest] = args;
   const index = Number(idx) - 1;
@@ -216,7 +225,10 @@ export const handleQueryServer: Handler = async (message, args) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.queries[guild.id];
+  const queries = cache.queries[guild.id];
+  if (!queries) return;
+
+  const { list } = queries;
 
   const queryServerFromIndex = list[Number(args[0]) - 1];
 
@@ -256,7 +268,10 @@ export const handleShowIp: Handler = async (message, args) => {
   if (!guild || !cmd) return;
 
   const cache = store.getState();
-  const { list } = cache.queries[guild.id];
+  const queries = cache.queries[guild.id];
+  if (!queries) return;
+
+  const { list } = queries;
 
   const matchedIndex = args[0] ? [args[0]] : cmd.match(/\d/g);
   if (!matchedIndex) return;

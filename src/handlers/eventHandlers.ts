@@ -103,7 +103,10 @@ export const onPresenceUpdate = async (
   if (status === 'offline') {
     if (!guild || !user) return;
     const cache = store.getState();
-    const { channel: pugChannel, list } = cache.pugs[guild.id];
+    const pugs = cache.pugs[guild.id];
+    if (!pugs) return;
+
+    const { channel: pugChannel, list } = pugs;
     if (!pugChannel) return;
 
     list.forEach((pug) => {
@@ -131,7 +134,10 @@ export const onGuildMemberRemove = (
 ) => {
   const { guild, user } = member;
   const cache = store.getState();
-  const { channel: pugChannel, list } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { channel: pugChannel, list } = pugs;
   if (!pugChannel || !user) return;
 
   list.forEach((pug) => {
@@ -165,8 +171,10 @@ export const onGuildMemberUpdate = (
   } = updated;
 
   const cache = store.getState();
-  const { channel: channelId } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
 
+  const { channel: channelId } = pugs;
   if (!channelId) return;
 
   const hadCooldownRoleBefore = prevRoles.cache.some(

@@ -8,7 +8,7 @@ import {
   onGuildMemberUpdate,
   commandHandlers,
 } from '~/handlers';
-import { emojis, isGuildRegistered } from '~/utils';
+import { emojis } from '~/utils';
 import { connectDB, hydrateStore } from './setup';
 import { pugPubSub } from './pubsub';
 import { formatBroadcastCaptainsReady } from './formatting';
@@ -50,7 +50,10 @@ bBot.on('guildMemberUpdate', onGuildMemberUpdate);
 pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
   log.info(`Captains ready for ${pugName} at guild ${guildId}`);
   const cache = store.getState();
-  const { channel: channelId, list } = cache.pugs[guildId];
+  const pugs = cache.pugs[guildId];
+  if (!pugs) return;
+
+  const { channel: channelId, list } = pugs;
   const pug = list.find((p) => p.name === pugName);
   const guild = bBot.guilds.cache.get(guildId);
   if (!pug || !channelId || !guild) return;
@@ -65,10 +68,12 @@ pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
 const sendRestartMessageToGuilds = () => {
   const cache = store.getState();
   bBot.guilds.cache.forEach((guild) => {
-    if (!isGuildRegistered(guild.id)) return;
+    const pugs = cache.pugs[guild.id];
+    const queries = cache.queries[guild.id];
+    if (!pugs || !queries) return;
 
-    const { channel: pugChannel } = cache.pugs[guild.id];
-    const { channel: queryChannel } = cache.queries[guild.id];
+    const { channel: pugChannel } = pugs;
+    const { channel: queryChannel } = queries;
     const channelId = pugChannel ? pugChannel : queryChannel;
     if (channelId) {
       const channel = bBot.channels.cache.get(channelId);
@@ -82,12 +87,19 @@ const sendRestartMessageToGuilds = () => {
 const monitorUsersForUnblocking = () => {
   setInterval(() => {
     const cache = store.getState();
-    Object.entries(cache.blocks).forEach(([guildId, { list }]) => {
+    Object.entries(cache.blocks).forEach(([guildId, blocks]) => {
+      if (!blocks) return;
+
+      const { list } = blocks;
+
       if (list.length > 0) {
         const guild = bBot.guilds.cache.get(guildId);
         if (!guild) return;
 
-        const { channel: channelId } = cache.pugs[guildId];
+        const pugs = cache.pugs[guildId];
+        if (!pugs) return;
+
+        const { channel: channelId } = pugs;
         if (!channelId) return;
 
         const channel = guild.channels.cache.get(channelId);

@@ -22,7 +22,7 @@ type GuildBlockState = {
 };
 
 type BlocksState = {
-  [guild: string]: GuildBlockState;
+  [guild: string]: GuildBlockState | undefined;
 };
 
 let initialState: BlocksState = {};
@@ -36,14 +36,20 @@ const blocksSlice = createSlice({
     },
     addBlockedUser(state, action: PayloadAction<AddBlockedUserPayload>) {
       const { guildId, ...block } = action.payload;
-      state[guildId].list.push(block);
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        thisGuild.list.push(block);
+      }
     },
     removeBlockedUser(state, action: PayloadAction<RemoveBlockedUserPayload>) {
       const { guildId, id } = action.payload;
-      const blockedUserIndex = state[guildId].list.findIndex(
-        (u) => u.culprit.id === id
-      );
-      state[guildId].list.splice(blockedUserIndex, 1);
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        const blockedUserIndex = thisGuild.list.findIndex(
+          (u) => u.culprit.id === id
+        );
+        thisGuild.list.splice(blockedUserIndex, 1);
+      }
     },
   },
 });

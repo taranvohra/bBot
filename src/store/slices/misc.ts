@@ -15,7 +15,7 @@ type GuildMiscState = {
 };
 
 type MiscState = {
-  [guild: string]: GuildMiscState;
+  [guild: string]: GuildMiscState | undefined;
 };
 
 let initialState: MiscState = {};
@@ -29,28 +29,40 @@ const miscSlice = createSlice({
     },
     setPrefix(state, action: PayloadAction<SetPrefixPayload>) {
       const { guildId, prefix } = action.payload;
-      state[guildId].prefix = prefix;
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        thisGuild.prefix = prefix;
+      }
     },
     ignoreCommandGroup(
       state,
       action: PayloadAction<IgnoreCommandGroupPayload>
     ) {
       const { guildId, group } = action.payload;
-      state[guildId].ignoredCommandGroup.push(group);
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        thisGuild.ignoredCommandGroup.push(group);
+      }
     },
     unIgnoreCommandGroup(
       state,
       action: PayloadAction<UnIgnoreCommandGroupPayload>
     ) {
       const { guildId, group } = action.payload;
-      const groupIndex = state[guildId].ignoredCommandGroup.findIndex(
-        (cg) => cg === group
-      );
-      state[guildId].ignoredCommandGroup.splice(groupIndex, 1);
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        const groupIndex = thisGuild.ignoredCommandGroup.findIndex(
+          (cg) => cg === group
+        );
+        thisGuild.ignoredCommandGroup.splice(groupIndex, 1);
+      }
     },
     addCommandCooldown(state, action: PayloadAction<AddCommandCooldown>) {
       const { guildId, command, timestamp } = action.payload;
-      state[guildId].cooldowns[command] = timestamp;
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        thisGuild.cooldowns[command] = timestamp;
+      }
     },
   },
 });

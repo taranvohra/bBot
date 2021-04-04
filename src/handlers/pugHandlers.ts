@@ -68,7 +68,10 @@ export const handleAddGameType: Handler = async (message, args) => {
 
   const guildId = guild.id;
   const cache = store.getState();
-  const { gameTypes } = cache.pugs[guildId];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { gameTypes } = pugs;
 
   let isMix = false;
   let noOfTeams: number;
@@ -150,7 +153,10 @@ export const handleDeleteGameType: Handler = async (message, args) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { gameTypes, list } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { gameTypes, list } = pugs;
 
   const name = args[0].toLowerCase();
 
@@ -218,7 +224,10 @@ export const handleSetDefaultJoin: Handler = async (message, args) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { gameTypes } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { gameTypes } = pugs;
 
   const allJoins = args
     .map((a) => {
@@ -256,8 +265,12 @@ export const handleJoinGameTypes: Handler = async (
 
   const user = mentioned || author;
   const cache = store.getState();
-  const { gameTypes, list } = cache.pugs[guild.id];
-  const { list: blockedList } = cache.blocks[guild.id];
+  const pugs = cache.pugs[guild.id];
+  const blocks = cache.blocks[guild.id];
+  if (!pugs || !blocks) return;
+
+  const { gameTypes, list } = pugs;
+  const { list: blockedList } = blocks;
 
   const isInvisible = message.author.presence.status === 'offline';
   if (isInvisible) {
@@ -305,7 +318,10 @@ export const handleJoinGameTypes: Handler = async (
       if (!toBroadcast) {
         // Getting fresh cache everytime
         const cache = store.getState();
-        const { list } = cache.pugs[guild.id];
+        const pugs = cache.pugs[guild.id];
+        if (!pugs) return;
+
+        const { list } = pugs;
 
         let result: JoinStatus['result'];
         const gameType = gameTypes.find((g) => g.name === game);
@@ -453,7 +469,10 @@ export const handleLeaveGameTypes: Handler = async (
   const user = mentioned || author;
 
   const cache = store.getState();
-  const { gameTypes } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { gameTypes } = pugs;
 
   if (args.length === 0) {
     message.channel.send(`Invalid, no pugs were mentioned`);
@@ -462,58 +481,58 @@ export const handleLeaveGameTypes: Handler = async (
 
   const leaveStatuses = args
     .map((a) => a.toLowerCase())
-    .map(
-      (game): LeaveStatus => {
-        // Getting fresh cache everytime
-        const cache = store.getState();
-        const { list } = cache.pugs[guild.id];
+    .map((game): LeaveStatus | undefined => {
+      // Getting fresh cache everytime
+      const cache = store.getState();
+      const pugs = cache.pugs[guild.id];
+      if (!pugs) return;
 
-        let result: LeaveStatus['result'];
-        const gameType = gameTypes.find((g) => g.name === game);
-        if (!gameType) {
-          result = 'not-found';
-          return { name: game, result };
-        }
+      const { list } = pugs;
 
-        const pug = list.find((p) => p.name === game);
-        if (!pug) return { name: game, result: 'not-found' };
-
-        const indexOfPlayerInPug = pug.players.findIndex(
-          (u) => u.id === user.id
-        );
-        const isInPug = indexOfPlayerInPug !== -1;
-
-        if (isInPug) {
-          pug.removePlayer(user.id);
-          log.info(`Removed user ${user.id} from ${game} in ${guild.id}`);
-
-          if (indexOfPlayerInPug === 0 && pug.isMix) {
-            pug.players = [];
-            message.channel.send(
-              `**${pug.name.toUpperCase()}** will be abandoned because the first person in the list left`
-            );
-          }
-
-          if (pug.isInPickingMode) {
-            pug.stopPug();
-            log.info(`Stopped pug ${game} at ${guild.id}`);
-          }
-          result = 'left';
-          return {
-            name: game,
-            result,
-            pug,
-            user,
-          };
-        } else {
-          result = 'not-in';
-          return { name: game, result };
-        }
+      let result: LeaveStatus['result'];
+      const gameType = gameTypes.find((g) => g.name === game);
+      if (!gameType) {
+        result = 'not-found';
+        return { name: game, result };
       }
-    );
 
+      const pug = list.find((p) => p.name === game);
+      if (!pug) return { name: game, result: 'not-found' };
+
+      const indexOfPlayerInPug = pug.players.findIndex((u) => u.id === user.id);
+      const isInPug = indexOfPlayerInPug !== -1;
+
+      if (isInPug) {
+        pug.removePlayer(user.id);
+        log.info(`Removed user ${user.id} from ${game} in ${guild.id}`);
+
+        if (indexOfPlayerInPug === 0 && pug.isMix) {
+          pug.players = [];
+          message.channel.send(
+            `**${pug.name.toUpperCase()}** will be abandoned because the first person in the list left`
+          );
+        }
+
+        if (pug.isInPickingMode) {
+          pug.stopPug();
+          log.info(`Stopped pug ${game} at ${guild.id}`);
+        }
+        result = 'left';
+        return {
+          name: game,
+          result,
+          pug,
+          user,
+        };
+      } else {
+        result = 'not-in';
+        return { name: game, result };
+      }
+    });
+
+  const allLeaveStatuses = leaveStatuses.filter(Boolean) as LeaveStatus[];
   // Compute dead pugs
-  const deadPugs = leaveStatuses.reduce((acc, { pug, user }) => {
+  const deadPugs = allLeaveStatuses.reduce((acc, { pug, user }) => {
     if (pug && user) {
       if (pug.players.length === pug.noOfPlayers - 1) {
         acc.push({ pug, user });
@@ -529,7 +548,7 @@ export const handleLeaveGameTypes: Handler = async (
   }, [] as { pug: Pug; user: User }[]);
 
   const leaveMessage = formatLeaveStatus(
-    leaveStatuses,
+    allLeaveStatuses,
     content === 'zzz' ? 'offline' : content === 'left' ? 'left' : undefined
   );
 
@@ -551,7 +570,10 @@ export const handleListGameTypes: Handler = async (message, args) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { gameTypes, list } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { gameTypes, list } = pugs;
   const [gameType] = args;
 
   if (gameType) {
@@ -601,7 +623,10 @@ export const handleListAllCurrentGameTypes: Handler = async (message) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { list } = pugs;
 
   message.channel.send(formatListAllCurrentGameTypes(list, guild.name));
 
@@ -614,7 +639,10 @@ export const handleLeaveAllGameTypes: Handler = async (message) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { list } = pugs;
 
   const listToLeave = list
     .filter((pug) => pug.players.find((p) => p.id === author.id))
@@ -637,7 +665,10 @@ export const handleAddCaptain: Handler = async (message) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { list } = pugs;
 
   const forPug = list.find((pug) => {
     const isCandidate = pug.isInPickingMode && !pug.areCaptainsDecided();
@@ -683,7 +714,10 @@ export const handlePickPlayer: Handler = async (
   if (!guild) return;
 
   const cache = store.getState();
-  const { list, gameTypes } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { list, gameTypes } = pugs;
   const user = mentionedUser ? mentionedUser : author;
 
   const forPug = list.find((pug) => {
@@ -830,7 +864,10 @@ export const handlePugPicking: Handler = async (message) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { list } = pugs;
 
   const pugsInPicking = list.filter(
     (pug) => pug.isInPickingMode && pug.areCaptainsDecided()
@@ -851,7 +888,10 @@ export const handleAddOrRemoveTag: Handler = async (message, args) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { list } = pugs;
   const user = author;
 
   const isAddingTag = Boolean(args[0]);
@@ -953,13 +993,18 @@ export const handlePromoteAvailablePugs: Handler = async (message, args) => {
   if (!guild || !member) return;
 
   const cache = store.getState();
-  const { list } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  const misc = cache.misc[guild.id];
+
+  if (!pugs || !misc) return;
+
+  const { list } = pugs;
 
   const hasCoolDownRole = member.roles.cache.some(
     (role) => role.name === 'COOLDOWN'
   );
   if (hasCoolDownRole) {
-    const { cooldowns } = cache.misc[guild.id];
+    const { cooldowns } = misc;
     const cooldownCmd = cooldowns['promote'];
     if (cooldownCmd) {
       const timeDiff = cooldownCmd - Date.now();
@@ -1025,7 +1070,10 @@ export const handleDecidePromoteOrPick: Handler = async (message, args) => {
   else {
     // p 4 or p siege5
     const cache = store.getState();
-    const { gameTypes } = cache.pugs[guild.id];
+    const pugs = cache.pugs[guild.id];
+    if (!pugs) return;
+
+    const { gameTypes } = pugs;
     const isArgGameType = gameTypes.find(
       (g) => g.name === args[0].toLowerCase()
     );
@@ -1238,7 +1286,10 @@ export const handleAdminResetPug: Handler = async (message, args) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { list } = pugs;
 
   const pugName = args[0].toLowerCase();
   const pug = list.find((p) => p.name === pugName);
@@ -1278,8 +1329,12 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
   }
 
   const cache = store.getState();
-  const { list: pugList } = cache.pugs[guild.id];
-  const { list } = cache.blocks[guild.id];
+  const pugs = cache.pugs[guild.id];
+  const blocks = cache.blocks[guild.id];
+  if (!pugs || !blocks) return;
+
+  const { list: pugList } = pugs;
+  const { list } = blocks;
 
   if (list.some((u) => u.culprit.id === mentionedUser.id)) {
     log.debug(
@@ -1382,7 +1437,10 @@ export const handleAdminUnblockPlayer: Handler = async (
   }
 
   const cache = store.getState();
-  const { list } = cache.blocks[guild.id];
+  const blocks = cache.blocks[guild.id];
+  if (!blocks) return;
+
+  const { list } = blocks;
 
   if (!list.some((u) => u.culprit.id === mentionedUser.id)) {
     message.channel.send(
@@ -1411,7 +1469,10 @@ export const handleAdminShowBlockedPlayers: Handler = async (message, _) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { list } = cache.blocks[guild.id];
+  const blocks = cache.blocks[guild.id];
+  if (!blocks) return;
+
+  const { list } = blocks;
 
   if (list.length === 0)
     message.author.send(`There are no blocked users at **${guild.name}**`);
@@ -1441,7 +1502,10 @@ export const handleAdminEnableMapvoteCoinFlip: Handler = async (
   if (!guild) return;
 
   const cache = store.getState();
-  const { gameTypes } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { gameTypes } = pugs;
   const gameType = args[0].toLowerCase();
 
   if (!gameTypes.some((g) => g.name === gameType)) {
@@ -1473,7 +1537,10 @@ export const handleAdminDisableMapvoteCoinFlip: Handler = async (
   if (!guild) return;
 
   const cache = store.getState();
-  const { gameTypes } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { gameTypes } = pugs;
   const gameType = args[0].toLowerCase();
 
   if (!gameTypes.some((g) => g.name === gameType)) {
@@ -1502,7 +1569,10 @@ export const handleAdminUpdateTeamEmojis: Handler = async (message, args) => {
   if (!guild) return;
 
   const cache = store.getState();
-  const { gameTypes } = cache.pugs[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { gameTypes } = pugs;
 
   const emoji = args[0].toLowerCase();
   if (!(emoji in teamEmojiTypes)) {

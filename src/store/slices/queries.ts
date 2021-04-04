@@ -22,7 +22,7 @@ type GuildQueriesState = {
 };
 
 type QueriesState = {
-  [guild: string]: GuildQueriesState;
+  [guild: string]: GuildQueriesState | undefined;
 };
 
 let initialState: QueriesState = {};
@@ -36,21 +36,33 @@ const queriesSlice = createSlice({
     },
     setQueryChannel(state, action: PayloadAction<SetQueryChannelPayload>) {
       const { channelId, guildId } = action.payload;
-      state[guildId].channel = channelId;
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        thisGuild.channel = channelId;
+      }
     },
     addQueryServer(state, action: PayloadAction<AddQueryServerPayload>) {
       const { guildId, ...queryServer } = action.payload;
-      state[guildId].list.push(queryServer);
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        thisGuild.list.push(queryServer);
+      }
     },
     removeQueryServer(state, action: PayloadAction<RemoveQueryServerPayload>) {
       const { guildId, index } = action.payload;
-      state[guildId].list.splice(index, 1);
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        thisGuild.list.splice(index, 1);
+      }
     },
     editQueryServer(state, action: PayloadAction<EditQueryServerPayload>) {
       const { guildId, attribute, value, id } = action.payload;
-      const { list } = state[guildId];
-      const queryServerIndex = list.findIndex((qs) => qs.id === id);
-      state[guildId].list[queryServerIndex][attribute] = value;
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        const { list } = thisGuild;
+        const queryServerIndex = list.findIndex((qs) => qs.id === id);
+        thisGuild.list[queryServerIndex][attribute] = value;
+      }
     },
   },
 });

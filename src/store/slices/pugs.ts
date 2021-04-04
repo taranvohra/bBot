@@ -30,7 +30,7 @@ type GuildPugsState = {
 };
 
 type PugsState = {
-  [guild: string]: GuildPugsState;
+  [guild: string]: GuildPugsState | undefined;
 };
 
 let initialState: PugsState = {};
@@ -44,54 +44,75 @@ const pugsSlice = createSlice({
     },
     setPugChannel(state, action: PayloadAction<SetPugChannelPayload>) {
       const { guildId, channelId } = action.payload;
-      state[guildId].channel = channelId;
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        thisGuild.channel = channelId;
+      }
     },
     addGameType(state, action: PayloadAction<AddGameTypePayload>) {
       const { guildId, ...gametype } = action.payload;
-      state[guildId].gameTypes.push(gametype);
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        thisGuild.gameTypes.push(gametype);
+      }
     },
     removeGameType(state, action: PayloadAction<RemoveGameTypePayload>) {
       const { guildId, name } = action.payload;
-      const { gameTypes } = state[guildId];
-      const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
-      state[guildId].gameTypes.splice(gameTypeIndex, 1);
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        const { gameTypes } = thisGuild;
+        const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
+        thisGuild.gameTypes.splice(gameTypeIndex, 1);
+      }
     },
     addPug(state, action: PayloadAction<AddPugPayload>) {
       const { guildId, pug } = action.payload;
-      state[guildId].list.push(pug);
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        thisGuild.list.push(pug);
+      }
     },
     removePug(state, action: PayloadAction<RemovePugPayload>) {
       const { guildId, name } = action.payload;
-      const { list } = state[guildId];
-      const pugIndex = list.findIndex((pug) => pug.name === name);
-      state[guildId].list.splice(pugIndex, 1);
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        const { list } = thisGuild;
+        const pugIndex = list.findIndex((pug) => pug.name === name);
+        thisGuild.list.splice(pugIndex, 1);
+      }
     },
     enableCoinFlip(state, action: PayloadAction<EnableCoinFlipPayload>) {
       const { guildId, name } = action.payload;
-      const { gameTypes, list } = state[guildId];
-      const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
-      const pugIndex = list.findIndex((pug) => pug.name === name);
-      state[guildId].gameTypes[gameTypeIndex].isCoinFlipEnabled = true;
-      if (pugIndex !== -1)
-        state[guildId].list[pugIndex].isCoinFlipEnabled = true;
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        const { gameTypes, list } = thisGuild;
+        const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
+        const pugIndex = list.findIndex((pug) => pug.name === name);
+        thisGuild.gameTypes[gameTypeIndex].isCoinFlipEnabled = true;
+        if (pugIndex !== -1) thisGuild.list[pugIndex].isCoinFlipEnabled = true;
+      }
     },
     disableCoinFlip(state, action: PayloadAction<DisableCoinFlipPayload>) {
       const { guildId, name } = action.payload;
-      const { gameTypes, list } = state[guildId];
-      const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
-      const pugIndex = list.findIndex((pug) => pug.name === name);
-      state[guildId].gameTypes[gameTypeIndex].isCoinFlipEnabled = false;
-      if (pugIndex !== -1)
-        state[guildId].list[pugIndex].isCoinFlipEnabled = false;
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        const { gameTypes, list } = thisGuild;
+        const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
+        const pugIndex = list.findIndex((pug) => pug.name === name);
+        thisGuild.gameTypes[gameTypeIndex].isCoinFlipEnabled = false;
+        if (pugIndex !== -1) thisGuild.list[pugIndex].isCoinFlipEnabled = false;
+      }
     },
     updateTeamEmojis(state, action: PayloadAction<UpdateTeamEmojiPayload>) {
       const { guildId, name, teamEmojis } = action.payload;
-      const { gameTypes, list } = state[guildId];
-      const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
-      const pugIndex = list.findIndex((pug) => pug.name === name);
-      state[guildId].gameTypes[gameTypeIndex].teamEmojis = teamEmojis;
-      if (pugIndex !== -1)
-        state[guildId].list[pugIndex].teamEmojis = teamEmojis;
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        const { gameTypes, list } = thisGuild;
+        const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
+        const pugIndex = list.findIndex((pug) => pug.name === name);
+        thisGuild.gameTypes[gameTypeIndex].teamEmojis = teamEmojis;
+        if (pugIndex !== -1) thisGuild.list[pugIndex].teamEmojis = teamEmojis;
+      }
     },
   },
 });
