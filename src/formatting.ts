@@ -450,7 +450,7 @@ export const formatUserStats = (user: PugUser) => {
     const title = `:pencil: Showing stats for **${user.username}** :pencil:`;
     const totals = `:video_game: **${totalPugs}** pug${
       totalPugs !== 1 ? 's' : ''
-    }\t:cop: **${totalCaptain}**\t:trophy: **${totalWins}**\t:x: **${totalLosses}**`;
+    }\t:cop: **${totalCaptain}**`;
     const distance = formatDistanceToNowStrict(lastPug.timestamp, {
       addSuffix: true,
     });
@@ -461,20 +461,15 @@ export const formatUserStats = (user: PugUser) => {
     const collectiveStatsTitle = `**GameTypes**`;
     const collectiveStatsBody = Object.entries(user.stats).reduce(
       (acc, [pugName, pugStats]) => {
-        const won = pugStats.won || 0;
-        const lost = pugStats.lost || 0;
-        const winPercentage = pugStats.won
-          ? pugStats.won / (pugStats.won + pugStats.lost)
-          : 0;
-        acc += `**${pugName.toUpperCase()}**\t**${pugStats.totalPugs}** pug${
-          pugStats.totalPugs !== 1 ? 's' : ''
-        }\t:cop: **${pugStats.totalCaptain}**\t:star: ${
+        acc += `**${pugName.toUpperCase()}**\t :video_game: **${
+          pugStats.totalPugs
+        }** pug${pugStats.totalPugs !== 1 ? 's' : ''}\t:cop: **${
+          pugStats.totalCaptain
+        }**\t:star: ${
           pugStats.rating === 0
             ? `**no rating**`
             : `**${pugStats.rating.toFixed(2)}**`
-        }\t:trophy: **${won}**\t:x: **${lost}**\t:muscle: **${(
-          winPercentage * 100
-        ).toFixed(2)}%**\n`;
+        }\n`;
         return acc;
       },
       ``
