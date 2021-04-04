@@ -1,10 +1,11 @@
+import config from './config';
 import mongoose from 'mongoose';
 import { DocumentType } from '@typegoose/typegoose';
 import store, { initBlocks, initMisc, initQueries, initPugs } from '~/store';
 import { Guild as GuildClass, Guilds } from '~/models';
 
 export const connectDB = async () =>
-  await mongoose.connect(process.env.DB as string, {
+  await mongoose.connect(config.DB, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,

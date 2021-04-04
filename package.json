@@ -49,6 +49,7 @@
     "@typegoose/typegoose": "^7.4.7",
     "date-fns": "^2.16.1",
     "discord.js": "^12.5.3",
+    "env-var": "^7.0.0",
     "fontkit": "^1.8.1",
     "geoip-country": "^4.0.62",
     "jimp": "^0.16.1",

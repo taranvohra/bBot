@@ -1,3 +1,4 @@
+import config from './config';
 import { Client, Intents, TextChannel, Message, User } from 'discord.js';
 import { compareAsc } from 'date-fns';
 import store from '~/store';
@@ -29,7 +30,7 @@ const bBot = new Client({ ws: { intents } });
 bBot.on('ready', () => {
   const message = `Bot started running at ${new Date().toUTCString()}`;
   log.info(message);
-  const HQChannel = bBot.channels.cache.get('559049937560797219');
+  const HQChannel = bBot.channels.cache.get(config.HQ_CHANNEL_ID);
   if (HQChannel) {
     (HQChannel as TextChannel).send(`\`\`\`\n${message}\`\`\``);
   }
@@ -133,8 +134,28 @@ const monitorUsersForUnblocking = () => {
     await hydrateStore();
     log.info(`Hydrated Store`);
 
-    bBot.login(process.env.DISCORD_BOT_TOKEN);
+    bBot.login(config.DISCORD_BOT_TOKEN);
   } catch (error) {
     console.log(`Error: ${error}`);
   }
 })();
+
+const logErrorToHQChannel = (message: string, error?: Error) => {
+  const HQChannel = bBot.channels.cache.get(config.HQ_CHANNEL_ID);
+  if (HQChannel) {
+    (HQChannel as TextChannel).send(
+      `\`\`\`\n${message}\n${error?.stack}\`\`\``
+    );
+  }
+};
+
+process.on('uncaughtException', (error) => {
+  log.error(error);
+  logErrorToHQChannel(error.message, error);
+});
+
+process.on('unhandledRejection', (reason) => {
+  const msg = `Unhandled Promise Rejection for reason ${reason}`;
+  log.error(msg);
+  logErrorToHQChannel(msg);
+});
