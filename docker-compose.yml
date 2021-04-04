@@ -7,5 +7,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./logs:/usr/app/bbot/logs
+      - ./snapshots/:/usr/app/bbot/snapshots
     env_file:
       - .env
