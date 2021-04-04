@@ -428,9 +428,7 @@ export const formatUserStats = (user: PugUser) => {
         game: { pug },
       },
     } = user;
-    const { totalPugs, totalCaptain, totalWins, totalLosses } = Object.values(
-      user.stats
-    ).reduce(
+    const { totalPugs, totalCaptain } = Object.values(user.stats).reduce(
       (acc, curr) => {
         acc.totalPugs += curr.totalPugs || 0;
         acc.totalCaptain += curr.totalCaptain || 0;
