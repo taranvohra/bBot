@@ -3,7 +3,7 @@ import { PugPlayer } from '~/models';
 import store from '~/store';
 
 export const CONSTANTS = {
-  defaultPrefix: '-',
+  defaultPrefix: '.',
   privilegedRoles: ['bBot'],
   teamIndexes: {
     red: 0,
