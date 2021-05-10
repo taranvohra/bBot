@@ -11,6 +11,8 @@ type EnableCoinFlipPayload = WithGuildID & GameTypeName;
 type DisableCoinFlipPayload = WithGuildID & GameTypeName;
 type UpdateTeamEmojiPayload = WithGuildID &
   GameTypeName & { teamEmojis: TeamEmojis };
+type UpdatePickingOrder = WithGuildID &
+  GameTypeName & { pickingOrder: number[] };
 
 type GameTypeName = { name: string };
 
@@ -114,6 +116,18 @@ const pugsSlice = createSlice({
         if (pugIndex !== -1) thisGuild.list[pugIndex].teamEmojis = teamEmojis;
       }
     },
+    updatePickingOrder(state, action: PayloadAction<UpdatePickingOrder>) {
+      const { guildId, name, pickingOrder } = action.payload;
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        const { gameTypes, list } = thisGuild;
+        const gameTypeIndex = gameTypes.findIndex((gt) => gt.name === name);
+        const pugIndex = list.findIndex((pug) => pug.name === name);
+        thisGuild.gameTypes[gameTypeIndex].pickingOrder = pickingOrder;
+        if (pugIndex !== -1)
+          thisGuild.list[pugIndex].pickingOrder = pickingOrder;
+      }
+    },
   },
 });
 
@@ -127,5 +141,6 @@ export const {
   disableCoinFlip,
   setPugChannel,
   updateTeamEmojis,
+  updatePickingOrder,
 } = pugsSlice.actions;
 export const pugsReducer = pugsSlice.reducer;

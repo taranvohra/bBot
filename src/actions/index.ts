@@ -298,3 +298,18 @@ export const updateGuildGameTypeTeamEmojis = (
       },
     }
   ).exec();
+
+export const updateGuildGameTypePickingOrder = (
+  guildId: string,
+  gameType: string,
+  newPickingOrder: number[]
+) =>
+  Guilds.findOneAndUpdate(
+    {
+      _id: guildId,
+      'gameTypes.name': gameType,
+    },
+    {
+      $set: { 'gameTypes.$.pickingOrder': newPickingOrder },
+    }
+  ).exec();
