@@ -304,6 +304,7 @@ export const handleJoinGameTypes: Handler = async (
     message.channel.send(
       `Please leave **${isPartOfFilledPug.name.toUpperCase()}** first to join other pugs`
     );
+    return;
   }
 
   const dbUser = await Users.findOne({
