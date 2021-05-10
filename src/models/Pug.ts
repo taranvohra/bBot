@@ -1,4 +1,4 @@
-import { getRandomInt, shuffle, CONSTANTS, powerSet } from '~/utils';
+import { getRandomInt, shuffle, CONSTANTS, powerSet, isDuelPug } from '~/utils';
 import { pugPubSub } from '../pubsub';
 
 type PugUser = Pick<PugPlayer, 'id' | 'name' | 'stats'>;
@@ -168,11 +168,12 @@ export class Pug {
   fillPug(guildId: string) {
     this.isInPickingMode = true;
 
-    // No captain picking for mix mode
-    if (this.isMix) return;
+    /**
+     *  No captain picking for the following modes -  Duel, Mix, DM
+     */
 
-    // 1v1 picking order is basically [-1]
-    if (this.pickingOrder.length === 1 && this.pickingOrder[0] === -1) return;
+    if (isDuelPug(this.pickingOrder) || this.isMix || this.noOfTeams === 1)
+      return;
 
     this.timerFn = setTimeout(() => {
       const playersNotCaptain = this.players.filter(

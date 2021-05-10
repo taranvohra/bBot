@@ -423,9 +423,14 @@ export const handleJoinGameTypes: Handler = async (
       user?.send(DM);
     });
 
-    // If 1v1 or mix pug, there wont be live picking
+    // If 1v1/mix/deathmatch pug, there wont be live picking
     // so end the pug and update stats
-    if (isDuelPug(toBroadcast.pickingOrder) || toBroadcast.isMix) {
+    if (
+      isDuelPug(toBroadcast.pickingOrder) ||
+      toBroadcast.isMix ||
+      toBroadcast.noOfTeams === 1
+    ) {
+      log.debug(`${toBroadcast.name} is a Duel/Mix/DM Pug. No picking needed`);
       const sequences = await getNextSequences(guild.id, toBroadcast.name);
       if (!sequences) {
         throw new Error(
