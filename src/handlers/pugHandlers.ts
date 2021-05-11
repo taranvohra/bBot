@@ -27,6 +27,7 @@ import {
   updateGuildUserDefaultJoins,
   createNewUserLog,
   updateGuildGameTypeTeamEmojis,
+  updateGuildGameTypePickingOrder,
 } from '~/actions';
 import store, {
   addGameType,
@@ -39,6 +40,7 @@ import store, {
   enableCoinFlip,
   disableCoinFlip,
   updateTeamEmojis,
+  updatePickingOrder,
 } from '~/store';
 import {
   formatPugFilledDM,
@@ -81,8 +83,6 @@ export const handleAddGameType: Handler = async (message, args) => {
     Number(args[1]),
     args[2],
   ];
-
-  console.log({ noOfTeamsOrMix });
 
   if (!name || isNaN(noOfPlayers) || !noOfTeamsOrMix) {
     message.channel.send(`Invalid usage of command`);
@@ -304,6 +304,7 @@ export const handleJoinGameTypes: Handler = async (
     message.channel.send(
       `Please leave **${isPartOfFilledPug.name.toUpperCase()}** first to join other pugs`
     );
+    return;
   }
 
   const dbUser = await Users.findOne({
@@ -422,9 +423,14 @@ export const handleJoinGameTypes: Handler = async (
       user?.send(DM);
     });
 
-    // If 1v1 or mix pug, there wont be live picking
+    // If 1v1/mix/deathmatch pug, there wont be live picking
     // so end the pug and update stats
-    if (isDuelPug(toBroadcast.pickingOrder) || toBroadcast.isMix) {
+    if (
+      isDuelPug(toBroadcast.pickingOrder) ||
+      toBroadcast.isMix ||
+      toBroadcast.noOfTeams === 1
+    ) {
+      log.debug(`${toBroadcast.name} is a Duel/Mix/DM Pug. No picking needed`);
       const sequences = await getNextSequences(guild.id, toBroadcast.name);
       if (!sequences) {
         throw new Error(
@@ -1608,4 +1614,84 @@ export const handleAdminUpdateTeamEmojis: Handler = async (message, args) => {
     }**`
   );
   log.info(`Exiting handleAdminUpdateTeamEmojis`);
+};
+
+export const handleAdminEnforceCustomPickingOrder: Handler = async (
+  message,
+  args
+) => {
+  log.info(`Entering handleAdminEnforceCustomPickingOrder`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const pugs = cache.pugs[guild.id];
+  if (!pugs) return;
+
+  const { gameTypes } = pugs;
+
+  const [gameTypeArg, ...pickingOrderArgs] = args;
+  const gameType = gameTypes.find((g) => g.name === gameTypeArg.toLowerCase());
+  if (!gameType) {
+    log.debug(`Gametype ${gameTypeArg} doesnt exist at guild ${guild.id}`);
+    message.channel.send(`**${gameTypeArg}** does not exist`);
+    return;
+  }
+
+  if (
+    isDuelPug(gameType.pickingOrder) ||
+    gameType.isMix ||
+    gameType.noOfTeams === 1
+  ) {
+    log.debug(`No custom picking order for Duel/Mix/DM gametypes`);
+    message.channel.send(
+      `Custom picking order cannot be applied for Duel/Mix/DM gametypes`
+    );
+    return;
+  }
+
+  const customPickingOrder = pickingOrderArgs.map((pick) => parseInt(pick) - 1);
+
+  if (customPickingOrder.length !== gameType.pickingOrder.length) {
+    log.debug(
+      `Invalid length of picking order for ${gameTypeArg} at guild ${guild.id}`
+    );
+    message.channel.send(
+      `Incomplete picking order! It does not allow picking of ${gameType.pickingOrder.length} players`
+    );
+    return;
+  }
+
+  const hasValidPicksInPickingOrder = customPickingOrder.every(
+    (pick) => pick >= 0 && pick < gameType.noOfTeams
+  );
+
+  if (!hasValidPicksInPickingOrder) {
+    log.debug(
+      `Custom picking order for ${gameType.name} at guild ${guild.id} has out of bound picks`
+    );
+    message.channel.send(
+      `Invalid picking order! It has out-of-bound/invalid picks`
+    );
+    return;
+  }
+
+  await updateGuildGameTypePickingOrder(
+    guild.id,
+    gameType.name,
+    customPickingOrder
+  );
+  store.dispatch(
+    updatePickingOrder({
+      guildId: guild.id,
+      name: gameType.name,
+      pickingOrder: customPickingOrder,
+    })
+  );
+  log.info(
+    `Custom picking order set for ${gameType.name} at guild ${guild.id}`
+  );
+  message.channel.send(`Custom picking order set!`);
+
+  log.info(`Exiting handleAdminEnforceCustomPickingOrder`);
 };

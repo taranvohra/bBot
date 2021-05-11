@@ -152,7 +152,7 @@ export const formatBroadcastPug = (pug: Pug) => {
 
   const isDuel = isDuelPug(pug.pickingOrder);
   const footer =
-    isDuel || pug.isMix
+    isDuel || pug.isMix || pug.noOfTeams === 1
       ? ``
       : `Type **${
           CONSTANTS.defaultPrefix
@@ -516,7 +516,7 @@ export const formatLastPug = (
 
   let activeTeams = ``;
   if (isDuelPug(pug.pickingOrder)) {
-    activeTeams = `**${pug.players[0].name}** :people_wrestling: **${pug.players[1].name}**\n`;
+    activeTeams = `**${pug.players[0].name}** :vs: **${pug.players[1].name}**\n`;
   } else if (pug.isMix) {
     activeTeams = pug.players.reduce((acc, curr, i, arr) => {
       if (i === 0) acc += `**${curr.name}'s** team\t:vs:\t`;
@@ -524,6 +524,13 @@ export const formatLastPug = (
         acc += `**${curr.name}**${
           i === arr.length - 1 ? '\n' : ' :small_orange_diamond: '
         }`;
+      return acc;
+    }, ``);
+  } else if (pug.noOfTeams === 1) {
+    activeTeams = pug.players.reduce((acc, curr, i, arr) => {
+      acc += `**${curr.name}**${
+        i === arr.length - 1 ? '\n' : '  :crossed_swords:  '
+      }`;
       return acc;
     }, ``);
   } else {
