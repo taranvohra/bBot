@@ -239,6 +239,20 @@ Sets the preferred teamemoji for the gametype. `emoji` can be one of `agonies`, 
 
 Note that if `gametype` is omitted then the default is change it for **ALL** gametypes.
 
+**setpickingorder** 🐱‍👤<br/>
+`Usage -> .setpickingorder gametype pickingOrder`
+
+Enforces a custom picking order for the gametype. An example of a picking order for a gametype with `2 teams` is `1 2 2 1 1 2 2 1`. It goes like `Red picks first, then blue picks 2 times then red picks 2 times then blue picks 2 times and finally last pick goes to red`
+
+```
+Red - 1
+Blue - 2
+Green - 3
+Gold - 4
+```
+
+Note that this command does not work for `DUEL/MIX/DM` gametypes.
+
 ### Queries
 
 **addqueryserver, aqs** 🐱‍👤<br/>
