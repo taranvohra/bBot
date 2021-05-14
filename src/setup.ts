@@ -36,6 +36,7 @@ export const hydrateStore = async () => {
         ignoredCommandGroup,
         prefix,
         cooldowns: {},
+        autoremovals: {},
       })
     );
     store.dispatch(
