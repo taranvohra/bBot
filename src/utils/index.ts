@@ -186,10 +186,7 @@ export const isCommandConstraintSatified = (command: Command, cmd: string) =>
     ? command.aliases.some((a) => command.rgx!(a).test(cmd))
     : command.aliases.includes(cmd);
 
-export const calculateBlockExpiry = (
-  period: 'm' | 'h' | 'd',
-  length: number
-) => {
+export const calculateExpiry = (period: 'm' | 'h' | 'd', length: number) => {
   const expiry = new Date();
   if (period === 'm') expiry.setMinutes(expiry.getMinutes() + length);
   else if (period === 'h') expiry.setHours(expiry.getHours() + length);
@@ -201,10 +198,8 @@ export const getHostPortPasswordFromAddress = (
   address: string
 ): { host: string; port: number; password: string } => {
   const [stringAfterProtocol] = address.split('unreal://').filter(Boolean);
-  const [
-    stringBeforePassword,
-    stringAfterPassword = '',
-  ] = stringAfterProtocol.split('?');
+  const [stringBeforePassword, stringAfterPassword = ''] =
+    stringAfterProtocol.split('?');
   const [hostString, portString] = stringBeforePassword.split(':');
   const [, password] = stringAfterPassword.split('=');
   return {
@@ -217,7 +212,7 @@ export const getHostPortPasswordFromAddress = (
 export const fizzZoop = <T>(array: T[]) =>
   array.reduce((acc, curr, i, arr) => {
     if (i % 2 === 0) {
-      const item = ((curr as unknown) as string).toLowerCase();
+      const item = (curr as unknown as string).toLowerCase();
       acc[item] = arr[i + 1];
     }
     return acc;

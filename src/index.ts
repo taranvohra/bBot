@@ -36,6 +36,7 @@ bBot.on('ready', () => {
   }
   sendRestartMessageToGuilds();
   monitorUsersForUnblocking();
+  monitorForAutoRemovals();
 });
 
 bBot.on('disconnect', () => {});
@@ -87,6 +88,7 @@ const sendRestartMessageToGuilds = () => {
 
 const monitorUsersForUnblocking = () => {
   setInterval(() => {
+    const now = new Date();
     const cache = store.getState();
     Object.entries(cache.blocks).forEach(([guildId, blocks]) => {
       if (!blocks) return;
@@ -112,7 +114,7 @@ const monitorUsersForUnblocking = () => {
           const mentionedUser = {
             ...user.culprit,
           } as User;
-          if (compareAsc(new Date(), user.expiresAt) >= 0) {
+          if (compareAsc(now, user.expiresAt) >= 0) {
             commandHandlers['handleAdminUnblockPlayer'](
               message,
               [],
@@ -122,7 +124,45 @@ const monitorUsersForUnblocking = () => {
         });
       }
     });
-    cache.blocks;
+  }, 60000);
+};
+
+const monitorForAutoRemovals = () => {
+  setInterval(() => {
+    const now = new Date();
+    const cache = store.getState();
+    Object.entries(cache.misc).forEach(([guildId, misc]) => {
+      if (!misc) return;
+      const { autoremovals } = misc;
+
+      const guild = bBot.guilds.cache.get(guildId);
+      if (!guild) return;
+
+      const pugs = cache.pugs[guildId];
+      if (!pugs) return;
+
+      const { channel: channelId } = pugs;
+      if (!channelId) return;
+      const channel = guild.channels.cache.get(channelId);
+
+      Object.entries(autoremovals).forEach(([userId, expiry]) => {
+        if (expiry) {
+          if (compareAsc(now, expiry) >= 0) {
+            const user = bBot.users.cache.get(userId);
+            const message = {
+              guild,
+              channel,
+              content: 'arr',
+              author: {
+                id: userId,
+                username: user?.username ?? userId,
+              },
+            } as Message;
+            commandHandlers['handleLeaveAllGameTypes'](message, []);
+          }
+        }
+      });
+    });
   }, 60000);
 };
 

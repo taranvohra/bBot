@@ -66,6 +66,7 @@ export const handleRegisterServer: Handler = async (message, _) => {
       guildId: guild.id,
       cooldowns: {},
       ignoredCommandGroup: [],
+      autoremovals: {},
     })
   );
   store.dispatch(initBlocks({ guildId: guild.id, list: [] }));

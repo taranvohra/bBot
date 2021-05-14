@@ -5,12 +5,17 @@ type SetPrefixPayload = WithGuildID & Pick<GuildMiscState, 'prefix'>;
 type IgnoreCommandGroupPayload = WithGuildID & { group: string };
 type UnIgnoreCommandGroupPayload = IgnoreCommandGroupPayload;
 type AddCommandCooldown = WithGuildID & { command: string; timestamp: number };
+type AddAutoRemoval = WithGuildID & { userId: string; expiry: Date };
+type ClearAutoRemoval = WithGuildID & { userId: string };
 
 type GuildMiscState = {
   prefix?: string;
   ignoredCommandGroup: Array<string>;
   cooldowns: {
-    [command: string]: number;
+    [command: string]: number | undefined;
+  };
+  autoremovals: {
+    [userId: string]: Date | undefined;
   };
 };
 
@@ -64,6 +69,20 @@ const miscSlice = createSlice({
         thisGuild.cooldowns[command] = timestamp;
       }
     },
+    addAutoRemoval(state, action: PayloadAction<AddAutoRemoval>) {
+      const { guildId, userId, expiry } = action.payload;
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        thisGuild.autoremovals[userId] = expiry;
+      }
+    },
+    clearAutoRemoval(state, action: PayloadAction<ClearAutoRemoval>) {
+      const { guildId, userId } = action.payload;
+      const thisGuild = state[guildId];
+      if (thisGuild) {
+        delete thisGuild.autoremovals[userId];
+      }
+    },
   },
 });
 
@@ -73,5 +92,7 @@ export const {
   setPrefix,
   unIgnoreCommandGroup,
   addCommandCooldown,
+  addAutoRemoval,
+  clearAutoRemoval,
 } = miscSlice.actions;
 export const miscReducer = miscSlice.reducer;

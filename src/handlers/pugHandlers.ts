@@ -10,7 +10,7 @@ import {
   emojis,
   getRandomInt,
   sanitizeName,
-  calculateBlockExpiry,
+  calculateExpiry,
   isDuelPug,
   getRandomPickIndex,
   teamEmojiTypes,
@@ -41,6 +41,8 @@ import store, {
   disableCoinFlip,
   updateTeamEmojis,
   updatePickingOrder,
+  addAutoRemoval,
+  clearAutoRemoval,
 } from '~/store';
 import {
   formatPugFilledDM,
@@ -456,6 +458,9 @@ export const handleJoinGameTypes: Handler = async (
         `Remove pug ${toBroadcast.name} at guild ${guild.id} from store`
       );
       store.dispatch(removePug({ guildId: guild.id, name: toBroadcast.name }));
+      store.dispatch(
+        clearAutoRemoval({ guildId: guild.id, userId: author.id })
+      );
     }
   }
 
@@ -555,7 +560,13 @@ export const handleLeaveGameTypes: Handler = async (
 
   const leaveMessage = formatLeaveStatus(
     allLeaveStatuses,
-    content === 'zzz' ? 'offline' : content === 'left' ? 'left' : undefined
+    content === 'zzz'
+      ? 'offline'
+      : content === 'left'
+      ? 'left'
+      : content === 'arr'
+      ? 'autoremove'
+      : undefined
   );
 
   if (!returnMsg) {
@@ -646,9 +657,11 @@ export const handleLeaveAllGameTypes: Handler = async (message) => {
 
   const cache = store.getState();
   const pugs = cache.pugs[guild.id];
-  if (!pugs) return;
+  const misc = cache.misc[guild.id];
+  if (!pugs || !misc) return;
 
   const { list } = pugs;
+  const { autoremovals } = misc;
 
   const listToLeave = list
     .filter((pug) => pug.players.find((p) => p.id === author.id))
@@ -660,6 +673,9 @@ export const handleLeaveAllGameTypes: Handler = async (message) => {
     );
     return;
   }
+
+  if (autoremovals[author.id])
+    store.dispatch(clearAutoRemoval({ guildId: guild.id, userId: author.id }));
 
   handleLeaveGameTypes(message, listToLeave);
   log.info(`Exiting handleLeaveAllGameTypes`);
@@ -816,11 +832,9 @@ export const handlePickPlayer: Handler = async (
     }
   }
 
-  const pickedPlayers = [
-    pick1,
-    pick2,
-    lastPickedPlayerIndex,
-  ].filter((i): i is number => Number.isInteger(i));
+  const pickedPlayers = [pick1, pick2, lastPickedPlayerIndex].filter(
+    (i): i is number => Number.isInteger(i)
+  );
   message.channel.send(formatPickPlayerStatus(forPug, pickedPlayers) ?? '');
 
   if (!forPug.isInPickingMode) {
@@ -1370,7 +1384,7 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
   const blockLength = parseInt(blockLengthString);
   if (blockLength <= 0) return;
 
-  const expiry = calculateBlockExpiry(
+  const expiry = calculateExpiry(
     blockPeriodString as 'm' | 'h' | 'd',
     blockLength
   );
@@ -1694,4 +1708,83 @@ export const handleAdminEnforceCustomPickingOrder: Handler = async (
   message.channel.send(`Custom picking order set!`);
 
   log.info(`Exiting handleAdminEnforceCustomPickingOrder`);
+};
+
+export const handleAddAutoRemove: Handler = async (message, args) => {
+  log.info(`Entering handleAddAutoRemove`);
+  const { guild, author } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const misc = cache.misc[guild.id];
+  const pugs = cache.pugs[guild.id];
+  if (!misc || !pugs) return;
+
+  const userId = author.id;
+  const { list } = pugs;
+
+  const userHasJoinedAtleastOnePug = list.some((pug) =>
+    pug.players.find((p) => p.id === userId)
+  );
+
+  if (!userHasJoinedAtleastOnePug) {
+    log.debug(`User ${userId} has not joined any pug, so no autoremoval`);
+    message.channel.send(
+      `You need to join atleast one pug to be able to use this command`
+    );
+    return;
+  }
+
+  const [timeframe = ''] = args;
+  const [autoRemoveLengthString] = timeframe.match(/[0-9]+/g) ?? [];
+  const [autoRemovePeriodString] = timeframe.match(/[m|h|d]/g) ?? [];
+
+  if (!autoRemoveLengthString || !autoRemovePeriodString) {
+    message.channel.send(`No duration was provided`);
+    return;
+  }
+
+  const autoRemoveLength = parseInt(autoRemoveLengthString);
+  if (autoRemoveLength <= 0) return;
+
+  const expiry = calculateExpiry(
+    autoRemovePeriodString as 'm' | 'h' | 'd',
+    autoRemoveLength
+  );
+
+  store.dispatch(addAutoRemoval({ guildId: guild.id, userId, expiry }));
+  log.info(`Autoremoval added for user ${userId} at ${expiry.toUTCString()}`);
+
+  message.channel.send(
+    `<@${userId}>, you will be autoremoved from every pug at **${expiry.toUTCString()}**`
+  );
+
+  log.info(`Exiting handleAddAutoRemove`);
+};
+
+export const handleClearAutoRemove: Handler = async (message, _) => {
+  log.info(`Entering handleClearAutoRemove`);
+  const { guild, author } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const misc = cache.misc[guild.id];
+  if (!misc) return;
+
+  const userId = author.id;
+  const { autoremovals } = misc;
+
+  const userHasAutoRemoval = autoremovals[userId];
+  if (!userHasAutoRemoval) {
+    log.debug(`User ${userId} has no autoremoval`);
+    message.channel.send(`You have no autoremoval added`);
+    return;
+  }
+
+  store.dispatch(clearAutoRemoval({ guildId: guild.id, userId }));
+  log.info(`Autoremoval cleared for user ${userId}`);
+
+  message.channel.send(`<@${userId}>, you will not be autoremoved anymore`);
+
+  log.info(`Exiting handleClearAutoRemove`);
 };

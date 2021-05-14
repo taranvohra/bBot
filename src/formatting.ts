@@ -87,7 +87,7 @@ export const formatJoinStatus = (statuses: Array<JoinStatus>) => {
 
 export const formatLeaveStatus = (
   statuses: Array<LeaveStatus>,
-  reason?: 'offline' | 'left'
+  reason?: 'offline' | 'left' | 'autoremove'
 ) => {
   const { left, nf, nj, username } = statuses.reduce(
     (acc, { name, result, pug, user }) => {
@@ -122,6 +122,8 @@ export const formatLeaveStatus = (
     reasonMsg = `because the user went offline ${emojis.residentsleeper}${emojis.pupcurn}`;
   else if (reason === 'left')
     reasonMsg = 'because the user left this discord server';
+  else if (reason === 'autoremove')
+    reasonMsg = 'because the user had autoremoval added';
   else reasonMsg = '';
 
   return `${left.length > 0 ? `${username} left  ${left} ${reasonMsg}` : ``}${
