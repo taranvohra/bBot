@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js';
+import { GuildMember, User } from 'discord.js';
 import { PugPlayer } from '~/models';
 import store from '~/store';
 
@@ -229,6 +229,11 @@ export const getRandomPickIndex = (players: Array<PugPlayer>) => {
 
   return shuffle(indexes)[0];
 };
+
+export const getPlayerIndexFromPlayerList = (
+  players: Array<PugPlayer>,
+  user: User
+) => players.findIndex((p) => p.id === user.id);
 
 export const secondsToHH_MM_SS = (seconds: number) =>
   new Date(seconds * 1000).toISOString().substr(11, 8);

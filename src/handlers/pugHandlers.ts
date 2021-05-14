@@ -14,6 +14,7 @@ import {
   isDuelPug,
   getRandomPickIndex,
   teamEmojiTypes,
+  getPlayerIndexFromPlayerList,
 } from '~/utils';
 import {
   addGuildGameType,
@@ -732,7 +733,11 @@ export const handlePickPlayer: Handler = async (
   mentionedUser
 ) => {
   log.info(`Entering handlePickPlayer`);
-  const { guild, author } = message;
+  const {
+    guild,
+    author,
+    mentions: { users },
+  } = message;
   if (!guild) return;
 
   const cache = store.getState();
@@ -773,11 +778,15 @@ export const handlePickPlayer: Handler = async (
   let lastPickedPlayerIndex: number | null;
 
   const canPickTwice = pickingOrder[turn + 1] === team; // next turn is same team pick
+  const mentionedUsers = users.array();
 
   // +1 because few lines down we're going to subtract -1 so we still gucci 😎
+  const firstMentionedUser = mentionedUsers[0];
   const playerIndex =
     index === 'random'
       ? getRandomPickIndex(forPug.players) + 1
+      : firstMentionedUser
+      ? getPlayerIndexFromPlayerList(forPug.players, firstMentionedUser) + 1
       : parseInt(index);
   if (!playerIndex) return;
 
@@ -802,9 +811,12 @@ export const handlePickPlayer: Handler = async (
   /**
    * Situation when captain picks two in a row
    */
+  const secondMentionedUser = mentionedUsers[1];
   const playerIndex2 =
     index2 === 'random'
       ? getRandomPickIndex(forPug.players) + 1
+      : secondMentionedUser
+      ? getPlayerIndexFromPlayerList(forPug.players, secondMentionedUser) + 1
       : parseInt(index2);
 
   if (canPickTwice && playerIndex2) {
@@ -1082,13 +1094,13 @@ export const handlePromoteAvailablePugs: Handler = async (message, args) => {
 
 export const handleDecidePromoteOrPick: Handler = async (message, args) => {
   log.info(`Entering handleDecidePromoteOrPick`);
-  const { guild, cmd } = message;
+  const { guild, cmd, mentions } = message;
   if (!guild || !cmd) return;
 
   // just p or promote
   if (!args[0]) handlePromoteAvailablePugs(message, args);
   else {
-    // p 4 or p siege5
+    // p 4 or p siege5 or p @mention
     const cache = store.getState();
     const pugs = cache.pugs[guild.id];
     if (!pugs) return;
@@ -1099,7 +1111,11 @@ export const handleDecidePromoteOrPick: Handler = async (message, args) => {
     );
 
     if (isArgGameType) handlePromoteAvailablePugs(message, args);
-    else if (!isNaN(parseInt(args[0])) || args[0] === 'random')
+    else if (
+      mentions.users.size !== 0 ||
+      !isNaN(parseInt(args[0])) ||
+      args[0] === 'random'
+    )
       handlePickPlayer(message, args);
     else handlePromoteAvailablePugs(message, args);
   }
@@ -1296,6 +1312,8 @@ export const handleAdminPickPlayer: Handler = async (message, args) => {
   }
 
   mentionedUser.username = sanitizeName(mentionedUser.username);
+  // because if picks are also mentions then the mentioned user should atleast be removed for no confusion
+  message.mentions.users.delete(mentionedUser.id);
   handlePickPlayer(message, args.slice(1), mentionedUser);
   log.info(`Exiting handleAdminPickPlayer`);
 };
