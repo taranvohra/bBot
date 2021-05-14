@@ -65,7 +65,7 @@ Shows the `last 10` logs of the mentioned user.
 
 Generates an `invite` for your server with no expiry and unlimited uses. If such an invite already exists, it re-uses that.
 
-#### Pugs
+### Pugs
 
 **addgametype, agm** 🐱‍👤<br/>
 `Usage -> .addgametype name totalPlayers totalTeams`
@@ -180,6 +180,21 @@ Generates an image of top 10 puggers for the gametype (sorted by most number of 
 `Usage -> .pugstats`
 
 Outputs a summary of total number of pugs played, individual pug count(s) and a timestamp when the first pug was played
+
+**addautoremove, aar** 😸<br/>
+`Usage -> .addautoremove expiry`
+
+Automatically removes the user from all the pugs they have joined after expiry.
+
+⏲ _Expiry Parameters_ ⏲
+`m` for minutes or `h` for hours or `d` for days.
+
+For example `.autoremove 30m` will automatically remove the user from all the pugs after `30 minutes`.
+
+**clearautoremove, car** 😸<br/>
+`Usage -> .clearautoremove`
+
+Clears your autoremoval request (if any).
 
 **add** 🐱‍👤<br/>
 `Usage -> .add @mention#0000 gametype1 gametype2 etc`
