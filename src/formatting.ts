@@ -122,8 +122,7 @@ export const formatLeaveStatus = (
     reasonMsg = `because the user went offline ${emojis.residentsleeper}${emojis.pupcurn}`;
   else if (reason === 'left')
     reasonMsg = 'because the user left this discord server';
-  else if (reason === 'autoremove')
-    reasonMsg = 'because the user had autoremoval added';
+  else if (reason === 'autoremove') reasonMsg = 'because of autoremove';
   else reasonMsg = '';
 
   return `${left.length > 0 ? `${username} left  ${left} ${reasonMsg}` : ``}${
