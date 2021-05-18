@@ -5,6 +5,7 @@ import { formatDistance } from 'date-fns';
 import { User } from 'discord.js';
 import { Pug, Users, Pugs, GuildStats } from '~/models';
 import {
+  Period,
   computePickingOrder,
   CONSTANTS,
   emojis,
@@ -15,6 +16,7 @@ import {
   getRandomPickIndex,
   teamEmojiTypes,
   getPlayerIndexFromPlayerList,
+  getHumanReadablePeriodName,
 } from '~/utils';
 import {
   addGuildGameType,
@@ -424,6 +426,9 @@ export const handleJoinGameTypes: Handler = async (
     toBroadcast.players.forEach((player) => {
       const user = message.client.users.cache.get(player.id);
       user?.send(DM);
+      store.dispatch(
+        clearAutoRemoval({ guildId: guild.id, userId: player.id })
+      );
     });
 
     // If 1v1/mix/deathmatch pug, there wont be live picking
@@ -459,9 +464,6 @@ export const handleJoinGameTypes: Handler = async (
         `Remove pug ${toBroadcast.name} at guild ${guild.id} from store`
       );
       store.dispatch(removePug({ guildId: guild.id, name: toBroadcast.name }));
-      store.dispatch(
-        clearAutoRemoval({ guildId: guild.id, userId: author.id })
-      );
     }
   }
 
@@ -1402,10 +1404,7 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
   const blockLength = parseInt(blockLengthString);
   if (blockLength <= 0) return;
 
-  const expiry = calculateExpiry(
-    blockPeriodString as 'm' | 'h' | 'd',
-    blockLength
-  );
+  const expiry = calculateExpiry(blockPeriodString as Period, blockLength);
 
   const newBlock = {
     blockedOn: new Date(),
@@ -1742,13 +1741,24 @@ export const handleAddAutoRemove: Handler = async (message, args) => {
   const { list } = pugs;
 
   const userHasJoinedAtleastOnePug = list.some((pug) =>
-    pug.players.find((p) => p.id === userId)
+    pug.players.some((p) => p.id === userId)
   );
 
   if (!userHasJoinedAtleastOnePug) {
     log.debug(`User ${userId} has not joined any pug, so no autoremoval`);
     message.channel.send(
       `You need to join atleast one pug to be able to use this command`
+    );
+    return;
+  }
+
+  const userIsPartOfFilledPug = list.some(
+    (pug) => pug.isInPickingMode && pug.players.some((p) => p.id === userId)
+  );
+  if (userIsPartOfFilledPug) {
+    log.debug(`User ${userId} is part of filled pug, so no autoremoval`);
+    message.channel.send(
+      `You cannot use autoremove while you're in a filled pug`
     );
     return;
   }
@@ -1766,7 +1776,7 @@ export const handleAddAutoRemove: Handler = async (message, args) => {
   if (autoRemoveLength <= 0) return;
 
   const expiry = calculateExpiry(
-    autoRemovePeriodString as 'm' | 'h' | 'd',
+    autoRemovePeriodString as Period,
     autoRemoveLength
   );
 
@@ -1774,7 +1784,9 @@ export const handleAddAutoRemove: Handler = async (message, args) => {
   log.info(`Autoremoval added for user ${userId} at ${expiry.toUTCString()}`);
 
   message.channel.send(
-    `<@${userId}>, you will be autoremoved from every pug at **${expiry.toUTCString()}**`
+    `<@${userId}>, you will be automatically removed from every pug in **${autoRemoveLength} ${getHumanReadablePeriodName(
+      autoRemovePeriodString as Period
+    )}${autoRemoveLength > 1 ? 's' : ''}** (${expiry.toUTCString()})`
   );
 
   log.info(`Exiting handleAddAutoRemove`);

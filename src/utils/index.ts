@@ -26,6 +26,14 @@ export const CONSTANTS = {
   commandGroups: ['pugs', 'queries'],
 };
 
+export type Period = 'm' | 'h' | 'd';
+
+export const PERIOD_NAMES: Record<Period, string> = {
+  m: 'minute',
+  h: 'hour',
+  d: 'day',
+};
+
 export const isGuildRegistered = (guildId: string) => {
   const cache = store.getState();
   return cache.misc[guildId] !== undefined;
@@ -186,13 +194,16 @@ export const isCommandConstraintSatified = (command: Command, cmd: string) =>
     ? command.aliases.some((a) => command.rgx!(a).test(cmd))
     : command.aliases.includes(cmd);
 
-export const calculateExpiry = (period: 'm' | 'h' | 'd', length: number) => {
+export const calculateExpiry = (period: Period, length: number) => {
   const expiry = new Date();
   if (period === 'm') expiry.setMinutes(expiry.getMinutes() + length);
   else if (period === 'h') expiry.setHours(expiry.getHours() + length);
   else expiry.setHours(expiry.getHours() + length * 24);
   return expiry;
 };
+
+export const getHumanReadablePeriodName = (period: Period) =>
+  PERIOD_NAMES[period];
 
 export const getHostPortPasswordFromAddress = (
   address: string
