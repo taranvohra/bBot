@@ -94,6 +94,11 @@ There are 2 versions of this command, with gametype and without.
 - If gametype is mentioned then it will show all the users who have currently joined the gametype
 - If gametype is `not` mentioned then it will summarise all the gametypes with their names and a count of number of players joined / max players
 
+**liast** 😸<br/>
+`Usage -> .liast`
+
+Combination of `list` and `last`.
+
 **lsa** 😸<br/>
 `Usage -> .lsa`
 
