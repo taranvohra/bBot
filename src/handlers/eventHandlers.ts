@@ -3,11 +3,13 @@ import commands from '../commands';
 import {
   Message,
   Presence,
+  Guild,
   GuildMember,
   PartialGuildMember,
   TextChannel,
 } from 'discord.js';
-import store from '~/store';
+import store, { guildDeleted } from '~/store';
+import { Guilds } from '~/models';
 import {
   CONSTANTS,
   isMemberPrivileged,
@@ -21,6 +23,7 @@ import * as generalHandlers from './generalHandlers';
 import * as pugHandlers from './pugHandlers';
 import * as queryHandlers from './queryHandlers';
 import { takeSnapshot } from '../profiler';
+import log from '../log';
 
 export const commandHandlers = {
   ...generalHandlers,
@@ -208,4 +211,12 @@ export const onGuildMemberUpdate = (
       );
     }
   }
+};
+
+export const onGuildDelete = async ({ id: guildId }: Guild) => {
+  log.info(`Entering onGuildDelete`);
+  await Guilds.findByIdAndDelete(guildId);
+  store.dispatch(guildDeleted({ guildId }));
+  log.info(`Bot removed from guild ${guildId}`);
+  log.info(`Exiting onGuildDelete`);
 };

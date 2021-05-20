@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Pug } from '~/models';
+import { guildDeleted } from '../actions';
 
 type InitPayload = WithGuildID & GuildPugsState;
 type SetPugChannelPayload = WithGuildID & { channelId: string };
@@ -128,6 +129,12 @@ const pugsSlice = createSlice({
           thisGuild.list[pugIndex].pickingOrder = pickingOrder;
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(guildDeleted, (state, action) => {
+      const { guildId } = action.payload;
+      delete state[guildId];
+    });
   },
 });
 

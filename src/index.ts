@@ -8,6 +8,7 @@ import {
   onGuildMemberRemove,
   onGuildMemberUpdate,
   commandHandlers,
+  onGuildDelete,
 } from '~/handlers';
 import { emojis } from '~/utils';
 import { connectDB, hydrateStore } from './setup';
@@ -48,6 +49,8 @@ bBot.on('presenceUpdate', onPresenceUpdate);
 bBot.on('guildMemberRemove', onGuildMemberRemove);
 
 bBot.on('guildMemberUpdate', onGuildMemberUpdate);
+
+bBot.on('guildDelete', onGuildDelete);
 
 pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
   log.info(`Captains ready for ${pugName} at guild ${guildId}`);

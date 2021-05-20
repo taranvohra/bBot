@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { guildDeleted } from '../actions';
 
 type InitPayload = WithGuildID & GuildMiscState;
 type SetPrefixPayload = WithGuildID & Pick<GuildMiscState, 'prefix'>;
@@ -83,6 +84,12 @@ const miscSlice = createSlice({
         delete thisGuild.autoremovals[userId];
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(guildDeleted, (state, action) => {
+      const { guildId } = action.payload;
+      delete state[guildId];
+    });
   },
 });
 

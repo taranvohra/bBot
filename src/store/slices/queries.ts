@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { guildDeleted } from '../actions';
 
 type InitPayload = WithGuildID & GuildQueriesState;
 type SetQueryChannelPayload = WithGuildID & { channelId: string };
@@ -64,6 +65,12 @@ const queriesSlice = createSlice({
         thisGuild.list[queryServerIndex][attribute] = value;
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(guildDeleted, (state, action) => {
+      const { guildId } = action.payload;
+      delete state[guildId];
+    });
   },
 });
 

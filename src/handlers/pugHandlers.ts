@@ -653,6 +653,13 @@ export const handleListAllCurrentGameTypes: Handler = async (message) => {
   log.info(`Exiting handleListAllCurrentGameTypes`);
 };
 
+export const handleListAndLast: Handler = async (message, args) => {
+  log.info(`Entering handleListAndLast`);
+  handleListGameTypes(message, args);
+  handleCheckLastPugs(message, args);
+  log.info(`Exiting handleListAndLast`);
+};
+
 export const handleLeaveAllGameTypes: Handler = async (message) => {
   log.info(`Entering handleLeaveAllGameTypes`);
   const { guild, author } = message;

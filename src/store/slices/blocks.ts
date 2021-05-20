@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { guildDeleted } from '../actions';
 
 type InitPayload = WithGuildID & GuildBlockState;
 type AddBlockedUserPayload = WithGuildID & Block;
@@ -52,11 +53,14 @@ const blocksSlice = createSlice({
       }
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(guildDeleted, (state, action) => {
+      const { guildId } = action.payload;
+      delete state[guildId];
+    });
+  },
 });
 
-export const {
-  initBlocks,
-  addBlockedUser,
-  removeBlockedUser,
-} = blocksSlice.actions;
+export const { initBlocks, addBlockedUser, removeBlockedUser } =
+  blocksSlice.actions;
 export const blocksReducer = blocksSlice.reducer;
