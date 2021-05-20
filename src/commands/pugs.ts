@@ -59,6 +59,14 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
+    key: 'handleListAndLast',
+    aliases: ['liast'],
+    type: 'solo',
+    isPrivileged: false,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
     key: 'handleListAllCurrentGameTypes',
     aliases: ['lsa'],
     type: 'solo',
