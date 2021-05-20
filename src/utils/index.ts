@@ -52,30 +52,33 @@ export const isCommandInValidChannel = (
   guildId: string,
   channelId: string
 ): { valid: boolean; reason: string | undefined } => {
-  const cache = store.getState();
-  const pugs = cache.pugs[guildId];
-  const queries = cache.queries[guildId];
-  if (!pugs || !queries) return { valid: false, reason: undefined };
+  const { group } = command;
+  if (group === 'general') {
+    return { valid: true, reason: '' };
+  } else {
+    const cache = store.getState();
+    const pugs = cache.pugs[guildId];
+    const queries = cache.queries[guildId];
 
-  switch (command.group) {
-    case 'general':
-      return { valid: true, reason: '' };
+    if (!pugs || !queries) return { valid: false, reason: undefined };
 
-    case 'pugs':
+    if (group === 'pugs') {
       const pugChannel = pugs.channel;
       return pugChannel
         ? pugChannel === channelId
           ? { valid: true, reason: '' }
           : { valid: false, reason: pugChannel }
         : { valid: false, reason: undefined };
-
-    case 'queries':
+    } else if (group === 'queries') {
       const queriesChannel = queries.channel;
       return queriesChannel
         ? queriesChannel === channelId
           ? { valid: true, reason: '' }
           : { valid: false, reason: queriesChannel }
         : { valid: false, reason: undefined };
+    } else {
+      return { valid: false, reason: undefined };
+    }
   }
 };
 

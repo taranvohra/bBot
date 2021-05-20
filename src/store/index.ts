@@ -32,3 +32,4 @@ const store = configureStore({
 
 export default store;
 export * from './slices';
+export * from './actions';
