@@ -1,7 +1,7 @@
 import log from '../log';
 import fs from 'fs';
 import Jimp from 'jimp';
-import { formatDistance } from 'date-fns';
+import { formatDistance, differenceInDays } from 'date-fns';
 import { User } from 'discord.js';
 import { Pug, Users, Pugs, GuildStats } from '~/models';
 import {
@@ -1734,10 +1734,15 @@ export const handleAdminEnforceCustomPickingOrder: Handler = async (
   log.info(`Exiting handleAdminEnforceCustomPickingOrder`);
 };
 
-export const handleAddAutoRemove: Handler = async (message, args) => {
-  log.info(`Entering handleAddAutoRemove`);
+export const handleAutoRemove: Handler = async (message, args) => {
+  log.info(`Entering handleAutoRemove`);
   const { guild, author } = message;
   if (!guild) return;
+
+  if (args.length === 0) {
+    handleClearAutoRemove(message, args);
+    return;
+  }
 
   const cache = store.getState();
   const misc = cache.misc[guild.id];
@@ -1787,6 +1792,11 @@ export const handleAddAutoRemove: Handler = async (message, args) => {
     autoRemoveLength
   );
 
+  if (isNaN(expiry.getTime()) || differenceInDays(expiry, new Date()) > 7) {
+    message.channel.send(`Duration exceeding 7 days is prohibited`);
+    return;
+  }
+
   store.dispatch(addAutoRemoval({ guildId: guild.id, userId, expiry }));
   log.info(`Autoremoval added for user ${userId} at ${expiry.toUTCString()}`);
 
@@ -1796,7 +1806,7 @@ export const handleAddAutoRemove: Handler = async (message, args) => {
     )}${autoRemoveLength > 1 ? 's' : ''}** (${expiry.toUTCString()})`
   );
 
-  log.info(`Exiting handleAddAutoRemove`);
+  log.info(`Exiting handleAutoRemove`);
 };
 
 export const handleClearAutoRemove: Handler = async (message, _) => {
