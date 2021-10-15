@@ -244,9 +244,9 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
-    key: 'handleAddAutoRemove',
-    aliases: ['addautoremove', 'aar'],
-    type: 'args',
+    key: 'handleAutoRemove',
+    aliases: ['autoremove', 'ar'],
+    type: 'both',
     isPrivileged: false,
     needsRegisteredGuild: true,
   },
