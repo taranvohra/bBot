@@ -252,8 +252,16 @@ const pugsCommandList: Command[] = [
   },
   {
     group,
-    key: 'handleAdminForbidCaptain',
-    aliases: ['forbidcaptain', 'fc'],
+    key: 'handleAdminBlockCaptain',
+    aliases: ['blockcaptain', 'blockcapt'],
+    type: 'args',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
+  {
+    group,
+    key: 'handleAdminUnBlockCaptain',
+    aliases: ['unblockcaptain', 'unblockcapt'],
     type: 'args',
     isPrivileged: true,
     needsRegisteredGuild: true,
