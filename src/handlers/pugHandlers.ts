@@ -702,9 +702,23 @@ export const handleAddCaptain: Handler = async (message) => {
 
   const cache = store.getState();
   const pugs = cache.pugs[guild.id];
-  if (!pugs) return;
+  const blocks = cache.blocks[guild.id];
+  if (!pugs || !blocks) return;
 
   const { list } = pugs;
+
+  const blockedFromCaptaining = blocks.captains.some(
+    (userId) => userId === author.id
+  );
+  if (blockedFromCaptaining) {
+    log.debug(
+      `${author.id} cannot captain pugs on ${guild.id} because they are blocked`
+    );
+    message.channel.send(
+      `**${author.username}** is blocked from captaining pugs.`
+    );
+    return;
+  }
 
   const forPug = list.find((pug) => {
     const isCandidate = pug.isInPickingMode && !pug.areCaptainsDecided();
