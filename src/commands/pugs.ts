@@ -250,14 +250,6 @@ const pugsCommandList: Command[] = [
     isPrivileged: false,
     needsRegisteredGuild: true,
   },
-  {
-    group,
-    key: 'handleClearAutoRemove',
-    aliases: ['clearautoremove', 'car'],
-    type: 'solo',
-    isPrivileged: false,
-    needsRegisteredGuild: true,
-  },
 ];
 
 export default pugsCommandList;
