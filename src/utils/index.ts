@@ -1,5 +1,5 @@
 import { GuildMember, User } from 'discord.js';
-import { PugPlayer } from '~/models';
+import { PugPlayer, Guilds } from '~/models';
 import store from '~/store';
 
 export const CONSTANTS = {
@@ -264,4 +264,10 @@ export const powerSet = <T>(array: T[]) => {
     subsets.push(temp);
   }
   return subsets;
+};
+
+export const getGuildBlockedCaptains = async (guildId: string) => {
+  const guild = await Guilds.findById(guildId).select('blockedCaptains').exec();
+  if (!guild) return [];
+  return guild.blockedCaptains;
 };
