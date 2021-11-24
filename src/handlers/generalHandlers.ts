@@ -45,6 +45,7 @@ export const handleRegisterServer: Handler = async (message, _) => {
     queryServers: [],
     blocks: [],
     ignoredCommandGroup: [],
+    blockedCaptains: [],
   });
 
   // If guild is de-registered and registered again
@@ -69,7 +70,7 @@ export const handleRegisterServer: Handler = async (message, _) => {
       autoremovals: {},
     })
   );
-  store.dispatch(initBlocks({ guildId: guild.id, list: [] }));
+  store.dispatch(initBlocks({ guildId: guild.id, list: [], captains: [] }));
   store.dispatch(initQueries({ guildId: guild.id, list: [], channel: null }));
 
   message.channel.send(`**${guild?.name}** has been registered with bBot!`);

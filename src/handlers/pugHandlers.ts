@@ -31,6 +31,8 @@ import {
   createNewUserLog,
   updateGuildGameTypeTeamEmojis,
   updateGuildGameTypePickingOrder,
+  addGuildBlockedCaptain,
+  removeGuildBlockedCaptain,
 } from '~/actions';
 import store, {
   addGameType,
@@ -46,6 +48,8 @@ import store, {
   updatePickingOrder,
   addAutoRemoval,
   clearAutoRemoval,
+  addBlockedCaptain,
+  removeBlockedCaptain,
 } from '~/store';
 import {
   formatPugFilledDM,
@@ -1834,4 +1838,115 @@ export const handleClearAutoRemove: Handler = async (message, _) => {
   message.channel.send(`<@${userId}>, you will not be autoremoved anymore`);
 
   log.info(`Exiting handleClearAutoRemove`);
+};
+
+export const handleAdminBlockCaptain: Handler = async (message, args) => {
+  log.info(`Entering handleAdminBlockCaptain`);
+  const { guild, mentions } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+  if (!mentionedUser) {
+    message.channel.send(`No mentioned user`);
+    return;
+  }
+
+  const cache = store.getState();
+  const blocks = cache.blocks[guild.id];
+  if (!blocks) return;
+
+  const alreadyBlocked = blocks.captains.some(
+    (userId) => userId === mentionedUser.id
+  );
+  if (alreadyBlocked) {
+    log.debug(
+      `User ${mentionedUser.username} is already blocked from captaining`
+    );
+    message.channel.send(
+      `**${mentionedUser.username}** is already blocked from captaining`
+    );
+    return;
+  }
+
+  const reason = args.slice(1).join(' ');
+  if (!reason) {
+    message.channel.send(`Specify the reason`);
+    return;
+  }
+
+  const newBlockedCaptain = {
+    culprit: {
+      id: mentionedUser.id,
+      username: mentionedUser.username,
+    },
+    by: {
+      id: message.author.id,
+      username: message.author.username,
+    },
+    on: new Date(),
+    reason,
+  };
+
+  await addGuildBlockedCaptain(guild.id, newBlockedCaptain);
+
+  log.info(
+    `User ${mentionedUser.id} is now blocked from captaining at guild ${guild.id}`
+  );
+
+  store.dispatch(
+    addBlockedCaptain({
+      guildId: guild.id,
+      userId: mentionedUser.id,
+    })
+  );
+
+  const logDescription = `**FORBIDDEN CAPTAIN** for reason: __${reason}__ by <@${message.author.id}>`;
+  createNewUserLog(guild.id, mentionedUser.id, logDescription);
+
+  const finalMsg = `:cop: :no_entry_sign: ${mentionedUser.username} will now be blocked from becoming a captain in pugs for reason __${reason}__`;
+  message.channel.send(finalMsg);
+  log.info(`Exiting handleForbidCaptain`);
+};
+
+export const handleAdminUnBlockCaptain: Handler = async (message, _) => {
+  log.info(`Entering handleAdminUnBlockCaptain`);
+  const { guild, mentions } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+  if (!mentionedUser) {
+    message.channel.send(`No mentioned user`);
+    return;
+  }
+
+  const cache = store.getState();
+  const blocks = cache.blocks[guild.id];
+  if (!blocks) return;
+
+  const notBlocked = blocks.captains.some(
+    (userId) => userId === mentionedUser.id
+  );
+  if (notBlocked) {
+    log.debug(
+      `User ${mentionedUser.username} is already not blocked from captaining`
+    );
+    message.channel.send(
+      `Cannot unblock **${mentionedUser.username}** from captaining if the user isn't blocked in the first place ${emojis.smart}`
+    );
+    return;
+  }
+
+  await removeGuildBlockedCaptain(guild.id, mentionedUser.id);
+  log.info(`Unblocked captain ${mentionedUser.id} at guild ${guild.id}`);
+
+  store.dispatch(
+    removeBlockedCaptain({
+      guildId: guild.id,
+      userId: mentionedUser.id,
+    })
+  );
+
+  const finalMsg = `:cop: :white_check_mark: ${mentionedUser.username} will now be able to become a captain in pugs`;
+  message.channel.send(finalMsg);
+  log.info(`Exiting handleAdminUnBlockCaptain`);
 };

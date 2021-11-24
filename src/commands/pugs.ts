@@ -250,6 +250,14 @@ const pugsCommandList: Command[] = [
     isPrivileged: false,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleAdminForbidCaptain',
+    aliases: ['forbidcaptain', 'fc'],
+    type: 'args',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default pugsCommandList;

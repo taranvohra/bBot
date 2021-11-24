@@ -59,6 +59,20 @@ export class Block {
   reason!: string;
 }
 
+export class BlockedCaptain {
+  @prop({ _id: false })
+  culprit!: User;
+
+  @prop({ _id: false })
+  by!: User;
+
+  @prop()
+  on!: Date;
+
+  @prop({ default: '' })
+  reason!: string;
+}
+
 export class Guild {
   @prop({ type: String })
   _id!: string;
@@ -83,6 +97,9 @@ export class Guild {
 
   @prop()
   prefix?: string;
+
+  @prop({ _id: false, default: [] })
+  blockedCaptains!: BlockedCaptain[];
 }
 
 export const Guilds = getModelForClass(Guild);

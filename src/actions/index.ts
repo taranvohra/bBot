@@ -8,6 +8,7 @@ import {
   Block,
   QueryServer,
   Logs,
+  BlockedCaptain,
 } from '~/models';
 
 export const updateGuildPugChannel = (guildId: string, channelId: string) =>
@@ -313,3 +314,36 @@ export const updateGuildGameTypePickingOrder = (
       $set: { 'gameTypes.$.pickingOrder': newPickingOrder },
     }
   ).exec();
+
+export const addGuildBlockedCaptain = async (
+  guildId: string,
+  blockedCaptain: BlockedCaptain
+) =>
+  Guilds.findByIdAndUpdate(guildId, {
+    $push: {
+      blockedCaptains: blockedCaptain,
+    },
+  }).exec();
+
+export const removeGuildBlockedCaptain = async (
+  guildId: string,
+  culpritId: string
+) => {
+  const guild = await Guilds.findById(guildId).select('blockedCaptains').exec();
+  if (!guild) return;
+
+  const blockedCaptain = guild.blockedCaptains.find(
+    (b) => b.culprit.id === culpritId
+  );
+  if (!blockedCaptain) return;
+
+  const { culprit } = blockedCaptain;
+
+  return Guilds.findByIdAndUpdate(guildId, {
+    $pull: {
+      blockedCaptains: {
+        culprit,
+      },
+    },
+  }).exec();
+};
