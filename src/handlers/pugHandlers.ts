@@ -715,7 +715,7 @@ export const handleAddCaptain: Handler = async (message) => {
       `${author.id} cannot captain pugs on ${guild.id} because they are blocked`
     );
     message.channel.send(
-      `**${author.username}** is blocked from captaining pugs.`
+      `:cop: :no_good: **${author.username}** is blocked from captaining pugs :cop: :no_good:`
     );
     return;
   }
