@@ -266,6 +266,14 @@ const pugsCommandList: Command[] = [
     isPrivileged: true,
     needsRegisteredGuild: true,
   },
+  {
+    group,
+    key: 'handleAdminShowBlockedCaptains',
+    aliases: ['showblockedcaptain', 'showblockedcapt'],
+    type: 'solo',
+    isPrivileged: true,
+    needsRegisteredGuild: true,
+  },
 ];
 
 export default pugsCommandList;

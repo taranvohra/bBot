@@ -3,7 +3,7 @@ import fs from 'fs';
 import Jimp from 'jimp';
 import { formatDistance, differenceInDays } from 'date-fns';
 import { User } from 'discord.js';
-import { Pug, Users, Pugs, GuildStats } from '~/models';
+import { Pug, Users, Pugs, GuildStats, Guilds } from '~/models';
 import {
   Period,
   computePickingOrder,
@@ -1914,7 +1914,7 @@ export const handleAdminBlockCaptain: Handler = async (message, args) => {
     })
   );
 
-  const logDescription = `**FORBIDDEN CAPTAIN** for reason: __${reason}__ by <@${message.author.id}>`;
+  const logDescription = `**BLOCKED CAPTAIN** for reason: __${reason}__ by <@${message.author.id}>`;
   createNewUserLog(guild.id, mentionedUser.id, logDescription);
 
   const finalMsg = `:cop: :no_entry_sign: ${mentionedUser.username} will now be blocked from becoming a captain in pugs for reason __${reason}__`;
@@ -1963,4 +1963,38 @@ export const handleAdminUnBlockCaptain: Handler = async (message, _) => {
   const finalMsg = `:cop: :white_check_mark: ${mentionedUser.username} will now be able to become a captain in pugs`;
   message.channel.send(finalMsg);
   log.info(`Exiting handleAdminUnBlockCaptain`);
+};
+
+export const handleAdminShowBlockedCaptain: Handler = async (message, _) => {
+  log.info(`Entering handleAdminShowBlockedCaptain`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const blocks = cache.blocks[guild.id];
+  if (!blocks) return;
+
+  const { captains } = blocks;
+
+  if (captains.length === 0)
+    message.author.send(`There are no blocked captains at **${guild.name}**`);
+  else {
+    const guildInfo = await Guilds.findById(guild.id).exec();
+    if (!guildInfo) {
+      log.debug(`No guild info found for ${guild.id}`);
+      return;
+    }
+
+    const msg = guildInfo.blockedCaptains.reduce((acc, curr) => {
+      acc += `**${curr.culprit.username}**  • ${
+        curr.reason || 'no reason'
+      } • by <@${curr.by.id}>\n`;
+      return acc;
+    }, ``);
+    message.author.send(
+      `:cop: :no_entry_sign: List of Blocked Captains at **${guild.name}** :cop: :no_entry_sign:\n\n${msg}`
+    );
+  }
+  message.channel.send(`<@${message.author.id}>, you have received a DM`);
+  log.info(`Exiting handleAdminShowBlockedCaptain`);
 };
