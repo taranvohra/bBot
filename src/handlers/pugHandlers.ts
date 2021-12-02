@@ -1917,7 +1917,7 @@ export const handleAdminBlockCaptain: Handler = async (message, args) => {
   const logDescription = `**BLOCKED CAPTAIN** for reason: __${reason}__ by <@${message.author.id}>`;
   createNewUserLog(guild.id, mentionedUser.id, logDescription);
 
-  const finalMsg = `:cop: :no_entry_sign: ${mentionedUser.username} will now be blocked from becoming a captain in pugs for reason __${reason}__`;
+  const finalMsg = `:cop: :no_entry_sign: **${mentionedUser.username}** will now be blocked from becoming a captain in pugs for reason _${reason}_ :cop: :no_entry_sign:`;
   message.channel.send(finalMsg);
   log.info(`Exiting handleForbidCaptain`);
 };
@@ -1937,10 +1937,10 @@ export const handleAdminUnBlockCaptain: Handler = async (message, _) => {
   const blocks = cache.blocks[guild.id];
   if (!blocks) return;
 
-  const notBlocked = blocks.captains.some(
+  const isBlocked = blocks.captains.some(
     (userId) => userId === mentionedUser.id
   );
-  if (notBlocked) {
+  if (!isBlocked) {
     log.debug(
       `User ${mentionedUser.username} is already not blocked from captaining`
     );
@@ -1960,12 +1960,12 @@ export const handleAdminUnBlockCaptain: Handler = async (message, _) => {
     })
   );
 
-  const finalMsg = `:cop: :white_check_mark: ${mentionedUser.username} will now be able to become a captain in pugs`;
+  const finalMsg = `:cop: :white_check_mark: **${mentionedUser.username}** is unblocked from captaining :cop: :white_check_mark:`;
   message.channel.send(finalMsg);
   log.info(`Exiting handleAdminUnBlockCaptain`);
 };
 
-export const handleAdminShowBlockedCaptain: Handler = async (message, _) => {
+export const handleAdminShowBlockedCaptains: Handler = async (message, _) => {
   log.info(`Entering handleAdminShowBlockedCaptain`);
   const { guild } = message;
   if (!guild) return;
@@ -1986,9 +1986,9 @@ export const handleAdminShowBlockedCaptain: Handler = async (message, _) => {
     }
 
     const msg = guildInfo.blockedCaptains.reduce((acc, curr) => {
-      acc += `**${curr.culprit.username}**  • ${
+      acc += `<@${curr.culprit.id}> • reason: **${
         curr.reason || 'no reason'
-      } • by <@${curr.by.id}>\n`;
+      }** • by <@${curr.by.id}>\n`;
       return acc;
     }, ``);
     message.author.send(

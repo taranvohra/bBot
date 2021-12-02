@@ -27,7 +27,7 @@ export const hydrateStore = async () => {
       queryServers,
       blocks,
       prefix,
-      blockedCaptains,
+      blockedCaptains = [],
     } = guild;
 
     store.dispatch(
