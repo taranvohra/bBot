@@ -3,7 +3,7 @@ import fs from 'fs';
 import Jimp from 'jimp';
 import { formatDistance, differenceInDays } from 'date-fns';
 import { User } from 'discord.js';
-import { Pug, Users, Pugs, GuildStats } from '~/models';
+import { Pug, Users, Pugs, GuildStats, Guilds } from '~/models';
 import {
   Period,
   computePickingOrder,
@@ -31,6 +31,8 @@ import {
   createNewUserLog,
   updateGuildGameTypeTeamEmojis,
   updateGuildGameTypePickingOrder,
+  addGuildBlockedCaptain,
+  removeGuildBlockedCaptain,
 } from '~/actions';
 import store, {
   addGameType,
@@ -46,6 +48,8 @@ import store, {
   updatePickingOrder,
   addAutoRemoval,
   clearAutoRemoval,
+  addBlockedCaptain,
+  removeBlockedCaptain,
 } from '~/store';
 import {
   formatPugFilledDM,
@@ -698,9 +702,23 @@ export const handleAddCaptain: Handler = async (message) => {
 
   const cache = store.getState();
   const pugs = cache.pugs[guild.id];
-  if (!pugs) return;
+  const blocks = cache.blocks[guild.id];
+  if (!pugs || !blocks) return;
 
   const { list } = pugs;
+
+  const blockedFromCaptaining = blocks.captains.some(
+    (userId) => userId === author.id
+  );
+  if (blockedFromCaptaining) {
+    log.debug(
+      `${author.id} cannot captain pugs on ${guild.id} because they are blocked`
+    );
+    message.channel.send(
+      `:cop: :no_good: **${author.username}** is blocked from captaining pugs :cop: :no_good:`
+    );
+    return;
+  }
 
   const forPug = list.find((pug) => {
     const isCandidate = pug.isInPickingMode && !pug.areCaptainsDecided();
@@ -1834,4 +1852,149 @@ export const handleClearAutoRemove: Handler = async (message, _) => {
   message.channel.send(`<@${userId}>, you will not be autoremoved anymore`);
 
   log.info(`Exiting handleClearAutoRemove`);
+};
+
+export const handleAdminBlockCaptain: Handler = async (message, args) => {
+  log.info(`Entering handleAdminBlockCaptain`);
+  const { guild, mentions } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+  if (!mentionedUser) {
+    message.channel.send(`No mentioned user`);
+    return;
+  }
+
+  const cache = store.getState();
+  const blocks = cache.blocks[guild.id];
+  if (!blocks) return;
+
+  const alreadyBlocked = blocks.captains.some(
+    (userId) => userId === mentionedUser.id
+  );
+  if (alreadyBlocked) {
+    log.debug(
+      `User ${mentionedUser.username} is already blocked from captaining`
+    );
+    message.channel.send(
+      `**${mentionedUser.username}** is already blocked from captaining`
+    );
+    return;
+  }
+
+  const reason = args.slice(1).join(' ');
+  if (!reason) {
+    message.channel.send(`Specify the reason`);
+    return;
+  }
+
+  const newBlockedCaptain = {
+    culprit: {
+      id: mentionedUser.id,
+      username: mentionedUser.username,
+    },
+    by: {
+      id: message.author.id,
+      username: message.author.username,
+    },
+    on: new Date(),
+    reason,
+  };
+
+  await addGuildBlockedCaptain(guild.id, newBlockedCaptain);
+
+  log.info(
+    `User ${mentionedUser.id} is now blocked from captaining at guild ${guild.id}`
+  );
+
+  store.dispatch(
+    addBlockedCaptain({
+      guildId: guild.id,
+      userId: mentionedUser.id,
+    })
+  );
+
+  const logDescription = `**BLOCKED CAPTAIN** for reason: __${reason}__ by <@${message.author.id}>`;
+  createNewUserLog(guild.id, mentionedUser.id, logDescription);
+
+  const finalMsg = `:cop: :no_entry_sign: **${mentionedUser.username}** will now be blocked from becoming a captain in pugs for reason _${reason}_ :cop: :no_entry_sign:`;
+  message.channel.send(finalMsg);
+  log.info(`Exiting handleForbidCaptain`);
+};
+
+export const handleAdminUnBlockCaptain: Handler = async (message, _) => {
+  log.info(`Entering handleAdminUnBlockCaptain`);
+  const { guild, mentions } = message;
+  if (!guild) return;
+
+  const mentionedUser = mentions.users.first();
+  if (!mentionedUser) {
+    message.channel.send(`No mentioned user`);
+    return;
+  }
+
+  const cache = store.getState();
+  const blocks = cache.blocks[guild.id];
+  if (!blocks) return;
+
+  const isBlocked = blocks.captains.some(
+    (userId) => userId === mentionedUser.id
+  );
+  if (!isBlocked) {
+    log.debug(
+      `User ${mentionedUser.username} is already not blocked from captaining`
+    );
+    message.channel.send(
+      `Cannot unblock **${mentionedUser.username}** from captaining if the user isn't blocked in the first place ${emojis.smart}`
+    );
+    return;
+  }
+
+  await removeGuildBlockedCaptain(guild.id, mentionedUser.id);
+  log.info(`Unblocked captain ${mentionedUser.id} at guild ${guild.id}`);
+
+  store.dispatch(
+    removeBlockedCaptain({
+      guildId: guild.id,
+      userId: mentionedUser.id,
+    })
+  );
+
+  const finalMsg = `:cop: :white_check_mark: **${mentionedUser.username}** is unblocked from captaining :cop: :white_check_mark:`;
+  message.channel.send(finalMsg);
+  log.info(`Exiting handleAdminUnBlockCaptain`);
+};
+
+export const handleAdminShowBlockedCaptains: Handler = async (message, _) => {
+  log.info(`Entering handleAdminShowBlockedCaptain`);
+  const { guild } = message;
+  if (!guild) return;
+
+  const cache = store.getState();
+  const blocks = cache.blocks[guild.id];
+  if (!blocks) return;
+
+  const { captains } = blocks;
+
+  if (captains.length === 0)
+    message.author.send(`There are no blocked captains at **${guild.name}**`);
+  else {
+    const guildInfo = await Guilds.findById(guild.id).exec();
+    if (!guildInfo) {
+      log.debug(`No guild info found for ${guild.id}`);
+      return;
+    }
+
+    const msg = guildInfo.blockedCaptains.reduce((acc, curr) => {
+      acc += `<@${curr.culprit.id}> • reason: **${
+        curr.reason || 'no reason'
+      }** • by <@${curr.by.id}>\n`;
+      return acc;
+    }, ``);
+    message.author.send(
+      `:cop: :no_entry_sign: List of Blocked Captains at **${guild.name}** :cop: :no_entry_sign:\n\n${msg}`
+    );
+  }
+  message.channel.send(`<@${message.author.id}>, you have received a DM`);
+  log.info(`Exiting handleAdminShowBlockedCaptain`);
 };

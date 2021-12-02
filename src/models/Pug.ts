@@ -1,4 +1,11 @@
-import { getRandomInt, shuffle, CONSTANTS, powerSet, isDuelPug } from '~/utils';
+import {
+  getRandomInt,
+  shuffle,
+  CONSTANTS,
+  powerSet,
+  isDuelPug,
+  getGuildBlockedCaptains,
+} from '~/utils';
 import { pugPubSub } from '../pubsub';
 
 type PugUser = Pick<PugPlayer, 'id' | 'name' | 'stats'>;
@@ -175,138 +182,81 @@ export class Pug {
     if (isDuelPug(this.pickingOrder) || this.isMix || this.noOfTeams === 1)
       return;
 
-    this.timerFn = setTimeout(() => {
+    this.timerFn = setTimeout(async () => {
+      /**
+       * Because we have an async call, if by the time it resolves and captains are
+       * already picked, there is no point executing rest of the code
+       */
+      const guildBlockedCaptains = await getGuildBlockedCaptains(guildId);
+      const noOfCaptainsToDecide =
+        this.noOfTeams - this.getCurrentCaptainCount();
+      if (noOfCaptainsToDecide === 0) return;
+
       const playersNotCaptain = this.players.filter(
         (p) => this.isCaptain(p.id) === false
       );
       const remaining = playersNotCaptain.length;
-
-      const poolForCaptains = shuffle(playersNotCaptain)
-        .slice(0, remaining * 0.6)
+      const poolSize = Math.ceil(remaining * 0.6);
+      const initialPoolForCaptains = shuffle(playersNotCaptain)
+        .slice(0, poolSize)
         .sort((a, b) => a.stats[this.name].rating - b.stats[this.name].rating);
-
-      if (this.noOfTeams === 2) {
-        if (this.getCurrentCaptainCount() === 0) {
-          let leastDiff = Number.MAX_SAFE_INTEGER;
-          let pair = [0, 1];
-
-          // Finding Pair with least diff in ratings wrt each other
-          for (let i = 1; i < poolForCaptains.length - 1; i++) {
-            const iRating = poolForCaptains[i].stats[this.name].rating;
-            const iMinus1Rating =
-              poolForCaptains[i - 1].stats[this.name].rating;
-            const iPlus1Rating = poolForCaptains[i + 1].stats[this.name].rating;
-
-            const left = {
-              pair: [i, i - 1],
-              diff: Math.abs(iRating - iMinus1Rating),
-            };
-            const right = {
-              pair: [i, i + 1],
-              diff: Math.abs(iRating - iPlus1Rating),
-            };
-
-            const smallest = Math.min(left.diff, right.diff);
-            if (smallest === left.diff && smallest <= leastDiff) {
-              leastDiff = left.diff;
-              pair = left.pair;
-            } else if (smallest === right.diff && smallest <= leastDiff) {
-              leastDiff = right.diff;
-              pair = right.pair;
-            }
-          }
-
-          const firstCaptain = poolForCaptains[pair[0]];
-          const secondCaptain = poolForCaptains[pair[1]];
-
-          const [strongCaptain, weakCaptain] = [
-            firstCaptain,
-            secondCaptain,
-          ].sort(
-            (a, b) => b.stats[this.name].rating - a.stats[this.name].rating
+      let playersCaptBlockedInCurrentPool = initialPoolForCaptains.filter((c) =>
+        guildBlockedCaptains.some((gbc) => gbc.culprit.id === c.id)
+      );
+      const playersNotCaptBlockedInCurrentPool = initialPoolForCaptains.filter(
+        (c) => guildBlockedCaptains.every((gbc) => gbc.culprit.id !== c.id)
+      );
+      const finalPoolForCaptains = [...playersNotCaptBlockedInCurrentPool];
+      if (finalPoolForCaptains.length < noOfCaptainsToDecide) {
+        while (finalPoolForCaptains.length < noOfCaptainsToDecide) {
+          const [randomPlayer, ...remaining] = shuffle(
+            playersCaptBlockedInCurrentPool
           );
-
-          const strongPlayersCount = this.players.reduce((acc, curr) => {
-            const playerRating = curr.stats[this.name].rating;
-            if (playerRating <= CONSTANTS.strongPlayersRatingThreshold)
-              acc = acc + 1;
-            return acc;
-          }, 0);
-
-          if (strongPlayersCount >= 4 && strongPlayersCount <= 5) {
-            this.addCaptain(strongCaptain.id, 0);
-            this.addCaptain(weakCaptain.id, 1);
-          } else {
-            this.addCaptain(strongCaptain.id, 1);
-            this.addCaptain(weakCaptain.id, 0);
-          }
-        } else {
-          // 1 Captain already ready
-          const [fId] = this.captains.filter(Boolean);
-          const firstCaptainIndex = this.players.findIndex((p) => p.id === fId);
-          const firstCaptain = this.players[firstCaptainIndex];
-          const firstCaptainRating = firstCaptain.stats[this.name].rating;
-
-          let leastDiff = 10_000;
-          let otherCaptainIndex = -1;
-
-          for (let i = 0; i < poolForCaptains.length; i++) {
-            const iRating = poolForCaptains[i].stats[this.name].rating;
-            const diff = Math.abs(firstCaptainRating - iRating);
-            if (diff <= leastDiff) {
-              leastDiff = diff;
-              otherCaptainIndex = i;
-            }
-          }
-
-          const otherCaptain = poolForCaptains[otherCaptainIndex];
-          const otherCaptainTeam = Math.abs((firstCaptain.team! % 2) - 1);
-          this.addCaptain(otherCaptain.id, otherCaptainTeam);
+          finalPoolForCaptains.push(randomPlayer);
+          playersCaptBlockedInCurrentPool = remaining;
         }
-      } else {
-        const noOfCaptainsToDecide =
-          this.noOfTeams - this.getCurrentCaptainCount();
-        const poolPowerSet = powerSet(poolForCaptains);
-        const focusedSets = poolPowerSet.filter(
-          (s) => s.length === noOfCaptainsToDecide
-        );
-        const existingCapts = this.players.filter(
-          (p) => this.isCaptain(p.id) === true
-        );
+      }
 
-        const setsSortedByRatings = focusedSets.reduce((acc, curr) => {
-          const sortedSet = [...curr, ...existingCapts].sort((a, b) => {
-            const aRating = a.stats[this.name].rating;
-            const bRating = b.stats[this.name].rating;
-            return aRating - bRating;
-          });
-          acc.push(sortedSet);
-          return acc;
-        }, [] as typeof focusedSets);
+      const poolPowerSet = powerSet(finalPoolForCaptains);
+      const focusedSets = poolPowerSet.filter(
+        (s) => s.length === noOfCaptainsToDecide
+      );
+      const existingCapts = this.players.filter(
+        (p) => this.isCaptain(p.id) === true
+      );
 
-        const [bestSet] = setsSortedByRatings.slice().sort((setA, setB) => {
-          const setAFirst = setA[0].stats[this.name].rating;
-          const setALast = setA[setA.length - 1].stats[this.name].rating;
-          const setBFirst = setB[0].stats[this.name].rating;
-          const setBLast = setB[setB.length - 1].stats[this.name].rating;
-
-          const diffA = setALast - setAFirst;
-          const diffB = setBLast - setBFirst;
-          return diffA - diffB;
+      const setsSortedByRatings = focusedSets.reduce((acc, curr) => {
+        const sortedSet = [...curr, ...existingCapts].sort((a, b) => {
+          const aRating = a.stats[this.name].rating;
+          const bRating = b.stats[this.name].rating;
+          return aRating - bRating;
         });
+        acc.push(sortedSet);
+        return acc;
+      }, [] as typeof focusedSets);
 
-        bestSet.forEach((player) => {
-          if (!this.isCaptain(player.id)) {
-            while (1) {
-              const randomTeamIndex = getRandomInt(0, this.noOfTeams - 1);
-              if (!this.captains[randomTeamIndex]) {
-                this.addCaptain(player.id, randomTeamIndex);
-                break;
-              }
+      const [bestSet] = setsSortedByRatings.slice().sort((setA, setB) => {
+        const setAFirst = setA[0].stats[this.name].rating;
+        const setALast = setA[setA.length - 1].stats[this.name].rating;
+        const setBFirst = setB[0].stats[this.name].rating;
+        const setBLast = setB[setB.length - 1].stats[this.name].rating;
+
+        const diffA = setALast - setAFirst;
+        const diffB = setBLast - setBFirst;
+        return diffA - diffB;
+      });
+
+      bestSet.forEach((player) => {
+        if (!this.isCaptain(player.id)) {
+          while (1) {
+            const randomTeamIndex = getRandomInt(0, this.noOfTeams - 1);
+            if (!this.captains[randomTeamIndex]) {
+              this.addCaptain(player.id, randomTeamIndex);
+              break;
             }
           }
-        });
-      }
+        }
+      });
 
       pugPubSub.emit('captains_ready', guildId, this.name);
     }, CONSTANTS.autoCaptainPickTimer);

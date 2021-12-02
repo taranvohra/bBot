@@ -27,9 +27,16 @@ export const hydrateStore = async () => {
       queryServers,
       blocks,
       prefix,
+      blockedCaptains = [],
     } = guild;
 
-    store.dispatch(initBlocks({ guildId, list: blocks }));
+    store.dispatch(
+      initBlocks({
+        guildId,
+        list: blocks,
+        captains: blockedCaptains.map(({ culprit }) => culprit.id),
+      })
+    );
     store.dispatch(
       initMisc({
         guildId,

@@ -47,6 +47,7 @@ async function main() {
       queryServers: [],
       blocks: [],
       ignoredCommandGroup: [],
+      blockedCaptains: [],
     });
 
     await GuildStats.create({
