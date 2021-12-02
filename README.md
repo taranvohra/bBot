@@ -237,6 +237,21 @@ Unblocks the mentioned user.
 
 Shows the list of blocked users.
 
+**blockcaptain/blockcapt** 🐱‍👤<br/>
+`Usage -> .blockcaptain @mention#0000 reason`
+
+Blocks the mentioned user from becoming a captain in pugs.
+
+**unblockcaptain/unblockcapt** 🐱‍👤<br/>
+`Usage -> .unblockcaptain @mention#0000`
+
+Unblocks the mentioned user from becoming a captain in pugs.
+
+**showblockedcaptain/showblockedcapt** 🐱‍👤<br/>
+`Usage -> .showblocked`
+
+Shows the list of blocked captains.
+
 **enablecoinflip** 🐱‍👤<br/>
 `Usage -> .enablecoinflip gametype`
 
