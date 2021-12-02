@@ -187,7 +187,7 @@ Generates an image of top 10 puggers for the gametype (sorted by most number of 
 Outputs a summary of total number of pugs played, individual pug count(s) and a timestamp when the first pug was played
 
 **autoremove, ar** 😸<br/>
-`Usage -> .addautoremove expiry(?)`
+`Usage -> .autoremove expiry(?)`
 
 Automatically removes the user from all the pugs they have joined after expiry. Note that If no expiry is provided, it clears your autoremoval request (if any).
 
