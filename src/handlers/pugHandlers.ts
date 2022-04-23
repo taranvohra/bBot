@@ -298,7 +298,7 @@ export const handleJoinGameTypes: Handler = async (
       }** is blocked from joining pugs. Block expires in **${formatDistance(
         new Date(),
         new Date(block.expiresAt)
-      )}**`
+      )}** (<t:${Math.floor(block.expiresAt.getTime() / 1000)}:F>)`
     );
     return;
   }
@@ -1472,9 +1472,9 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
 
   const finalMsg = `${emojis.bannechu} **${
     mentionedUser.username
-  }** has been blocked from joining pugs till __**${expiry.toUTCString()}**__ ${
-    emojis.bannechu
-  } for reason ${reason}\n${removedMsg}`;
+  }** has been blocked from joining pugs till __<t:${Math.floor(
+    expiry.getTime() / 1000
+  )}:F>__ ${emojis.bannechu} for reason ${reason}\n${removedMsg}`;
 
   const logDescription = `**BLOCKED** for reason: __${reason}__ by <@${message.author.id}>`;
   createNewUserLog(guild.id, mentionedUser.id, logDescription);
@@ -1821,7 +1821,9 @@ export const handleAutoRemove: Handler = async (message, args) => {
   message.channel.send(
     `<@${userId}>, you will be automatically removed from every pug in **${autoRemoveLength} ${getHumanReadablePeriodName(
       autoRemovePeriodString as Period
-    )}${autoRemoveLength > 1 ? 's' : ''}** (${expiry.toUTCString()})`
+    )}${autoRemoveLength > 1 ? 's' : ''}** (<t:${Math.floor(
+      expiry.getTime() / 1000
+    )}:F>)`
   );
 
   log.info(`Exiting handleAutoRemove`);
