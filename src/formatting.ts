@@ -18,7 +18,6 @@ import {
   getTeamNumericIndex,
   secondsToHH_MM_SS,
 } from '~/utils';
-import { formatDistanceToNowStrict } from 'date-fns';
 
 const EMBED_COLOR = '#16171A';
 const edges = [
@@ -450,11 +449,10 @@ export const formatUserStats = (user: PugUser) => {
     const totals = `:video_game: **${totalPugs}** pug${
       totalPugs !== 1 ? 's' : ''
     }\t:cop: **${totalCaptain}**`;
-    const distance = formatDistanceToNowStrict(lastPug.timestamp, {
-      addSuffix: true,
-    });
 
-    const lastPugTitle = `Last pug played was **${pug.name.toUpperCase()}** (${distance})`;
+    const lastPugTitle = `Last pug played was **${pug.name.toUpperCase()}** (<t:${Math.floor(
+      lastPug.timestamp.getTime() / 1000
+    )}:R>)`;
     const lastPugBody = formatLastPug(lastPug, 1, '');
 
     const collectiveStatsTitle = `**GameTypes**`;
@@ -486,9 +484,6 @@ export const formatLastPug = (
   const {
     game: { pug, coinFlipWinner },
   } = lastPug;
-  const distance = formatDistanceToNowStrict(lastPug.timestamp, {
-    addSuffix: true,
-  });
 
   const pugTeams =
     isDuelPug(pug.pickingOrder) || pug.isMix
@@ -549,7 +544,9 @@ export const formatLastPug = (
   if (guildName) {
     const title = `Last${
       tCount > 1 ? tCount : ''
-    } **${pug.name.toUpperCase()}** at **${guildName}** (${distance})`;
+    } **${pug.name.toUpperCase()}** at **${guildName}** (<t:${Math.floor(
+      lastPug.timestamp.getTime() / 1000
+    )}:R>)`;
     return `${title}\n\n${activeTeams}\n${mapvoteWinnerTeam}`;
   } else {
     return `${activeTeams}${mapvoteWinnerTeam}`;
