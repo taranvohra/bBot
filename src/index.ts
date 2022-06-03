@@ -22,7 +22,7 @@ import log from './log';
  */
 const intents = new Intents();
 intents.add('GUILDS', 'GUILD_MEMBERS', 'GUILD_PRESENCES', 'GUILD_MESSAGES');
-const bBot = new Client({ ws: { intents } });
+const bBot = new Client({ intents });
 
 /*
  * B O T
@@ -42,7 +42,7 @@ bBot.on('ready', () => {
 
 bBot.on('disconnect', () => {});
 
-bBot.on('message', onMessage);
+bBot.on('messageCreate', onMessage);
 
 bBot.on('presenceUpdate', onPresenceUpdate);
 

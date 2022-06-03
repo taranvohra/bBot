@@ -1,4 +1,3 @@
-import config from '../config';
 import commands from '../commands';
 import {
   Message,
@@ -22,7 +21,6 @@ import {
 import * as generalHandlers from './generalHandlers';
 import * as pugHandlers from './pugHandlers';
 import * as queryHandlers from './queryHandlers';
-import { takeSnapshot } from '../profiler';
 import log from '../log';
 
 export const commandHandlers = {
@@ -40,12 +38,12 @@ export const onMessage = async (message: Message) => {
   const prefix = CONSTANTS.defaultPrefix; // TODO add option to pick guild specific prefix
   if (!content.startsWith(prefix)) return;
 
-  if (channel.id === config.HQ_CHANNEL_ID && content.includes('snapshot')) {
-    takeSnapshot()
-      .then((name) => message.channel.send(`Snapshot taken ${name}`))
-      .catch((err) => console.log(err));
-    return;
-  }
+  // if (channel.id === config.HQ_CHANNEL_ID && content.includes('snapshot')) {
+  //   takeSnapshot()
+  //     .then((name) => message.channel.send(`Snapshot taken ${name}`))
+  //     .catch((err) => console.log(err));
+  //   return;
+  // }
 
   const argsArr = content.substring(prefix.length).split(' ');
   if (argsArr.length === 0) return;
@@ -107,10 +105,7 @@ export const onMessage = async (message: Message) => {
   }
 };
 
-export const onPresenceUpdate = async (
-  _: Presence | undefined,
-  after: Presence
-) => {
+export const onPresenceUpdate = async (_: Presence | null, after: Presence) => {
   const { user, status, guild } = after;
   if (status === 'offline') {
     if (!guild || !user) return;

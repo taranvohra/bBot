@@ -111,7 +111,9 @@ export const handleShowServers: Handler = async (message) => {
     if (r.status === 'fulfilled') return parseServerResponse(r.value.data);
   });
 
-  message.channel.send(formatQueryServers(sortedList, parsedResponses));
+  const formattedResponse = formatQueryServers(sortedList, parsedResponses);
+
+  message.channel.send({ embeds: [formattedResponse] });
   log.info(`Exiting handleShowServers`);
 };
 
@@ -258,7 +260,7 @@ export const handleQueryServer: Handler = async (message, args) => {
     country,
   });
 
-  message.channel.send(formattedResponse);
+  message.channel.send({ embeds: [formattedResponse] });
   log.info(`Exiting handleQueryServer`);
 };
 

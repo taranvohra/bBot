@@ -596,8 +596,6 @@ export const formatQueryServerStatus = (
   players: PlayersType,
   { host, port, password, country }: ServerAddressInfo
 ) => {
-  const embed = new MessageEmbed();
-
   const noOfPlayers = parseInt(info.numplayers) || 0;
   const maxPlayers = parseInt(info.maxplayers);
   const maxTeams = parseInt(info.maxteams);
@@ -671,6 +669,19 @@ export const formatQueryServerStatus = (
     );
   }
 
+  const embed = new MessageEmbed({
+    color: EMBED_COLOR,
+    title: `${country ? `:flag_${country}:` : ``} ${info.hostname}`,
+    description: `${info.mapname} • ${noOfPlayers}/${maxPlayers} players • ${
+      xServerQueryProps.remainingTime || ''
+    }`,
+    footer: {
+      text: `unreal://${host}:${port}${
+        password ? `?password=${password}` : ``
+      }`,
+    },
+  });
+
   Object.keys(playerList).forEach((team) => {
     const teamIndex = getTeamNumericIndex(team);
     const teamPlayers = playerList[team].reduce((acc, curr) => {
@@ -688,33 +699,18 @@ export const formatQueryServerStatus = (
       : '';
   });
 
-  const description = `${
-    info.mapname
-  } • ${noOfPlayers}/${maxPlayers} players • ${
-    xServerQueryProps.remainingTime || ''
-  }`;
-  const footer = `unreal://${host}:${port}${
-    password ? `?password=${password}` : ``
-  }`;
-
-  embed.setTitle(`${country ? `:flag_${country}:` : ``} ${info.hostname}`);
-  embed.setColor(EMBED_COLOR);
-  embed.setDescription(description);
-  embed.setFooter(footer);
-
   return embed;
 };
 
-type Responses = Array<
-  | {
-      info: InfoType;
-      players: PlayersType;
-    }
-  | undefined
->;
 export const formatQueryServers = (
   list: Array<QueryServer>,
-  responses: Responses
+  responses: Array<
+    | {
+        info: InfoType;
+        players: PlayersType;
+      }
+    | undefined
+  >
 ) => {
   const { ipname, players } = list.reduce(
     (acc, curr, i) => {
@@ -734,13 +730,14 @@ export const formatQueryServers = (
     } as { ipname: string[]; players: string[] }
   );
 
-  const embed = new MessageEmbed();
-  embed.setColor(EMBED_COLOR);
+  const embed = new MessageEmbed({
+    color: EMBED_COLOR,
+    footer: { text: 'To query a server, type .q ip' },
+  });
 
   if (list.length > 0) {
-    embed.addField(`IP\u00A0\u00A0\u00A0Name`, ipname, true);
-    embed.addField('Players', players, true);
-    embed.setFooter('To query a server, type .q ip');
+    embed.addField(`IP\u00A0\u00A0\u00A0Name`, ipname.join('\n'), true);
+    embed.addField('Players', players.join('\n'), true);
   } else {
     embed.setDescription('No query servers added yet');
   }
