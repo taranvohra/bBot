@@ -1,4 +1,4 @@
-FROM node:14.18.1-alpine3.11
+FROM node:16.15.0-alpine3.14
 
 WORKDIR /usr/app/bbot
 
@@ -6,7 +6,7 @@ RUN apk update && apk add --no-cache python g++ make
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
