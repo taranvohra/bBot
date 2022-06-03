@@ -147,7 +147,7 @@ export const emojis = {
   pupcurn: '<a:pupcurn:610049697402454016>',
   residentsleeper: '<:residentsleeper:601092229343215646>',
   crinj: '<:crinj:803669994646011924>',
-  yobro: '<a:yobro:803671837052502027>',
+  wokege: '<:wokege:982337831517184040>',
 };
 
 export const teams = {

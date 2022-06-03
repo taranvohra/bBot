@@ -83,7 +83,7 @@ const sendRestartMessageToGuilds = () => {
     if (channelId) {
       const channel = bBot.channels.cache.get(channelId);
       if (channel) {
-        (channel as TextChannel).send(`I just restarted ${emojis.yobro}`);
+        (channel as TextChannel).send(`I just restarted ${emojis.wokege}`);
       }
     }
   });
