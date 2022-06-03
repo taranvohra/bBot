@@ -269,7 +269,7 @@ export const handleJoinGameTypes: Handler = async (
   mentioned
 ) => {
   log.info(`Entering handleJoinGameTypes`);
-  const { guild, author } = message;
+  const { guild, author, member } = message;
   if (!guild) return;
 
   const user = mentioned || author;
@@ -281,7 +281,8 @@ export const handleJoinGameTypes: Handler = async (
   const { gameTypes, list } = pugs;
   const { list: blockedList } = blocks;
 
-  const isInvisible = message.author.presence.status === 'offline';
+  const isInvisible = member?.presence?.status === 'offline';
+
   if (isInvisible) {
     message.channel.send(`You cannot join pugs while being invisible`);
     return;
@@ -805,7 +806,7 @@ export const handlePickPlayer: Handler = async (
   let lastPickedPlayerIndex: number | null;
 
   const canPickTwice = pickingOrder[turn + 1] === team; // next turn is same team pick
-  const mentionedUsers = users.array();
+  const mentionedUsers = users.map((user) => user);
 
   // +1 because few lines down we're going to subtract -1 so we still gucci 😎
   const firstMentionedUser = mentionedUsers[0];
@@ -1251,9 +1252,9 @@ export const handleShowTop10Played: Handler = async (message, args) => {
     });
 
     const imageName = Date.now();
-    template.write(`generated/${imageName}.png`);
+    await template.writeAsync(`generated/${imageName}.png`);
 
-    await message.channel.send('', {
+    await message.channel.send({
       files: [`generated/${imageName}.png`],
     });
 

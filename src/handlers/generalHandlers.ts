@@ -1,4 +1,4 @@
-import { GuildChannel } from 'discord.js';
+import { TextChannel } from 'discord.js';
 import log from '../log';
 import { formatUserLogs } from '../formatting';
 import { Guilds, GuildStats, Logs } from '~/models';
@@ -260,7 +260,7 @@ export const handleGetInvite: Handler = async (message) => {
   if (!guild) return;
 
   try {
-    const invite = await (channel as GuildChannel).createInvite({
+    const invite = await (channel as TextChannel).createInvite({
       maxAge: 0,
       maxUses: 0,
     });
