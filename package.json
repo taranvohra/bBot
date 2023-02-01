@@ -54,7 +54,7 @@
     "fontkit": "^1.8.1",
     "geoip-country": "^4.0.62",
     "jimp": "^0.16.1",
-    "mongoose": "^5.10.18",
+    "mongoose": "^5.13.15",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0"
   }
