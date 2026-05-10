@@ -7,7 +7,7 @@ const errorStackFormat = format((info) => {
     return Object.assign({}, info, {
       stack: info.stack,
       message: info.message,
-      errorStack: JSON.stringify(info.stack, null, 2),
+      errorStack: JSON.stringify(info.stack, null, 2)
     });
   }
   return info;
@@ -34,7 +34,7 @@ export default createLogger({
       datePattern: 'YYYY-MM-DD-HH',
       maxSize: '25m',
       maxFiles: '14d',
-      dirname: 'logs',
-    }),
-  ],
+      dirname: 'logs'
+    })
+  ]
 });

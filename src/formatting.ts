@@ -1,13 +1,13 @@
-import { User, EmbedBuilder } from "discord.js";
-import { isDocument } from "@typegoose/typegoose";
+import { User, EmbedBuilder } from 'discord.js';
+import { isDocument } from '@typegoose/typegoose';
 import {
   Pug,
   User as PugUser,
   PugSchema,
   QueryServer,
   Log,
-  GuildStat,
-} from "~/models";
+  GuildStat
+} from '~/models';
 import {
   CONSTANTS,
   emojis,
@@ -16,33 +16,33 @@ import {
   isDuelPug,
   sanitizeName,
   getTeamNumericIndex,
-  secondsToHH_MM_SS,
-} from "~/utils";
+  secondsToHH_MM_SS
+} from '~/utils';
 
-const EMBED_COLOR = "#16171A";
+const EMBED_COLOR = '#16171A';
 const edges = [
   {
     top: `+----- mapvote ------+`,
-    bottom: `+----------------------+`,
+    bottom: `+----------------------+`
   },
   {
     top: `+------ mapvote ------+`,
-    bottom: `+-----------------------+`,
+    bottom: `+-----------------------+`
   },
   {
     top: `+------- mapvote -------+`,
-    bottom: `+-------------------------+`,
+    bottom: `+-------------------------+`
   },
   {
     top: `+------- mapvote ------+`,
-    bottom: `+------------------------+`,
-  },
+    bottom: `+------------------------+`
+  }
 ];
 
 export const formatPugFilledDM = (pug: Pug, guildName: string) => {
   const DMTitle = `**${pug.name.toUpperCase()}** filled in **${guildName}**`;
   const DMBody = pug.players.reduce((acc, curr, i) => {
-    acc = acc + `${i === 0 ? "" : " :small_blue_diamond: "}${curr.name}`;
+    acc = acc + `${i === 0 ? '' : ' :small_blue_diamond: '}${curr.name}`;
     return acc;
   }, ``);
   return `${DMTitle}\n${DMBody}`;
@@ -52,27 +52,27 @@ export const formatJoinStatus = (statuses: Array<JoinStatus>) => {
   const { joined, missed, nf, aj, username } = statuses.reduce(
     (acc, { name, result, pug, user }) => {
       switch (result) {
-        case "not-found":
+        case 'not-found':
           acc.nf += `No pug found: **${name.toUpperCase()}**\n`;
           break;
-        case "full":
+        case 'full':
           acc.missed += `Sorry, **${name.toUpperCase()}** is already filled ${
             emojis.tearddy
           }\n`;
           break;
-        case "joined":
+        case 'joined':
           acc.joined += `**${name.toUpperCase()}** (${pug?.players.length}/${
             pug?.noOfPlayers
           }) :small_orange_diamond: `;
           break;
-        case "present":
+        case 'present':
           acc.aj += `**${name.toUpperCase()}** `;
           break;
       }
       acc.username = user?.username ?? acc.username;
       return acc;
     },
-    { joined: ``, missed: ``, nf: ``, aj: ``, username: `` },
+    { joined: ``, missed: ``, nf: ``, aj: ``, username: `` }
   );
 
   return `${
@@ -86,43 +86,43 @@ export const formatJoinStatus = (statuses: Array<JoinStatus>) => {
 
 export const formatLeaveStatus = (
   statuses: Array<LeaveStatus>,
-  reason?: "offline" | "left" | "autoremove",
+  reason?: 'offline' | 'left' | 'autoremove'
 ) => {
   const { left, nf, nj, username } = statuses.reduce(
     (acc, { name, result, pug, user }) => {
       switch (result) {
-        case "left":
+        case 'left':
           acc.left += `${
             acc.left.length > 0 ? `, ` : ``
           }**${name.toUpperCase()}** (${pug?.players.length}/${
             pug?.noOfPlayers
           })`;
           break;
-        case "not-in":
+        case 'not-in':
           acc.nj = `Cannot leave pug(s) you haven't joined `;
           break;
-        case "not-found":
+        case 'not-found':
           acc.nf += `No pug found: **${name.toUpperCase()}**`;
           break;
       }
-      acc.username = user?.username ?? "";
+      acc.username = user?.username ?? '';
       return acc;
     },
     {
       left: ``,
       nj: ``,
       nf: ``,
-      username: ``,
-    },
+      username: ``
+    }
   );
 
   let reasonMsg;
-  if (reason === "offline")
+  if (reason === 'offline')
     reasonMsg = `because the user went offline ${emojis.residentsleeper}${emojis.pupcurn}`;
-  else if (reason === "left")
-    reasonMsg = "because the user left this discord server";
-  else if (reason === "autoremove") reasonMsg = "because of autoremove";
-  else reasonMsg = "";
+  else if (reason === 'left')
+    reasonMsg = 'because the user left this discord server';
+  else if (reason === 'autoremove') reasonMsg = 'because of autoremove';
+  else reasonMsg = '';
 
   return `${left.length > 0 ? `${username} left  ${left} ${reasonMsg}` : ``}${
     nj.length > 0 ? `\n${nj}` : ``
@@ -170,7 +170,7 @@ export const formatListGameType = (pug: Pug) => {
   const players = pug.players.reduce((acc, p, i) => {
     const iMixFormatting = (i === 0 || i === 1) && pug.isMix;
     acc += `${
-      iMixFormatting ? ":small_blue_diamond:" : ":small_orange_diamond:"
+      iMixFormatting ? ':small_blue_diamond:' : ':small_orange_diamond:'
     } ${p.name} `;
     return acc;
   }, ``);
@@ -179,14 +179,14 @@ export const formatListGameType = (pug: Pug) => {
 
 export const formatListGameTypes = (
   list: Array<{ name: string; currPlayers: number; maxPlayers: number }>,
-  guildName: string,
+  guildName: string
 ) => {
   const title = `Pugs available at **${guildName}**`;
   const sortedList = list.sort((a, b) => b.currPlayers - a.currPlayers);
   const body = sortedList.reduce((acc, curr, i) => {
     acc += ` **${curr.name.toUpperCase()}** (${curr.currPlayers}/${
       curr.maxPlayers
-    }) ${i === list.length - 1 ? "" : ":small_orange_diamond:"}`;
+    }) ${i === list.length - 1 ? '' : ':small_orange_diamond:'}`;
     return acc;
   }, ``);
   return `${title}\n${body}`;
@@ -194,7 +194,7 @@ export const formatListGameTypes = (
 
 export const formatListAllCurrentGameTypes = (
   list: Array<Pug>,
-  guildName: string,
+  guildName: string
 ) => {
   const body = list.reduce((prev, curr) => {
     const base = `**${curr.name.toUpperCase()}** (${curr.players.length}/${
@@ -204,7 +204,7 @@ export const formatListAllCurrentGameTypes = (
     const players = curr.players.reduce((acc, p, i) => {
       const iMixFormatting = (i === 0 || i === 1) && curr.isMix;
       acc += `${
-        iMixFormatting ? ":small_blue_diamond:" : ":small_orange_diamond:"
+        iMixFormatting ? ':small_blue_diamond:' : ':small_orange_diamond:'
       } ${p.name} `;
       return acc;
     }, ``);
@@ -220,22 +220,22 @@ export const formatListAllCurrentGameTypes = (
 const getTeamIndex = (index: number) => {
   switch (index) {
     case 0:
-      return "team_0";
+      return 'team_0';
     case 1:
-      return "team_1";
+      return 'team_1';
     case 2:
-      return "team_2";
+      return 'team_2';
     case 3:
-      return "team_3";
+      return 'team_3';
     case 255:
-      return "team_255";
+      return 'team_255';
     default:
-      return "spec";
+      return 'spec';
   }
 };
 
 const getTeamEmojis = (emoji?: TeamEmojis) => {
-  if (!emoji) return allTeamEmojis["agonies"];
+  if (!emoji) return allTeamEmojis['agonies'];
   return allTeamEmojis[emoji];
 };
 
@@ -252,7 +252,7 @@ export const formatBroadcastCaptainsReady = (pug: Pug) => {
     if (!pug.captains.includes(curr.id)) {
       const rating =
         curr.stats[pug.name].rating === 0
-          ? "no rating"
+          ? 'no rating'
           : curr.stats[pug.name].rating.toFixed(2);
       acc += `**${index + 1})** *${curr.name}* (${rating}) ${
         curr.tag ? `[${curr.tag}] ` : ``
@@ -267,7 +267,7 @@ export const formatBroadcastCaptainsReady = (pug: Pug) => {
 export const formatAddCaptainStatus = (
   username: string,
   team: number,
-  pug: Pug,
+  pug: Pug
 ) => {
   const teamIndex = getTeamIndex(team);
   const teamEmojis = getTeamEmojis(pug.teamEmojis);
@@ -278,7 +278,7 @@ export const formatAddCaptainStatus = (
 
 export const formatPickPlayerStatus = (
   pug: Pug,
-  pickedPlayers: Array<number>,
+  pickedPlayers: Array<number>
 ) => {
   const picked = pickedPlayers.reduce((acc, curr) => {
     const currPlayer = pug.players[curr];
@@ -289,7 +289,7 @@ export const formatPickPlayerStatus = (
 
   let count = 0;
   const next = pug.players.find(
-    (p) => p.id === pug.captains[pug.pickingOrder[pug.turn]],
+    (p) => p.id === pug.captains[pug.pickingOrder[pug.turn]]
   );
 
   if (pug.isInPickingMode) {
@@ -301,16 +301,16 @@ export const formatPickPlayerStatus = (
 
   const teamIndex = getTeamIndex(next?.team as number);
   const turn = pug.isInPickingMode
-    ? `<@${next?.id}> pick ${count} player${count > 1 ? "s" : ""} for **${
+    ? `<@${next?.id}> pick ${count} player${count > 1 ? 's' : ''} for **${
         teams[teamIndex]
       }**`
     : `:fire: **Picking has finished** :fire:`;
 
   const pugTeams = Array.from(
     {
-      length: pug.noOfTeams,
+      length: pug.noOfTeams
     },
-    (_, i) => i,
+    (_, i) => i
   ).reduce(
     (acc, _, i) => {
       const teamIndex = getTeamIndex(i);
@@ -318,14 +318,14 @@ export const formatPickPlayerStatus = (
       acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
       return acc;
     },
-    {} as { [team: number]: string },
+    {} as { [team: number]: string }
   );
 
   const players = pug.players.reduce((acc, curr, index) => {
     if (curr.team === null)
       acc += `**${index + 1})** *${curr.name}* (${
         curr.stats[pug.name].rating === 0
-          ? "no rating"
+          ? 'no rating'
           : curr.stats[pug.name].rating.toFixed(2)
       }) ${curr.tag ? `[${curr.tag}] ` : ``}`;
     return acc;
@@ -345,14 +345,14 @@ export const formatPickPlayerStatus = (
     return acc;
   }, ``);
 
-  return `${picked}\n${turn}\n${pug.isInPickingMode ? "\n" : ""}${
+  return `${picked}\n${turn}\n${pug.isInPickingMode ? '\n' : ''}${
     pug.isInPickingMode ? `${players}\n` : ``
   }\n${activeTeams}`;
 };
 
 export const formatCoinFlipMapvoteWinner = (
   winningTeamIndex: number,
-  pug: Pug,
+  pug: Pug
 ) => {
   const head = `---- *mapvote coin flip* ----`;
   const teamIndex = getTeamIndex(winningTeamIndex);
@@ -367,7 +367,7 @@ export const formatPugsInPicking = (pugs: Array<Pug>) => {
   return pugs.reduce((acc, pug) => {
     let count = 0;
     const next = pug.players.find(
-      (p) => p.id === pug.captains[pug.pickingOrder[pug.turn]],
+      (p) => p.id === pug.captains[pug.pickingOrder[pug.turn]]
     );
 
     if (pug.isInPickingMode) {
@@ -379,14 +379,14 @@ export const formatPugsInPicking = (pugs: Array<Pug>) => {
 
     const teamIndex = getTeamIndex(next?.team as number);
     const turn = `<@${next?.id}> pick ${count} player${
-      count > 1 ? "s" : ""
+      count > 1 ? 's' : ''
     } for **${teams[teamIndex]}**`;
 
     const pugTeams = Array.from(
       {
-        length: pug.noOfTeams,
+        length: pug.noOfTeams
       },
-      (_, i) => i,
+      (_, i) => i
     ).reduce(
       (acc, _, i) => {
         const teamIndex = getTeamIndex(i);
@@ -394,14 +394,14 @@ export const formatPugsInPicking = (pugs: Array<Pug>) => {
         acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]}`;
         return acc;
       },
-      {} as { [team: number]: string },
+      {} as { [team: number]: string }
     );
 
     const players = pug.players.reduce((acc, curr, index) => {
       if (curr.team === null)
         acc += `**${index + 1})** *${curr.name}* (${
           curr.stats[pug.name].rating === 0
-            ? "no rating"
+            ? 'no rating'
             : curr.stats[pug.name].rating.toFixed(2)
         }) ${curr.tag ? `[${curr.tag}] ` : ``}`;
       return acc;
@@ -431,8 +431,8 @@ export const formatUserStats = (user: PugUser) => {
     const {
       lastPug,
       lastPug: {
-        game: { pug },
-      },
+        game: { pug }
+      }
     } = user;
     const { totalPugs, totalCaptain } = Object.values(user.stats).reduce(
       (acc, curr) => {
@@ -448,25 +448,25 @@ export const formatUserStats = (user: PugUser) => {
         totalWins: 0,
         totalLosses: 0,
         totalWinRate: 0,
-        totalGameTypes: 0,
-      },
+        totalGameTypes: 0
+      }
     );
     const title = `:pencil: Showing stats for **${user.username}** :pencil:`;
     const totals = `:video_game: **${totalPugs}** pug${
-      totalPugs !== 1 ? "s" : ""
+      totalPugs !== 1 ? 's' : ''
     }\t:cop: **${totalCaptain}**`;
 
     const lastPugTitle = `Last pug played was **${pug.name.toUpperCase()}** (<t:${Math.floor(
-      lastPug.timestamp.getTime() / 1000,
+      lastPug.timestamp.getTime() / 1000
     )}:R>)`;
-    const lastPugBody = formatLastPug(lastPug, 1, "");
+    const lastPugBody = formatLastPug(lastPug, 1, '');
 
     const collectiveStatsTitle = `**GameTypes**`;
     const collectiveStatsBody = Object.entries(user.stats).reduce(
       (acc, [pugName, pugStats]) => {
         acc += `**${pugName.toUpperCase()}**\t :video_game: **${
           pugStats.totalPugs
-        }** pug${pugStats.totalPugs !== 1 ? "s" : ""}\t:cop: **${
+        }** pug${pugStats.totalPugs !== 1 ? 's' : ''}\t:cop: **${
           pugStats.totalCaptain
         }**\t:star: ${
           pugStats.rating === 0
@@ -475,7 +475,7 @@ export const formatUserStats = (user: PugUser) => {
         }\n`;
         return acc;
       },
-      ``,
+      ``
     );
     return `${title}\n\n${totals}\n\n${lastPugTitle}\n\n${lastPugBody}\n${collectiveStatsTitle}\n${collectiveStatsBody}`;
   }
@@ -485,10 +485,10 @@ export const formatUserStats = (user: PugUser) => {
 export const formatLastPug = (
   lastPug: PugSchema,
   tCount: number,
-  guildName: string,
+  guildName: string
 ) => {
   const {
-    game: { pug, coinFlipWinner },
+    game: { pug, coinFlipWinner }
   } = lastPug;
 
   const pugTeams =
@@ -501,7 +501,7 @@ export const formatLastPug = (
             acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
             return acc;
           },
-          {} as { [key: string]: string },
+          {} as { [key: string]: string }
         );
 
   const currTeams =
@@ -524,14 +524,14 @@ export const formatLastPug = (
       if (i === 0) acc += `**${curr.name}'s** team\t:vs:\t`;
       else
         acc += `**${curr.name}**${
-          i === arr.length - 1 ? "\n" : " :small_orange_diamond: "
+          i === arr.length - 1 ? '\n' : ' :small_orange_diamond: '
         }`;
       return acc;
     }, ``);
   } else if (pug.noOfTeams === 1) {
     activeTeams = pug.players.reduce((acc, curr, i, arr) => {
       acc += `**${curr.name}**${
-        i === arr.length - 1 ? "\n" : "  :crossed_swords:  "
+        i === arr.length - 1 ? '\n' : '  :crossed_swords:  '
       }`;
       return acc;
     }, ``);
@@ -543,15 +543,15 @@ export const formatLastPug = (
   }
 
   const mapvoteWinnerTeam =
-    typeof coinFlipWinner === "number"
+    typeof coinFlipWinner === 'number'
       ? `${formatMapvoteWinner(coinFlipWinner, pug)}\n`
       : ``;
 
   if (guildName) {
     const title = `Last${
-      tCount > 1 ? tCount : ""
+      tCount > 1 ? tCount : ''
     } **${pug.name.toUpperCase()}** at **${guildName}** (<t:${Math.floor(
-      lastPug.timestamp.getTime() / 1000,
+      lastPug.timestamp.getTime() / 1000
     )}:R>)`;
     return `${title}\n\n${activeTeams}\n${mapvoteWinnerTeam}`;
   } else {
@@ -570,7 +570,7 @@ export const formatMapvoteWinner = (team: number, pug: Pug) => {
 
 export const formatPromoteAvailablePugs = (
   pugs: Array<Pug>,
-  guildName: string,
+  guildName: string
 ) => {
   const title = `@here in **${guildName}**`;
   const sortedPugs = pugs.slice().sort((a, b) => {
@@ -600,7 +600,7 @@ type ServerAddressInfo = {
 export const formatQueryServerStatus = (
   info: InfoType,
   players: PlayersType,
-  { host, port, password, country }: ServerAddressInfo,
+  { host, port, password, country }: ServerAddressInfo
 ) => {
   const noOfPlayers = parseInt(info.numplayers) || 0;
   const maxPlayers = parseInt(info.maxplayers);
@@ -614,17 +614,17 @@ export const formatQueryServerStatus = (
     [teams.team_2]: [],
     [teams.team_3]: [],
     [teams.team_255]: [],
-    [teams.spec]: [],
+    [teams.spec]: []
   };
 
   for (let i = 0; i < noOfPlayers; i++) {
     const playerFlag =
-      players[`countryc_${i}`] && players[`countryc_${i}`] !== "none"
+      players[`countryc_${i}`] && players[`countryc_${i}`] !== 'none'
         ? `:flag_${players[`countryc_${i}`]}:`
         : `:flag_white:`;
 
     const player = `${playerFlag} ${sanitizeName(players[`player_${i}`])}`;
-    if (players[`mesh_${i}`] === "Spectator") {
+    if (players[`mesh_${i}`] === 'Spectator') {
       playerList[teams.spec].push(player);
       continue;
     }
@@ -639,22 +639,22 @@ export const formatQueryServerStatus = (
 
   let xServerQueryProps: { remainingTime: string; teamScores: string[] } = {
     remainingTime: ``,
-    teamScores: [],
+    teamScores: []
   };
   if (info.xserverquery) {
     const remainingSeconds = parseInt(info.remainingtime);
     const secs = remainingSeconds % 60;
     const mins = (remainingSeconds - secs) / 60;
 
-    const [hh, mm, ss] = secondsToHH_MM_SS(remainingSeconds).split(":");
+    const [hh, mm, ss] = secondsToHH_MM_SS(remainingSeconds).split(':');
     const remainingTimeString =
-      hh === "00" ? `${mm}:${ss}` : `${hh}:${mm}:${ss}`;
+      hh === '00' ? `${mm}:${ss}` : `${hh}:${mm}:${ss}`;
 
     let teamScores = {
-      [teams.team_0]: "",
-      [teams.team_1]: "",
-      [teams.team_2]: "",
-      [teams.team_3]: "",
+      [teams.team_0]: '',
+      [teams.team_1]: '',
+      [teams.team_2]: '',
+      [teams.team_3]: ''
     };
 
     for (let i = 0; i < maxTeams; i++)
@@ -663,7 +663,7 @@ export const formatQueryServerStatus = (
     const isNotOverTime =
       (mins === timeLimit && secs === 0) || mins < timeLimit;
     xServerQueryProps.remainingTime = `${remainingTimeString} ${
-      isNotOverTime ? "remaining" : "(overtime)"
+      isNotOverTime ? 'remaining' : '(overtime)'
     }\n`;
     xServerQueryProps.teamScores = Object.keys(teamScores).reduce(
       (acc, curr) => {
@@ -671,7 +671,7 @@ export const formatQueryServerStatus = (
         acc[index] = ` • ${teamScores[curr]}`;
         return acc;
       },
-      [] as string[],
+      [] as string[]
     );
   }
 
@@ -680,18 +680,18 @@ export const formatQueryServerStatus = (
     .setTitle(`${country ? `:flag_${country}:` : ``} ${info.hostname}`)
     .setDescription(
       `${info.mapname} • ${noOfPlayers}/${maxPlayers} players • ${
-        xServerQueryProps.remainingTime || ""
-      }`,
+        xServerQueryProps.remainingTime || ''
+      }`
     )
     .setFooter({
-      text: `unreal://${host}:${port}${password ? `?password=${password}` : ``}`,
+      text: `unreal://${host}:${port}${password ? `?password=${password}` : ``}`
     });
 
   Object.keys(playerList).forEach((team) => {
     const teamIndex = getTeamNumericIndex(team);
     const teamPlayers = playerList[team].reduce((acc, curr) => {
-      if (team === teams.spec) acc += curr + " • ";
-      else acc += curr + " " + "\n";
+      if (team === teams.spec) acc += curr + ' • ';
+      else acc += curr + ' ' + '\n';
       return acc;
     }, ``);
 
@@ -699,9 +699,9 @@ export const formatQueryServerStatus = (
       ? embed.addFields({
           name: team + (xServerQueryProps.teamScores[teamIndex] || ``),
           value: teamPlayers,
-          inline: team !== teams.spec,
+          inline: team !== teams.spec
         })
-      : "";
+      : '';
   });
 
   return embed;
@@ -715,7 +715,7 @@ export const formatQueryServers = (
         players: PlayersType;
       }
     | undefined
-  >,
+  >
 ) => {
   const { ipname, players } = list.reduce(
     (acc, curr, i) => {
@@ -725,31 +725,31 @@ export const formatQueryServers = (
       acc.players.push(
         response && response.info.numplayers && response.info.maxplayers
           ? `\`${response.info.numplayers}/${response.info.maxplayers}\``
-          : "`Timed Out`",
+          : '`Timed Out`'
       );
       return acc;
     },
     {
       ipname: [],
-      players: [],
-    } as { ipname: string[]; players: string[] },
+      players: []
+    } as { ipname: string[]; players: string[] }
   );
 
   const embed = new EmbedBuilder()
     .setColor(EMBED_COLOR)
-    .setFooter({ text: "To query a server, type .q ip" });
+    .setFooter({ text: 'To query a server, type .q ip' });
 
   if (list.length > 0) {
     embed.addFields(
       {
         name: `IP\u00A0\u00A0\u00A0Name`,
-        value: ipname.join("\n"),
-        inline: true,
+        value: ipname.join('\n'),
+        inline: true
       },
-      { name: "Players", value: players.join("\n"), inline: true },
+      { name: 'Players', value: players.join('\n'), inline: true }
     );
   } else {
-    embed.setDescription("No query servers added yet");
+    embed.setDescription('No query servers added yet');
   }
 
   return embed;
@@ -764,7 +764,7 @@ export const formatUserLogs = (logs: Array<Log>) =>
 export const formatPugStats = (
   guildName: string,
   guildStats: GuildStat,
-  firstPug?: PugSchema,
+  firstPug?: PugSchema
 ) => {
   const title = `:bar_chart: Pug stats for **${guildName}** :bar_chart:`;
   let body = ``;
@@ -773,11 +773,11 @@ export const formatPugStats = (
     const allPugCount = Object.entries(guildStats.pugs).reduce(
       (acc, [key, value], i, arr) => {
         acc += `**${key.toUpperCase()}** [${value}] ${
-          i === arr.length - 1 ? "" : ":white_small_square:"
+          i === arr.length - 1 ? '' : ':white_small_square:'
         } `;
         return acc;
       },
-      ``,
+      ``
     );
     body = `**${guildStats.total} pugs** played, ${firstPugInfo}\n\n${allPugCount}`;
   } else {

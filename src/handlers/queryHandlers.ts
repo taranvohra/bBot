@@ -3,13 +3,13 @@ import log from '../log';
 import store, {
   addQueryServer,
   removeQueryServer,
-  editQueryServer,
+  editQueryServer
 } from '~/store';
 import {
   addGuildQueryServer,
   removeGuildQueryServer,
   editGuildQueryServerAddress,
-  editGuildQueryServerName,
+  editGuildQueryServerName
 } from '~/actions';
 import { getHostPortPasswordFromAddress, fizzZoop } from '~/utils';
 import { formatQueryServers, formatQueryServerStatus } from '../formatting';
@@ -78,7 +78,7 @@ const parseServerResponse = (response: string) => {
     {
       info: [],
       players: [],
-      foundPlayerData: false,
+      foundPlayerData: false
     } as { info: string[]; players: string[]; foundPlayerData: boolean }
   );
 
@@ -136,7 +136,7 @@ export const handleAddQueryServer: Handler = async (message, args) => {
   await addGuildQueryServer(guild.id, {
     id,
     name,
-    address,
+    address
   });
   log.info(`Added query server ${address} at guild ${guild.id}`);
 
@@ -145,7 +145,7 @@ export const handleAddQueryServer: Handler = async (message, args) => {
       guildId: guild.id,
       id,
       name,
-      address,
+      address
     })
   );
   message.channel.send(`Query server added`);
@@ -214,7 +214,12 @@ export const handleEditQueryServer: Handler = async (message, args) => {
   }
 
   store.dispatch(
-    editQueryServer({ guildId: guild.id, id: queryServer.id, attribute, value })
+    editQueryServer({
+      guildId: guild.id,
+      id: queryServer.id,
+      attribute,
+      value
+    })
   );
 
   message.channel.send(`Query server edited`);
@@ -257,7 +262,7 @@ export const handleQueryServer: Handler = async (message, args) => {
     host,
     port,
     password,
-    country,
+    country
   });
 
   message.channel.send({ embeds: [formattedResponse] });

@@ -83,14 +83,14 @@ const miscSlice = createSlice({
       if (thisGuild) {
         delete thisGuild.autoremovals[userId];
       }
-    },
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(guildDeleted, (state, action) => {
       const { guildId } = action.payload;
       delete state[guildId];
     });
-  },
+  }
 });
 
 export const {
@@ -100,6 +100,6 @@ export const {
   unIgnoreCommandGroup,
   addCommandCooldown,
   addAutoRemoval,
-  clearAutoRemoval,
+  clearAutoRemoval
 } = miscSlice.actions;
 export const miscReducer = miscSlice.reducer;

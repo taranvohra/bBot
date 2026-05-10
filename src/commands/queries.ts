@@ -6,7 +6,7 @@ const queryCommandList: Command[] = [
     aliases: ['server', 'servers'],
     type: 'solo',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -14,7 +14,7 @@ const queryCommandList: Command[] = [
     aliases: ['addqueryserver', 'aqs'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -22,7 +22,7 @@ const queryCommandList: Command[] = [
     aliases: ['deletequeryserver', 'dqs'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -30,7 +30,7 @@ const queryCommandList: Command[] = [
     aliases: ['editqueryserver', 'eqs'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -38,7 +38,7 @@ const queryCommandList: Command[] = [
     aliases: ['q', 'query'],
     type: 'args',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -47,8 +47,8 @@ const queryCommandList: Command[] = [
     type: 'both',
     rgx: () => /^ip\s{0,1}/g,
     isPrivileged: false,
-    needsRegisteredGuild: true,
-  },
+    needsRegisteredGuild: true
+  }
 ];
 
 export default queryCommandList;

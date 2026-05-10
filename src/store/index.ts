@@ -11,7 +11,7 @@ import {
   miscReducer,
   blocksReducer,
   queriesReducer,
-  pugsReducer,
+  pugsReducer
 } from './slices';
 
 const store = configureStore({
@@ -19,15 +19,15 @@ const store = configureStore({
     misc: miscReducer,
     blocks: blocksReducer,
     queries: queriesReducer,
-    pugs: pugsReducer,
+    pugs: pugsReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       immutableCheck: {
-        ignoredPaths: ['pugs'],
+        ignoredPaths: ['pugs']
       },
-      serializableCheck: false,
-    }),
+      serializableCheck: false
+    })
 });
 
 export default store;

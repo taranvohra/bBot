@@ -9,7 +9,7 @@ export const CONSTANTS = {
     red: 0,
     blue: 1,
     green: 2,
-    gold: 3,
+    gold: 3
   },
   teams: {
     team_0: 'Red Team',
@@ -17,13 +17,13 @@ export const CONSTANTS = {
     team_2: 'Green Team',
     team_3: 'Gold Team',
     team_255: 'Players',
-    spec: 'Spectators',
+    spec: 'Spectators'
   },
   tagLength: 50,
   autoCaptainPickTimer: 30_000,
   strongPlayersRatingThreshold: 3.75,
   coolDownSeconds: 120,
-  commandGroups: ['pugs', 'queries'],
+  commandGroups: ['pugs', 'queries']
 };
 
 export type Period = 'm' | 'h' | 'd';
@@ -31,7 +31,7 @@ export type Period = 'm' | 'h' | 'd';
 export const PERIOD_NAMES: Record<Period, string> = {
   m: 'minute',
   h: 'hour',
-  d: 'day',
+  d: 'day'
 };
 
 export const isGuildRegistered = (guildId: string) => {
@@ -147,7 +147,7 @@ export const emojis = {
   pupcurn: '<a:pupcurn:610049697402454016>',
   residentsleeper: '<:residentsleeper:601092229343215646>',
   crinj: '<:crinj:803669994646011924>',
-  wokege: '<:wokege:982337831517184040>',
+  wokege: '<:wokege:982337831517184040>'
 };
 
 export const teams = {
@@ -156,13 +156,13 @@ export const teams = {
   team_2: 'Green Team',
   team_3: 'Gold Team',
   team_255: 'Players',
-  spec: 'Spectators',
+  spec: 'Spectators'
 };
 
 export const teamEmojiTypes: Record<TeamEmojis, true> = {
   agonies: true,
   cores: true,
-  logos: true,
+  logos: true
 } as const;
 
 export const allTeamEmojis: Record<TeamEmojis, typeof teams> = {
@@ -172,7 +172,7 @@ export const allTeamEmojis: Record<TeamEmojis, typeof teams> = {
     team_2: '<:DISGUSTAGONY:610820391786774546>',
     team_3: '<:GOLDENAGONY:610826861165150221>',
     team_255: '',
-    spec: '',
+    spec: ''
   },
   cores: {
     team_0: '<:red_core:806233999230894082>',
@@ -180,7 +180,7 @@ export const allTeamEmojis: Record<TeamEmojis, typeof teams> = {
     team_2: '<:green_core:806234000163209257>',
     team_3: '<:gold_core:806233999428157511>',
     team_255: '',
-    spec: '',
+    spec: ''
   },
   logos: {
     team_0: '<:red_team:806233999768027187>',
@@ -188,8 +188,8 @@ export const allTeamEmojis: Record<TeamEmojis, typeof teams> = {
     team_2: '<:green_team:806233999054733323>',
     team_3: '<:gold_team:806233999236005949>',
     team_255: '',
-    spec: '',
-  },
+    spec: ''
+  }
 };
 
 export const isCommandConstraintSatified = (command: Command, cmd: string) =>
@@ -219,18 +219,21 @@ export const getHostPortPasswordFromAddress = (
   return {
     host: hostString,
     port: Number(portString) || 7777,
-    password,
+    password
   };
 };
 
 export const fizzZoop = <T>(array: T[]) =>
-  array.reduce((acc, curr, i, arr) => {
-    if (i % 2 === 0) {
-      const item = (curr as unknown as string).toLowerCase();
-      acc[item] = arr[i + 1];
-    }
-    return acc;
-  }, {} as { [key: string]: T });
+  array.reduce(
+    (acc, curr, i, arr) => {
+      if (i % 2 === 0) {
+        const item = (curr as unknown as string).toLowerCase();
+        acc[item] = arr[i + 1];
+      }
+      return acc;
+    },
+    {} as { [key: string]: T }
+  );
 
 export const getTeamNumericIndex = (teamName: string) =>
   Object.values(teams).findIndex((t) => t === teamName);

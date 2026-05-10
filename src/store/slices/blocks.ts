@@ -71,14 +71,14 @@ const blocksSlice = createSlice({
         );
         thisGuild.captains.splice(blockedCaptIndex, 1);
       }
-    },
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(guildDeleted, (state, action) => {
       const { guildId } = action.payload;
       delete state[guildId];
     });
-  },
+  }
 });
 
 export const {
@@ -86,6 +86,6 @@ export const {
   addBlockedUser,
   removeBlockedUser,
   addBlockedCaptain,
-  removeBlockedCaptain,
+  removeBlockedCaptain
 } = blocksSlice.actions;
 export const blocksReducer = blocksSlice.reducer;

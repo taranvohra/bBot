@@ -1,15 +1,15 @@
-import { TextChannel } from "discord.js";
-import log from "../log";
-import { formatUserLogs } from "../formatting";
-import { Guilds, GuildStats, Logs } from "~/models";
+import { TextChannel } from 'discord.js';
+import log from '../log';
+import { formatUserLogs } from '../formatting';
+import { Guilds, GuildStats, Logs } from '~/models';
 import {
   updateGuildPugChannel,
   updateGuildQueryChannel,
   updateGuildPrefix,
   addGuildIgnoredCommandGroup,
   removeGuildIgnoredCommandGroup,
-  createNewUserLog,
-} from "~/actions";
+  createNewUserLog
+} from '~/actions';
 import store, {
   initPugs,
   initMisc,
@@ -19,9 +19,9 @@ import store, {
   setQueryChannel,
   setPrefix,
   ignoreCommandGroup,
-  unIgnoreCommandGroup,
-} from "~/store";
-import { CONSTANTS } from "~/utils";
+  unIgnoreCommandGroup
+} from '~/store';
+import { CONSTANTS } from '~/utils';
 
 export const handleRegisterServer: Handler = async (message, _) => {
   log.info(`Entering handleRegisterServer`);
@@ -36,13 +36,13 @@ export const handleRegisterServer: Handler = async (message, _) => {
 
   await Guilds.create({
     _id: guild.id,
-    queryChannel: "",
-    pugChannel: "",
+    queryChannel: '',
+    pugChannel: '',
     gameTypes: [],
     queryServers: [],
     blocks: [],
     ignoredCommandGroup: [],
-    blockedCaptains: [],
+    blockedCaptains: []
   });
 
   // If guild is de-registered and registered again
@@ -50,22 +50,22 @@ export const handleRegisterServer: Handler = async (message, _) => {
   await GuildStats.create({
     _id: guild.id,
     total: 0,
-    pugs: {},
+    pugs: {}
   }).catch(() => {});
 
   log.info(`Registered new guild ${guild}`);
   log.debug(`Initializing store for ${guild.id}`);
 
   store.dispatch(
-    initPugs({ guildId: guild.id, list: [], gameTypes: [], channel: null }),
+    initPugs({ guildId: guild.id, list: [], gameTypes: [], channel: null })
   );
   store.dispatch(
     initMisc({
       guildId: guild.id,
       cooldowns: {},
       ignoredCommandGroup: [],
-      autoremovals: {},
-    }),
+      autoremovals: {}
+    })
   );
   store.dispatch(initBlocks({ guildId: guild.id, list: [], captains: [] }));
   store.dispatch(initQueries({ guildId: guild.id, list: [], channel: null }));
@@ -79,7 +79,7 @@ export const handleSetPugChannel: Handler = async (message, _) => {
   const {
     channel,
     channel: { id: channelId },
-    guild,
+    guild
   } = message;
 
   await updateGuildPugChannel(guild.id, channelId);
@@ -96,7 +96,7 @@ export const handleSetQueryChannel: Handler = async (message, _) => {
   const {
     channel,
     channel: { id: channelId },
-    guild,
+    guild
   } = message;
 
   await updateGuildQueryChannel(guild.id, channelId);
@@ -156,7 +156,7 @@ export const handleIgnoreCommandGroup: Handler = async (message, args) => {
   store.dispatch(ignoreCommandGroup({ guildId: guild.id, group }));
 
   channel.send(
-    `Commands under group **${group}** will be ignored from now onwards`,
+    `Commands under group **${group}** will be ignored from now onwards`
   );
   log.info(`Exiting handleIgnoreCommandGroup`);
 };
@@ -180,7 +180,7 @@ export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
   if (!ignoredCommandGroup.includes(group)) {
     log.info(`Command group ${group} was not ignored in the first place`);
     channel.send(
-      `Invalid. Command group **${group}** was not ignored in the first place`,
+      `Invalid. Command group **${group}** was not ignored in the first place`
     );
     return;
   }
@@ -191,7 +191,7 @@ export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
   store.dispatch(unIgnoreCommandGroup({ guildId: guild.id, group }));
 
   channel.send(
-    `Commands under group **${group}** will not be ignored from now onwards`,
+    `Commands under group **${group}** will not be ignored from now onwards`
   );
   log.info(`Exiting handleUnIgnoreCommandGroup`);
 };
@@ -207,7 +207,7 @@ export const handleWarnUser: Handler = async (message, args) => {
     return;
   }
 
-  const reason = args.slice(1).join(" ");
+  const reason = args.slice(1).join(' ');
   if (!reason) {
     channel.send(`No reason mentioned`);
     return;
@@ -217,7 +217,7 @@ export const handleWarnUser: Handler = async (message, args) => {
   createNewUserLog(guild.id, mentionedUser.id, logDescription);
 
   channel.send(
-    `<@${mentionedUser.id}>, you have been **WARNED** for __${reason}__`,
+    `<@${mentionedUser.id}>, you have been **WARNED** for __${reason}__`
   );
   log.info(`Exiting handleWarnUser`);
 };
@@ -235,7 +235,7 @@ export const handleViewUserLogs: Handler = async (message) => {
 
   const allUserLogs = await Logs.find({
     userId: mentionedUser.id,
-    guildId: guild.id,
+    guildId: guild.id
   })
     .sort({ _id: -1 })
     .limit(10);
@@ -253,19 +253,19 @@ export const handleGetInvite: Handler = async (message) => {
   const { guild, channel } = message;
 
   try {
-    if (!("createInvite" in channel)) {
-      throw new Error("Channel does not support invites");
+    if (!('createInvite' in channel)) {
+      throw new Error('Channel does not support invites');
     }
 
     const invite = await (channel as TextChannel).createInvite({
       maxAge: 0,
-      maxUses: 0,
+      maxUses: 0
     });
     channel.send(invite.url);
   } catch (error) {
     log.error(`Cannot create invites at guild ${guild.id}`);
     channel.send(
-      `Could not create invite. Make sure \`Create Invite\` permission is ticked for me`,
+      `Could not create invite. Make sure \`Create Invite\` permission is ticked for me`
     );
   }
 

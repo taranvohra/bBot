@@ -8,6 +8,8 @@
     "check:ts": "tsc --noEmit",
     "build:js": "babel src -s -d dist --extensions '.ts'",
     "build": "npm run clean && npm run check:ts && npm run build:js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "start": "node -r source-map-support/register dist",
     "dev": "ts-node-dev -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/index.ts",
     "migrate": "ts-node-dev --trace-warnings -r tsconfig-paths/register --no-notify --respawn --transpile-only --require dotenv/config src/migrations.ts"
@@ -39,6 +41,7 @@
     "babel-plugin-module-resolver": "^4.1.0",
     "babel-plugin-transform-typescript-metadata": "^0.3.1",
     "dotenv": "^8.2.0",
+    "prettier": "^3.6.1",
     "rimraf": "^3.0.2",
     "source-map-support": "^0.5.19",
     "ts-node-dev": "^1.1.1",

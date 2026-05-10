@@ -1,20 +1,20 @@
-import config from "./config";
-import { Client, GatewayIntentBits, Message, User, Channel } from "discord.js";
-import { compareAsc } from "date-fns";
-import store from "~/store";
+import config from './config';
+import { Client, GatewayIntentBits, Message, User, Channel } from 'discord.js';
+import { compareAsc } from 'date-fns';
+import store from '~/store';
 import {
   onMessage,
   onPresenceUpdate,
   onGuildMemberRemove,
   onGuildMemberUpdate,
   commandHandlers,
-  onGuildDelete,
-} from "~/handlers";
-import { emojis } from "~/utils";
-import { connectDB, hydrateStore } from "./setup";
-import { pugPubSub } from "./pubsub";
-import { formatBroadcastCaptainsReady } from "./formatting";
-import log from "./log";
+  onGuildDelete
+} from '~/handlers';
+import { emojis } from '~/utils';
+import { connectDB, hydrateStore } from './setup';
+import { pugPubSub } from './pubsub';
+import { formatBroadcastCaptainsReady } from './formatting';
+import log from './log';
 
 /*
  *  bBot will only receive the following events
@@ -26,13 +26,13 @@ const bBot = new Client({
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-  ],
+    GatewayIntentBits.MessageContent
+  ]
 });
 
 const sendToTextChannel = (
   channel: Channel | null | undefined,
-  content: string,
+  content: string
 ) => {
   if (channel?.isSendable()) {
     channel.send(content);
@@ -43,7 +43,7 @@ const sendToTextChannel = (
  * B O T
  *   E V E N T S
  */
-bBot.on("ready", () => {
+bBot.on('ready', () => {
   const message = `Bot started running at ${new Date().toUTCString()}`;
   log.info(message);
   const HQChannel = bBot.channels.cache.get(config.HQ_CHANNEL_ID);
@@ -53,19 +53,19 @@ bBot.on("ready", () => {
   monitorForAutoRemovals();
 });
 
-bBot.on("disconnect", () => {});
+bBot.on('disconnect', () => {});
 
-bBot.on("messageCreate", onMessage);
+bBot.on('messageCreate', onMessage);
 
-bBot.on("presenceUpdate", onPresenceUpdate);
+bBot.on('presenceUpdate', onPresenceUpdate);
 
-bBot.on("guildMemberRemove", onGuildMemberRemove);
+bBot.on('guildMemberRemove', onGuildMemberRemove);
 
-bBot.on("guildMemberUpdate", onGuildMemberUpdate);
+bBot.on('guildMemberUpdate', onGuildMemberUpdate);
 
-bBot.on("guildDelete", onGuildDelete);
+bBot.on('guildDelete', onGuildDelete);
 
-pugPubSub.on("captains_ready", (guildId: string, pugName: string) => {
+pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
   log.info(`Captains ready for ${pugName} at guild ${guildId}`);
   const cache = store.getState();
   const pugs = cache.pugs[guildId];
@@ -124,16 +124,16 @@ const monitorUsersForUnblocking = () => {
         list.forEach((user) => {
           const message = {
             guild,
-            channel,
+            channel
           } as Message;
           const mentionedUser = {
-            ...user.culprit,
+            ...user.culprit
           } as User;
           if (compareAsc(now, user.expiresAt) >= 0) {
-            commandHandlers["handleAdminUnblockPlayer"](
+            commandHandlers['handleAdminUnblockPlayer'](
               message as Message<true>,
               [],
-              mentionedUser,
+              mentionedUser
             );
           }
         });
@@ -168,15 +168,15 @@ const monitorForAutoRemovals = () => {
             const message = {
               guild,
               channel,
-              content: "arr",
+              content: 'arr',
               author: {
                 id: userId,
-                username: user?.username ?? userId,
-              },
+                username: user?.username ?? userId
+              }
             } as Message;
-            commandHandlers["handleLeaveAllGameTypes"](
+            commandHandlers['handleLeaveAllGameTypes'](
               message as Message<true>,
-              [],
+              []
             );
           }
         }
@@ -204,12 +204,12 @@ const logErrorToHQChannel = (message: string, error?: Error) => {
   sendToTextChannel(HQChannel, `\`\`\`\n${message}\n${error?.stack}\`\`\``);
 };
 
-process.on("uncaughtException", (error) => {
+process.on('uncaughtException', (error) => {
   log.error(error);
   logErrorToHQChannel(error.message, error);
 });
 
-process.on("unhandledRejection", (reason) => {
+process.on('unhandledRejection', (reason) => {
   const msg = `Unhandled Promise Rejection for reason ${reason}`;
   log.error(msg);
   logErrorToHQChannel(msg);

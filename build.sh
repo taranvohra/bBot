@@ -8,17 +8,25 @@ BUILDER_NAME="${BUILDER_NAME:-bbot-multiarch}"
 case "${1:-}" in
   "")
     PLATFORM="linux/amd64"
-    TAG="latest"
+    DEFAULT_TAG="latest"
     ;;
   arm)
     PLATFORM="linux/arm64"
-    TAG="arm"
+    DEFAULT_TAG="arm"
     ;;
   *)
     echo "Usage: ./build.sh [arm]"
     exit 1
     ;;
 esac
+
+TAGS="${TAGS:-$DEFAULT_TAG}"
+
+declare -a TAG_ARGS=()
+
+for tag in $TAGS; do
+  TAG_ARGS+=("-t" "$IMAGE_NAME:$tag")
+done
 
 if ! docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
   docker buildx create --name "$BUILDER_NAME" --use
@@ -31,6 +39,6 @@ docker buildx inspect --bootstrap >/dev/null
 docker buildx build \
   --platform "$PLATFORM" \
   -f Dockerfile \
-  -t "$IMAGE_NAME:$TAG" \
+  "${TAG_ARGS[@]}" \
   --push \
   .

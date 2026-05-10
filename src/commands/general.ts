@@ -6,7 +6,7 @@ const generalCommandList: Command[] = [
     aliases: ['register'],
     type: 'solo',
     isPrivileged: true,
-    needsRegisteredGuild: false,
+    needsRegisteredGuild: false
   },
   {
     group,
@@ -14,7 +14,7 @@ const generalCommandList: Command[] = [
     aliases: ['setpugchannel'],
     type: 'solo',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -22,7 +22,7 @@ const generalCommandList: Command[] = [
     aliases: ['setquerychannel'],
     type: 'solo',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -30,7 +30,7 @@ const generalCommandList: Command[] = [
     aliases: ['setprefix'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -38,7 +38,7 @@ const generalCommandList: Command[] = [
     aliases: ['ignorecommandgroup', 'igc'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -46,7 +46,7 @@ const generalCommandList: Command[] = [
     aliases: ['unignorecommandgroup', 'uigc'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -54,7 +54,7 @@ const generalCommandList: Command[] = [
     aliases: ['warn'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -62,7 +62,7 @@ const generalCommandList: Command[] = [
     aliases: ['logs'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -70,7 +70,7 @@ const generalCommandList: Command[] = [
     aliases: ['invite'],
     type: 'solo',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -78,8 +78,8 @@ const generalCommandList: Command[] = [
     aliases: ['help', 'commands'],
     type: 'solo',
     isPrivileged: false,
-    needsRegisteredGuild: false,
-  },
+    needsRegisteredGuild: false
+  }
 ];
 
 export default generalCommandList;
