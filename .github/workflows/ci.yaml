@@ -1,4 +1,4 @@
-name: bBot CI Checks
+name: CI (Typescript, Formatting)
 
 on:
   push:
