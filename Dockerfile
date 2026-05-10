@@ -1,8 +1,8 @@
-FROM node:16.15.0-alpine3.14
+FROM node:22-alpine
 
 WORKDIR /usr/app/bbot
 
-RUN apk update && apk add --no-cache python2 g++ make
+RUN apk add --no-cache python3 make g++
 
 COPY package*.json ./
 

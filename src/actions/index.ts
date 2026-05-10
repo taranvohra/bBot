@@ -8,35 +8,35 @@ import {
   Block,
   QueryServer,
   Logs,
-  BlockedCaptain,
+  BlockedCaptain
 } from '~/models';
 
 export const updateGuildPugChannel = (guildId: string, channelId: string) =>
   Guilds.findByIdAndUpdate(guildId, {
     $set: {
-      pugChannel: channelId,
-    },
+      pugChannel: channelId
+    }
   }).exec();
 
 export const updateGuildQueryChannel = (guildId: string, channelId: string) =>
   Guilds.findByIdAndUpdate(guildId, {
     $set: {
-      queryChannel: channelId,
-    },
+      queryChannel: channelId
+    }
   }).exec();
 
 export const updateGuildPrefix = (guildId: string, prefix: string) =>
   Guilds.findByIdAndUpdate(guildId, {
     $set: {
-      prefix,
-    },
+      prefix
+    }
   }).exec();
 
 export const addGuildIgnoredCommandGroup = (guildId: string, group: string) =>
   Guilds.findByIdAndUpdate(guildId, {
     $addToSet: {
-      ignoredCommandGroup: group,
-    },
+      ignoredCommandGroup: group
+    }
   }).exec();
 
 export const removeGuildIgnoredCommandGroup = (
@@ -45,20 +45,20 @@ export const removeGuildIgnoredCommandGroup = (
 ) =>
   Guilds.findByIdAndUpdate(guildId, {
     $pull: {
-      ignoredCommandGroup: group,
-    },
+      ignoredCommandGroup: group
+    }
   }).exec();
 
 export const addGuildGameType = (guildId: string, gameType: GameType) =>
   Guilds.findByIdAndUpdate(guildId, {
     $push: {
-      gameTypes: gameType,
-    },
+      gameTypes: gameType
+    }
   }).exec();
 
 export const deleteGuildGameType = (guildId: string, gameTypeName: string) =>
   Guilds.findByIdAndUpdate(guildId, {
-    $pull: { gameTypes: { name: gameTypeName } },
+    $pull: { gameTypes: { name: gameTypeName } }
   }).exec();
 
 export const getNextSequences = async (
@@ -70,8 +70,8 @@ export const getNextSequences = async (
     {
       $inc: {
         total: 1,
-        [`pugs.${gameTypeName}`]: 1,
-      },
+        [`pugs.${gameTypeName}`]: 1
+      }
     },
     { new: true }
   ).exec();
@@ -115,7 +115,7 @@ export const updateStatsAfterPug = (
         updateOne: {
           filter: {
             guildId,
-            userId,
+            userId
           },
           update: {
             $set: {
@@ -123,11 +123,11 @@ export const updateStatsAfterPug = (
               lastPug: savedPugId,
               [`stats.${name}.rating`]: updatedRating,
               [`stats.${name}.totalCaptain`]: updatedTotalCaptain,
-              [`stats.${name}.totalPugs`]: updatedTotalPugs,
-            },
+              [`stats.${name}.totalPugs`]: updatedTotalPugs
+            }
           },
-          upsert: true,
-        },
+          upsert: true
+        }
       };
     }),
     { ordered: false }
@@ -146,14 +146,14 @@ export const getLastXPug = async (
     return Pugs.findOne({
       guildId,
       gameSequence,
-      name: gameType,
+      name: gameType
     });
   } else {
     const totalGamesSoFar = guildStats?.total ?? 0;
     const overallSequence = totalGamesSoFar - (howFar - 1);
     return Pugs.findOne({
       guildId,
-      overallSequence,
+      overallSequence
     });
   }
 };
@@ -161,8 +161,8 @@ export const getLastXPug = async (
 export const addGuildBlockedUser = async (guildId: string, block: Block) =>
   Guilds.findByIdAndUpdate(guildId, {
     $push: {
-      blocks: block,
-    },
+      blocks: block
+    }
   }).exec();
 
 export const removeGuildBlockedUser = async (
@@ -180,9 +180,9 @@ export const removeGuildBlockedUser = async (
   return Guilds.findByIdAndUpdate(guildId, {
     $pull: {
       blocks: {
-        culprit,
-      },
-    },
+        culprit
+      }
+    }
   }).exec();
 };
 
@@ -194,29 +194,29 @@ export const setGuildGameTypeCoinFlipTo = async (
   Guilds.findOneAndUpdate(
     {
       _id: guildId,
-      'gameTypes.name': gameType,
+      'gameTypes.name': gameType
     },
     {
       $set: {
-        'gameTypes.$.isCoinFlipEnabled': to,
-      },
+        'gameTypes.$.isCoinFlipEnabled': to
+      }
     }
   ).exec();
 
 export const addGuildQueryServer = async (guildId: string, qs: QueryServer) =>
   Guilds.findByIdAndUpdate(guildId, {
     $push: {
-      queryServers: qs,
-    },
+      queryServers: qs
+    }
   }).exec();
 
 export const removeGuildQueryServer = async (guildId: string, id: number) =>
   Guilds.findByIdAndUpdate(guildId, {
     $pull: {
       queryServers: {
-        id,
-      },
-    },
+        id
+      }
+    }
   }).exec();
 
 export const editGuildQueryServerName = async (
@@ -228,8 +228,8 @@ export const editGuildQueryServerName = async (
     { _id: guildId, 'queryServers.id': id },
     {
       $set: {
-        'queryServers.$.name': name,
-      },
+        'queryServers.$.name': name
+      }
     }
   ).exec();
 
@@ -242,8 +242,8 @@ export const editGuildQueryServerAddress = async (
     { _id: guildId, 'queryServers.id': id },
     {
       $set: {
-        'queryServers.$.address': address,
-      },
+        'queryServers.$.address': address
+      }
     }
   ).exec();
 
@@ -256,18 +256,18 @@ export const updateGuildUserDefaultJoins = async (
   Users.findOneAndUpdate(
     {
       guildId,
-      userId,
+      userId
     },
     {
       $set: {
         guildId,
         userId,
         username,
-        defaultJoins,
-      },
+        defaultJoins
+      }
     },
     {
-      upsert: true,
+      upsert: true
     }
   ).exec();
 
@@ -280,7 +280,7 @@ export const createNewUserLog = (
     guildId,
     userId,
     description,
-    timestamp: new Date(),
+    timestamp: new Date()
   });
 
 export const updateGuildGameTypeTeamEmojis = (
@@ -291,12 +291,12 @@ export const updateGuildGameTypeTeamEmojis = (
   Guilds.findOneAndUpdate(
     {
       _id: guildId,
-      'gameTypes.name': gameType,
+      'gameTypes.name': gameType
     },
     {
       $set: {
-        'gameTypes.$.teamEmojis': teamEmojis,
-      },
+        'gameTypes.$.teamEmojis': teamEmojis
+      }
     }
   ).exec();
 
@@ -308,10 +308,10 @@ export const updateGuildGameTypePickingOrder = (
   Guilds.findOneAndUpdate(
     {
       _id: guildId,
-      'gameTypes.name': gameType,
+      'gameTypes.name': gameType
     },
     {
-      $set: { 'gameTypes.$.pickingOrder': newPickingOrder },
+      $set: { 'gameTypes.$.pickingOrder': newPickingOrder }
     }
   ).exec();
 
@@ -321,8 +321,8 @@ export const addGuildBlockedCaptain = async (
 ) =>
   Guilds.findByIdAndUpdate(guildId, {
     $push: {
-      blockedCaptains: blockedCaptain,
-    },
+      blockedCaptains: blockedCaptain
+    }
   }).exec();
 
 export const removeGuildBlockedCaptain = async (
@@ -342,8 +342,8 @@ export const removeGuildBlockedCaptain = async (
   return Guilds.findByIdAndUpdate(guildId, {
     $pull: {
       blockedCaptains: {
-        culprit,
-      },
-    },
+        culprit
+      }
+    }
   }).exec();
 };

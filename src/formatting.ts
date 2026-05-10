@@ -1,4 +1,4 @@
-import { User, MessageEmbed } from 'discord.js';
+import { User, EmbedBuilder } from 'discord.js';
 import { isDocument } from '@typegoose/typegoose';
 import {
   Pug,
@@ -6,7 +6,7 @@ import {
   PugSchema,
   QueryServer,
   Log,
-  GuildStat,
+  GuildStat
 } from '~/models';
 import {
   CONSTANTS,
@@ -16,27 +16,27 @@ import {
   isDuelPug,
   sanitizeName,
   getTeamNumericIndex,
-  secondsToHH_MM_SS,
+  secondsToHH_MM_SS
 } from '~/utils';
 
 const EMBED_COLOR = '#16171A';
 const edges = [
   {
     top: `+----- mapvote ------+`,
-    bottom: `+----------------------+`,
+    bottom: `+----------------------+`
   },
   {
     top: `+------ mapvote ------+`,
-    bottom: `+-----------------------+`,
+    bottom: `+-----------------------+`
   },
   {
     top: `+------- mapvote -------+`,
-    bottom: `+-------------------------+`,
+    bottom: `+-------------------------+`
   },
   {
     top: `+------- mapvote ------+`,
-    bottom: `+------------------------+`,
-  },
+    bottom: `+------------------------+`
+  }
 ];
 
 export const formatPugFilledDM = (pug: Pug, guildName: string) => {
@@ -112,7 +112,7 @@ export const formatLeaveStatus = (
       left: ``,
       nj: ``,
       nf: ``,
-      username: ``,
+      username: ``
     }
   );
 
@@ -308,15 +308,18 @@ export const formatPickPlayerStatus = (
 
   const pugTeams = Array.from(
     {
-      length: pug.noOfTeams,
+      length: pug.noOfTeams
     },
     (_, i) => i
-  ).reduce((acc, _, i) => {
-    const teamIndex = getTeamIndex(i);
-    const teamEmojis = getTeamEmojis(pug.teamEmojis);
-    acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
-    return acc;
-  }, {} as { [team: number]: string });
+  ).reduce(
+    (acc, _, i) => {
+      const teamIndex = getTeamIndex(i);
+      const teamEmojis = getTeamEmojis(pug.teamEmojis);
+      acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]} `;
+      return acc;
+    },
+    {} as { [team: number]: string }
+  );
 
   const players = pug.players.reduce((acc, curr, index) => {
     if (curr.team === null)
@@ -381,15 +384,18 @@ export const formatPugsInPicking = (pugs: Array<Pug>) => {
 
     const pugTeams = Array.from(
       {
-        length: pug.noOfTeams,
+        length: pug.noOfTeams
       },
       (_, i) => i
-    ).reduce((acc, _, i) => {
-      const teamIndex = getTeamIndex(i);
-      const teamEmojis = getTeamEmojis(pug.teamEmojis);
-      acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]}`;
-      return acc;
-    }, {} as { [team: number]: string });
+    ).reduce(
+      (acc, _, i) => {
+        const teamIndex = getTeamIndex(i);
+        const teamEmojis = getTeamEmojis(pug.teamEmojis);
+        acc[i] = `**${teams[teamIndex]}** ${teamEmojis[teamIndex]}`;
+        return acc;
+      },
+      {} as { [team: number]: string }
+    );
 
     const players = pug.players.reduce((acc, curr, index) => {
       if (curr.team === null)
@@ -425,8 +431,8 @@ export const formatUserStats = (user: PugUser) => {
     const {
       lastPug,
       lastPug: {
-        game: { pug },
-      },
+        game: { pug }
+      }
     } = user;
     const { totalPugs, totalCaptain } = Object.values(user.stats).reduce(
       (acc, curr) => {
@@ -442,7 +448,7 @@ export const formatUserStats = (user: PugUser) => {
         totalWins: 0,
         totalLosses: 0,
         totalWinRate: 0,
-        totalGameTypes: 0,
+        totalGameTypes: 0
       }
     );
     const title = `:pencil: Showing stats for **${user.username}** :pencil:`;
@@ -482,7 +488,7 @@ export const formatLastPug = (
   guildName: string
 ) => {
   const {
-    game: { pug, coinFlipWinner },
+    game: { pug, coinFlipWinner }
   } = lastPug;
 
   const pugTeams =
@@ -608,7 +614,7 @@ export const formatQueryServerStatus = (
     [teams.team_2]: [],
     [teams.team_3]: [],
     [teams.team_255]: [],
-    [teams.spec]: [],
+    [teams.spec]: []
   };
 
   for (let i = 0; i < noOfPlayers; i++) {
@@ -633,7 +639,7 @@ export const formatQueryServerStatus = (
 
   let xServerQueryProps: { remainingTime: string; teamScores: string[] } = {
     remainingTime: ``,
-    teamScores: [],
+    teamScores: []
   };
   if (info.xserverquery) {
     const remainingSeconds = parseInt(info.remainingtime);
@@ -648,7 +654,7 @@ export const formatQueryServerStatus = (
       [teams.team_0]: '',
       [teams.team_1]: '',
       [teams.team_2]: '',
-      [teams.team_3]: '',
+      [teams.team_3]: ''
     };
 
     for (let i = 0; i < maxTeams; i++)
@@ -669,18 +675,17 @@ export const formatQueryServerStatus = (
     );
   }
 
-  const embed = new MessageEmbed({
-    color: EMBED_COLOR,
-    title: `${country ? `:flag_${country}:` : ``} ${info.hostname}`,
-    description: `${info.mapname} • ${noOfPlayers}/${maxPlayers} players • ${
-      xServerQueryProps.remainingTime || ''
-    }`,
-    footer: {
-      text: `unreal://${host}:${port}${
-        password ? `?password=${password}` : ``
-      }`,
-    },
-  });
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_COLOR)
+    .setTitle(`${country ? `:flag_${country}:` : ``} ${info.hostname}`)
+    .setDescription(
+      `${info.mapname} • ${noOfPlayers}/${maxPlayers} players • ${
+        xServerQueryProps.remainingTime || ''
+      }`
+    )
+    .setFooter({
+      text: `unreal://${host}:${port}${password ? `?password=${password}` : ``}`
+    });
 
   Object.keys(playerList).forEach((team) => {
     const teamIndex = getTeamNumericIndex(team);
@@ -691,11 +696,11 @@ export const formatQueryServerStatus = (
     }, ``);
 
     playerList[team].length > 0
-      ? embed.addField(
-          team + (xServerQueryProps.teamScores[teamIndex] || ``),
-          teamPlayers,
-          team !== teams.spec
-        )
+      ? embed.addFields({
+          name: team + (xServerQueryProps.teamScores[teamIndex] || ``),
+          value: teamPlayers,
+          inline: team !== teams.spec
+        })
       : '';
   });
 
@@ -726,18 +731,23 @@ export const formatQueryServers = (
     },
     {
       ipname: [],
-      players: [],
+      players: []
     } as { ipname: string[]; players: string[] }
   );
 
-  const embed = new MessageEmbed({
-    color: EMBED_COLOR,
-    footer: { text: 'To query a server, type .q ip' },
-  });
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_COLOR)
+    .setFooter({ text: 'To query a server, type .q ip' });
 
   if (list.length > 0) {
-    embed.addField(`IP\u00A0\u00A0\u00A0Name`, ipname.join('\n'), true);
-    embed.addField('Players', players.join('\n'), true);
+    embed.addFields(
+      {
+        name: `IP\u00A0\u00A0\u00A0Name`,
+        value: ipname.join('\n'),
+        inline: true
+      },
+      { name: 'Players', value: players.join('\n'), inline: true }
+    );
   } else {
     embed.setDescription('No query servers added yet');
   }

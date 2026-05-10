@@ -4,7 +4,7 @@ import {
   CONSTANTS,
   powerSet,
   isDuelPug,
-  getGuildBlockedCaptains,
+  getGuildBlockedCaptains
 } from '~/utils';
 import { pugPubSub } from '../pubsub';
 
@@ -50,7 +50,7 @@ export class Pug {
     pickingOrder,
     isCoinFlipEnabled,
     isMix,
-    teamEmojis,
+    teamEmojis
   }: {
     name: string;
     noOfPlayers: number;
@@ -79,7 +79,7 @@ export class Pug {
       team: null,
       pick: null,
       tag: '',
-      ...user,
+      ...user
     });
     // put cases if player is already in, couldnt join or joined
   }
@@ -225,15 +225,18 @@ export class Pug {
         (p) => this.isCaptain(p.id) === true
       );
 
-      const setsSortedByRatings = focusedSets.reduce((acc, curr) => {
-        const sortedSet = [...curr, ...existingCapts].sort((a, b) => {
-          const aRating = a.stats[this.name].rating;
-          const bRating = b.stats[this.name].rating;
-          return aRating - bRating;
-        });
-        acc.push(sortedSet);
-        return acc;
-      }, [] as typeof focusedSets);
+      const setsSortedByRatings = focusedSets.reduce(
+        (acc, curr) => {
+          const sortedSet = [...curr, ...existingCapts].sort((a, b) => {
+            const aRating = a.stats[this.name].rating;
+            const bRating = b.stats[this.name].rating;
+            return aRating - bRating;
+          });
+          acc.push(sortedSet);
+          return acc;
+        },
+        [] as typeof focusedSets
+      );
 
       const [bestSet] = setsSortedByRatings.slice().sort((setA, setB) => {
         const setAFirst = setA[0].stats[this.name].rating;

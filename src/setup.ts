@@ -8,7 +8,7 @@ export const connectDB = async () =>
   await mongoose.connect(config.DB, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useFindAndModify: false,
+    useFindAndModify: false
   });
 
 export const hydrateStore = async () => {
@@ -27,14 +27,14 @@ export const hydrateStore = async () => {
       queryServers,
       blocks,
       prefix,
-      blockedCaptains = [],
+      blockedCaptains = []
     } = guild;
 
     store.dispatch(
       initBlocks({
         guildId,
         list: blocks,
-        captains: blockedCaptains.map(({ culprit }) => culprit.id),
+        captains: blockedCaptains.map(({ culprit }) => culprit.id)
       })
     );
     store.dispatch(
@@ -43,7 +43,7 @@ export const hydrateStore = async () => {
         ignoredCommandGroup,
         prefix,
         cooldowns: {},
-        autoremovals: {},
+        autoremovals: {}
       })
     );
     store.dispatch(

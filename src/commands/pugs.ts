@@ -6,7 +6,7 @@ const pugsCommandList: Command[] = [
     aliases: ['addgametype', 'agm'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -14,7 +14,7 @@ const pugsCommandList: Command[] = [
     aliases: ['deletegametype', 'dgm'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -22,7 +22,7 @@ const pugsCommandList: Command[] = [
     aliases: ['j', 'join'],
     type: 'both',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -30,7 +30,7 @@ const pugsCommandList: Command[] = [
     aliases: ['defaultjoin'],
     type: 'args',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
 
   {
@@ -39,7 +39,7 @@ const pugsCommandList: Command[] = [
     aliases: ['l', 'lv', 'leave'],
     type: 'both',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -47,7 +47,7 @@ const pugsCommandList: Command[] = [
     aliases: ['lva'],
     type: 'solo',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -55,7 +55,7 @@ const pugsCommandList: Command[] = [
     aliases: ['ls', 'list'],
     type: 'both',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -63,7 +63,7 @@ const pugsCommandList: Command[] = [
     aliases: ['liast'],
     type: 'solo',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -71,7 +71,7 @@ const pugsCommandList: Command[] = [
     aliases: ['lsa'],
     type: 'solo',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -79,7 +79,7 @@ const pugsCommandList: Command[] = [
     aliases: ['captain', 'capt'],
     type: 'solo',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -87,7 +87,7 @@ const pugsCommandList: Command[] = [
     aliases: ['pick'],
     type: 'args',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -95,7 +95,7 @@ const pugsCommandList: Command[] = [
     aliases: ['picking'],
     type: 'solo',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -103,7 +103,7 @@ const pugsCommandList: Command[] = [
     aliases: ['tag'],
     type: 'both',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -111,7 +111,7 @@ const pugsCommandList: Command[] = [
     aliases: ['stats'],
     type: 'both',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -120,7 +120,7 @@ const pugsCommandList: Command[] = [
     rgx: (cmd: string) => new RegExp(`^${cmd}(\d|t)*`, 'g'),
     type: 'both',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -128,7 +128,7 @@ const pugsCommandList: Command[] = [
     aliases: ['promote'],
     type: 'both',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -136,7 +136,7 @@ const pugsCommandList: Command[] = [
     aliases: ['p'],
     type: 'both',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -144,7 +144,7 @@ const pugsCommandList: Command[] = [
     aliases: ['top10played'],
     type: 'args',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -152,7 +152,7 @@ const pugsCommandList: Command[] = [
     aliases: ['pugstats'],
     type: 'solo',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -160,7 +160,7 @@ const pugsCommandList: Command[] = [
     aliases: ['add'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -168,7 +168,7 @@ const pugsCommandList: Command[] = [
     aliases: ['remove'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -176,7 +176,7 @@ const pugsCommandList: Command[] = [
     aliases: ['forcepick'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -184,7 +184,7 @@ const pugsCommandList: Command[] = [
     aliases: ['reset'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -192,7 +192,7 @@ const pugsCommandList: Command[] = [
     aliases: ['block'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -200,7 +200,7 @@ const pugsCommandList: Command[] = [
     aliases: ['unblock'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -208,7 +208,7 @@ const pugsCommandList: Command[] = [
     aliases: ['showblocked'],
     type: 'solo',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -216,7 +216,7 @@ const pugsCommandList: Command[] = [
     aliases: ['enablecoinflip'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -224,7 +224,7 @@ const pugsCommandList: Command[] = [
     aliases: ['disablecoinflip'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -232,7 +232,7 @@ const pugsCommandList: Command[] = [
     aliases: ['teamemojis'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -240,7 +240,7 @@ const pugsCommandList: Command[] = [
     aliases: ['setpickingorder'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -248,7 +248,7 @@ const pugsCommandList: Command[] = [
     aliases: ['autoremove', 'ar'],
     type: 'both',
     isPrivileged: false,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -256,7 +256,7 @@ const pugsCommandList: Command[] = [
     aliases: ['blockcaptain', 'blockcapt'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -264,7 +264,7 @@ const pugsCommandList: Command[] = [
     aliases: ['unblockcaptain', 'unblockcapt'],
     type: 'args',
     isPrivileged: true,
-    needsRegisteredGuild: true,
+    needsRegisteredGuild: true
   },
   {
     group,
@@ -272,8 +272,8 @@ const pugsCommandList: Command[] = [
     aliases: ['showblockedcaptain', 'showblockedcapt'],
     type: 'solo',
     isPrivileged: true,
-    needsRegisteredGuild: true,
-  },
+    needsRegisteredGuild: true
+  }
 ];
 
 export default pugsCommandList;

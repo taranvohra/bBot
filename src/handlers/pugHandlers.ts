@@ -1,6 +1,6 @@
 import log from '../log';
 import fs from 'fs';
-import Jimp from 'jimp';
+import { Jimp, HorizontalAlign, VerticalAlign } from 'jimp';
 import { formatDistance, differenceInDays } from 'date-fns';
 import { User } from 'discord.js';
 import { Pug, Users, Pugs, GuildStats, Guilds } from '~/models';
@@ -16,7 +16,7 @@ import {
   getRandomPickIndex,
   teamEmojiTypes,
   getPlayerIndexFromPlayerList,
-  getHumanReadablePeriodName,
+  getHumanReadablePeriodName
 } from '~/utils';
 import {
   addGuildGameType,
@@ -32,7 +32,7 @@ import {
   updateGuildGameTypeTeamEmojis,
   updateGuildGameTypePickingOrder,
   addGuildBlockedCaptain,
-  removeGuildBlockedCaptain,
+  removeGuildBlockedCaptain
 } from '~/actions';
 import store, {
   addGameType,
@@ -49,7 +49,7 @@ import store, {
   addAutoRemoval,
   clearAutoRemoval,
   addBlockedCaptain,
-  removeBlockedCaptain,
+  removeBlockedCaptain
 } from '~/store';
 import {
   formatPugFilledDM,
@@ -67,7 +67,7 @@ import {
   formatUserStats,
   formatLastPug,
   formatPromoteAvailablePugs,
-  formatPugStats,
+  formatPugStats
 } from '../formatting';
 import { pugPubSub } from '../pubsub';
 import { FONTS } from '../fonts';
@@ -90,7 +90,7 @@ export const handleAddGameType: Handler = async (message, args) => {
   const [name, noOfPlayers, noOfTeamsOrMix] = [
     args[0].toLowerCase(),
     Number(args[1]),
-    args[2],
+    args[2]
   ];
 
   if (!name || isNaN(noOfPlayers) || !noOfTeamsOrMix) {
@@ -144,7 +144,7 @@ export const handleAddGameType: Handler = async (message, args) => {
     pickingOrder,
     isCoinFlipEnabled: false,
     isMix,
-    teamEmojis: 'logos',
+    teamEmojis: 'logos'
   } as const;
 
   await addGuildGameType(guildId, newGameType);
@@ -213,7 +213,7 @@ export const handleDecideDefaultOrSpecificJoin: Handler = async (
   } else {
     const user = await Users.findOne({
       userId: author.id,
-      guildId: guild.id,
+      guildId: guild.id
     }).exec();
 
     if (!user || !user.defaultJoins || user.defaultJoins.length === 0) {
@@ -319,7 +319,7 @@ export const handleJoinGameTypes: Handler = async (
 
   const dbUser = await Users.findOne({
     userId: user.id,
-    guildId: guild.id,
+    guildId: guild.id
   }).exec();
 
   let toBroadcast: Pug | undefined;
@@ -362,12 +362,12 @@ export const handleJoinGameTypes: Handler = async (
             won: 0,
             totalPugs: 0,
             totalCaptain: 0,
-            rating: 0,
+            rating: 0
           };
           pug.addPlayer({
             id: user.id,
             name: user.username,
-            stats: { [game]: gameTypeStats },
+            stats: { [game]: gameTypeStats }
           });
           result = 'joined';
           log.info(`${user.id} joined ${pug.name} on ${guild.id}`);
@@ -458,8 +458,8 @@ export const handleJoinGameTypes: Handler = async (
         gameSequence: sequences.current,
         overallSequence: sequences.total,
         game: {
-          pug: toBroadcast,
-        },
+          pug: toBroadcast
+        }
       });
 
       updateStatsAfterPug(toBroadcast, newPug.id, guild.id);
@@ -541,7 +541,7 @@ export const handleLeaveGameTypes: Handler = async (
           name: game,
           result,
           pug,
-          user,
+          user
         };
       } else {
         result = 'not-in';
@@ -551,30 +551,33 @@ export const handleLeaveGameTypes: Handler = async (
 
   const allLeaveStatuses = leaveStatuses.filter(Boolean) as LeaveStatus[];
   // Compute dead pugs
-  const deadPugs = allLeaveStatuses.reduce((acc, { pug, user }) => {
-    if (pug && user) {
-      if (pug.players.length === pug.noOfPlayers - 1) {
-        acc.push({ pug, user });
+  const deadPugs = allLeaveStatuses.reduce(
+    (acc, { pug, user }) => {
+      if (pug && user) {
+        if (pug.players.length === pug.noOfPlayers - 1) {
+          acc.push({ pug, user });
+        }
+        if (pug.isEmpty()) {
+          store.dispatch(removePug({ guildId: guild.id, name: pug.name }));
+          log.info(
+            `Removed pug ${pug.name} at guild ${guild.id} because there are 0 players in`
+          );
+        }
       }
-      if (pug.isEmpty()) {
-        store.dispatch(removePug({ guildId: guild.id, name: pug.name }));
-        log.info(
-          `Removed pug ${pug.name} at guild ${guild.id} because there are 0 players in`
-        );
-      }
-    }
-    return acc;
-  }, [] as { pug: Pug; user: User }[]);
+      return acc;
+    },
+    [] as { pug: Pug; user: User }[]
+  );
 
   const leaveMessage = formatLeaveStatus(
     allLeaveStatuses,
     content === 'zzz'
       ? 'offline'
       : content === 'left'
-      ? 'left'
-      : content === 'arr'
-      ? 'autoremove'
-      : undefined
+        ? 'left'
+        : content === 'arr'
+          ? 'autoremove'
+          : undefined
   );
 
   if (!returnMsg) {
@@ -622,20 +625,23 @@ export const handleListGameTypes: Handler = async (message, args) => {
     const tempList = gameTypes.map((g) => ({
       name: g.name,
       currPlayers: 0,
-      maxPlayers: g.noOfPlayers,
+      maxPlayers: g.noOfPlayers
     }));
 
-    const gamesList = tempList.reduce((acc, curr) => {
-      const existingPug = list.find((p) => p.name === curr.name);
-      if (existingPug) {
-        acc.push({
-          name: existingPug.name,
-          currPlayers: existingPug.players.length,
-          maxPlayers: existingPug.noOfPlayers,
-        });
-      } else acc.push(curr);
-      return acc;
-    }, [] as typeof tempList);
+    const gamesList = tempList.reduce(
+      (acc, curr) => {
+        const existingPug = list.find((p) => p.name === curr.name);
+        if (existingPug) {
+          acc.push({
+            name: existingPug.name,
+            currPlayers: existingPug.players.length,
+            maxPlayers: existingPug.noOfPlayers
+          });
+        } else acc.push(curr);
+        return acc;
+      },
+      [] as typeof tempList
+    );
 
     message.channel.send(formatListGameTypes(gamesList, guild.name));
   }
@@ -764,7 +770,7 @@ export const handlePickPlayer: Handler = async (
   const {
     guild,
     author,
-    mentions: { users },
+    mentions: { users }
   } = message;
   if (!guild) return;
 
@@ -814,8 +820,8 @@ export const handlePickPlayer: Handler = async (
     index === 'random'
       ? getRandomPickIndex(forPug.players) + 1
       : firstMentionedUser
-      ? getPlayerIndexFromPlayerList(forPug.players, firstMentionedUser) + 1
-      : parseInt(index);
+        ? getPlayerIndexFromPlayerList(forPug.players, firstMentionedUser) + 1
+        : parseInt(index);
   if (!playerIndex) return;
 
   if (playerIndex < 1 || playerIndex > forPug.players.length) {
@@ -844,8 +850,8 @@ export const handlePickPlayer: Handler = async (
     index2 === 'random'
       ? getRandomPickIndex(forPug.players) + 1
       : secondMentionedUser
-      ? getPlayerIndexFromPlayerList(forPug.players, secondMentionedUser) + 1
-      : parseInt(index2);
+        ? getPlayerIndexFromPlayerList(forPug.players, secondMentionedUser) + 1
+        : parseInt(index2);
 
   if (canPickTwice && playerIndex2) {
     let if1 = true,
@@ -902,8 +908,8 @@ export const handlePickPlayer: Handler = async (
       overallSequence: sequences.total,
       game: {
         pug: forPug,
-        coinFlipWinner: isCoinFlipEnabled ? coinflip : undefined,
-      },
+        coinFlipWinner: isCoinFlipEnabled ? coinflip : undefined
+      }
     });
     log.debug(`Saved new pug ${savedPug.id} at ${guild.id} in DB`);
 
@@ -990,7 +996,7 @@ export const handleCheckStats: Handler = async (message) => {
 
   const user = await Users.findOne({
     userId: mentionedUser ? mentionedUser.id : author.id,
-    guildId: guild.id,
+    guildId: guild.id
   })
     .populate('lastPug')
     .exec();
@@ -1112,7 +1118,7 @@ export const handlePromoteAvailablePugs: Handler = async (message, args) => {
       addCommandCooldown({
         guildId: guild.id,
         command: 'promote',
-        timestamp: Date.now() + CONSTANTS.coolDownSeconds * 1000,
+        timestamp: Date.now() + CONSTANTS.coolDownSeconds * 1000
       })
     );
   }
@@ -1163,10 +1169,10 @@ export const handleShowTop10Played: Handler = async (message, args) => {
   const sortKey = `stats.${gameType}.totalPugs` as const;
   const top10Data = await Users.find({
     guildId: guild.id,
-    [`stats.${gameType}`]: { $exists: true },
+    [`stats.${gameType}`]: { $exists: true }
   })
     .sort({
-      [sortKey]: -1,
+      [sortKey]: -1
     })
     .select('username stats')
     .limit(10)
@@ -1178,7 +1184,11 @@ export const handleShowTop10Played: Handler = async (message, args) => {
     return;
   }
 
-  const top10 = top10Data.map(({ username, stats }) => {
+  const top10 = top10Data.map((userDoc: unknown) => {
+    const { username, stats } = userDoc as {
+      username: string;
+      stats: Record<string, { totalPugs: number }>;
+    };
     const { totalPugs } = stats[gameType];
     return { username, totalPugs };
   });
@@ -1188,74 +1198,80 @@ export const handleShowTop10Played: Handler = async (message, args) => {
     let Y = 50;
     const MAX_HEIGHT = 25;
 
-    template.print(
-      obelixFNT,
-      0,
-      0,
-      {
+    template.print({
+      font: obelixFNT,
+      x: 0,
+      y: 0,
+      text: {
         text: `TOP 10 PLAYED ${gameType.toUpperCase()}`,
-        alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
-        alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
+        alignmentX: HorizontalAlign.CENTER,
+        alignmentY: VerticalAlign.MIDDLE
       },
-      200,
-      MAX_HEIGHT
-    );
-
-    top10.forEach((player, i) => {
-      const { username, totalPugs } = player;
-      const name = username.replace(/\\[^\\]/g, (c) => c.substring(1));
-
-      const shouldUseUbuntu = name
-        .split('')
-        .every((_, i) => ubuntuTTF.hasGlyphForCodePoint(name.codePointAt(i)!));
-
-      template.print(
-        obelixFNT,
-        0,
-        Y,
-        {
-          text: (i + 1).toString(),
-          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
-          alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
-        },
-        30,
-        MAX_HEIGHT
-      );
-
-      template.print(
-        shouldUseUbuntu ? ubuntuFNT : arialFNT,
-        30,
-        Y,
-        {
-          text: name.substring(0, 12),
-          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
-          alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
-        },
-        120,
-        MAX_HEIGHT
-      );
-
-      template.print(
-        ubuntuFNT,
-        150,
-        Y,
-        {
-          text: totalPugs.toString(),
-          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
-          alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
-        },
-        50,
-        MAX_HEIGHT
-      );
-
-      Y += 25;
+      maxWidth: 200,
+      maxHeight: MAX_HEIGHT
     });
 
+    top10.forEach(
+      (player: { username: string; totalPugs: number }, i: number) => {
+        const { username, totalPugs } = player;
+        const name = username.replace(/\\[^\\]/g, (c: string) =>
+          c.substring(1)
+        );
+
+        const shouldUseUbuntu = name
+          .split('')
+          .every((_: string, i: number) =>
+            ubuntuTTF.hasGlyphForCodePoint(name.codePointAt(i)!)
+          );
+
+        template.print({
+          font: obelixFNT,
+          x: 0,
+          y: Y,
+          text: {
+            text: (i + 1).toString(),
+            alignmentX: HorizontalAlign.CENTER,
+            alignmentY: VerticalAlign.MIDDLE
+          },
+          maxWidth: 30,
+          maxHeight: MAX_HEIGHT
+        });
+
+        template.print({
+          font: shouldUseUbuntu ? ubuntuFNT : arialFNT,
+          x: 30,
+          y: Y,
+          text: {
+            text: name.substring(0, 12),
+            alignmentX: HorizontalAlign.CENTER,
+            alignmentY: VerticalAlign.MIDDLE
+          },
+          maxWidth: 120,
+          maxHeight: MAX_HEIGHT
+        });
+
+        template.print({
+          font: ubuntuFNT,
+          x: 150,
+          y: Y,
+          text: {
+            text: totalPugs.toString(),
+            alignmentX: HorizontalAlign.CENTER,
+            alignmentY: VerticalAlign.MIDDLE
+          },
+          maxWidth: 50,
+          maxHeight: MAX_HEIGHT
+        });
+
+        Y += 25;
+      }
+    );
+
     const imageName = Date.now();
-    await template.writeAsync(`generated/${imageName}.png`);
+    await template.write(`generated/${imageName}.png`);
 
     await message.channel.send({
-      files: [`generated/${imageName}.png`],
+      files: [`generated/${imageName}.png`]
     });
 
     try {
@@ -1282,7 +1298,7 @@ export const handleShowPugStats: Handler = async (message) => {
 
   const firstPug = await Pugs.findOne({
     guildId: guild.id,
-    overallSequence: 1,
+    overallSequence: 1
   }).exec();
 
   message.channel.send(
@@ -1436,14 +1452,14 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
     blockedOn: new Date(),
     by: {
       id: message.author.id,
-      username: message.author.username,
+      username: message.author.username
     },
     culprit: {
       id: mentionedUser.id,
-      username: mentionedUser.username,
+      username: mentionedUser.username
     },
     expiresAt: expiry,
-    reason,
+    reason
   };
 
   await addGuildBlockedUser(guild.id, newBlock);
@@ -1453,7 +1469,7 @@ export const handleAdminBlockPlayer: Handler = async (message, args) => {
   store.dispatch(
     addBlockedUser({
       guildId: guild.id,
-      ...newBlock,
+      ...newBlock
     })
   );
 
@@ -1518,7 +1534,7 @@ export const handleAdminUnblockPlayer: Handler = async (
   store.dispatch(
     removeBlockedUser({
       guildId: guild.id,
-      id: mentionedUser.id,
+      id: mentionedUser.id
     })
   );
 
@@ -1583,7 +1599,7 @@ export const handleAdminEnableMapvoteCoinFlip: Handler = async (
   store.dispatch(
     enableCoinFlip({
       guildId: guild.id,
-      name: gameType,
+      name: gameType
     })
   );
 
@@ -1618,7 +1634,7 @@ export const handleAdminDisableMapvoteCoinFlip: Handler = async (
   store.dispatch(
     disableCoinFlip({
       guildId: guild.id,
-      name: gameType,
+      name: gameType
     })
   );
 
@@ -1657,7 +1673,7 @@ export const handleAdminUpdateTeamEmojis: Handler = async (message, args) => {
       updateTeamEmojis({
         guildId: guild.id,
         name,
-        teamEmojis,
+        teamEmojis
       })
     );
     log.info(
@@ -1742,7 +1758,7 @@ export const handleAdminEnforceCustomPickingOrder: Handler = async (
     updatePickingOrder({
       guildId: guild.id,
       name: gameType.name,
-      pickingOrder: customPickingOrder,
+      pickingOrder: customPickingOrder
     })
   );
   log.info(
@@ -1894,14 +1910,14 @@ export const handleAdminBlockCaptain: Handler = async (message, args) => {
   const newBlockedCaptain = {
     culprit: {
       id: mentionedUser.id,
-      username: mentionedUser.username,
+      username: mentionedUser.username
     },
     by: {
       id: message.author.id,
-      username: message.author.username,
+      username: message.author.username
     },
     on: new Date(),
-    reason,
+    reason
   };
 
   await addGuildBlockedCaptain(guild.id, newBlockedCaptain);
@@ -1913,7 +1929,7 @@ export const handleAdminBlockCaptain: Handler = async (message, args) => {
   store.dispatch(
     addBlockedCaptain({
       guildId: guild.id,
-      userId: mentionedUser.id,
+      userId: mentionedUser.id
     })
   );
 
@@ -1959,7 +1975,7 @@ export const handleAdminUnBlockCaptain: Handler = async (message, _) => {
   store.dispatch(
     removeBlockedCaptain({
       guildId: guild.id,
-      userId: mentionedUser.id,
+      userId: mentionedUser.id
     })
   );
 
@@ -1988,12 +2004,15 @@ export const handleAdminShowBlockedCaptains: Handler = async (message, _) => {
       return;
     }
 
-    const msg = guildInfo.blockedCaptains.reduce((acc, curr) => {
-      acc += `<@${curr.culprit.id}> • reason: **${
-        curr.reason || 'no reason'
-      }** • by <@${curr.by.id}>\n`;
-      return acc;
-    }, ``);
+    const msg = guildInfo.blockedCaptains.reduce(
+      (acc: string, curr: (typeof guildInfo.blockedCaptains)[number]) => {
+        acc += `<@${curr.culprit.id}> • reason: **${
+          curr.reason || 'no reason'
+        }** • by <@${curr.by.id}>\n`;
+        return acc;
+      },
+      ``
+    );
     message.author.send(
       `:cop: :no_entry_sign: List of Blocked Captains at **${guild.name}** :cop: :no_entry_sign:\n\n${msg}`
     );

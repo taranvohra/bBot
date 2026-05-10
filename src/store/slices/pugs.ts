@@ -128,14 +128,14 @@ const pugsSlice = createSlice({
         if (pugIndex !== -1)
           thisGuild.list[pugIndex].pickingOrder = pickingOrder;
       }
-    },
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(guildDeleted, (state, action) => {
       const { guildId } = action.payload;
       delete state[guildId];
     });
-  },
+  }
 });
 
 export const {
@@ -148,6 +148,6 @@ export const {
   disableCoinFlip,
   setPugChannel,
   updateTeamEmojis,
-  updatePickingOrder,
+  updatePickingOrder
 } = pugsSlice.actions;
 export const pugsReducer = pugsSlice.reducer;

@@ -64,14 +64,14 @@ const queriesSlice = createSlice({
         const queryServerIndex = list.findIndex((qs) => qs.id === id);
         thisGuild.list[queryServerIndex][attribute] = value;
       }
-    },
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(guildDeleted, (state, action) => {
       const { guildId } = action.payload;
       delete state[guildId];
     });
-  },
+  }
 });
 
 export const {
@@ -79,6 +79,6 @@ export const {
   setQueryChannel,
   addQueryServer,
   removeQueryServer,
-  editQueryServer,
+  editQueryServer
 } = queriesSlice.actions;
 export const queriesReducer = queriesSlice.reducer;

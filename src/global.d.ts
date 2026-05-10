@@ -1,4 +1,4 @@
-import { Message, Client, User } from 'discord.js';
+import { Message, User } from 'discord.js';
 import { Pug } from '~/models';
 
 declare module 'discord.js' {
@@ -19,7 +19,7 @@ declare global {
   };
 
   export type Handler = (
-    message: Message,
+    message: Message<true>,
     args: string[],
     customMentionedUser?: User,
     returnMsg?: boolean

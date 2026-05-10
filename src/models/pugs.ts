@@ -3,8 +3,8 @@ import { Pug as PugClass } from './Pug';
 
 @modelOptions({
   options: {
-    customName: 'Pugs',
-  },
+    customName: 'Pugs'
+  }
 })
 export class PugSchema {
   @prop()

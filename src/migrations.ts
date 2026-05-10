@@ -5,7 +5,7 @@ import {
   GameType,
   QueryServer,
   Users,
-  Pugs,
+  Pugs
 } from '~/models';
 import { getNextSequences } from '~/actions';
 import mongoose from 'mongoose';
@@ -15,7 +15,7 @@ const source = mongoose.createConnection(
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useFindAndModify: false,
+    useFindAndModify: false
   }
 );
 
@@ -47,13 +47,13 @@ async function main() {
       queryServers: [],
       blocks: [],
       ignoredCommandGroup: [],
-      blockedCaptains: [],
+      blockedCaptains: []
     });
 
     await GuildStats.create({
       _id: server_id,
       total: 0,
-      pugs: {},
+      pugs: {}
     });
   }
 
@@ -68,7 +68,7 @@ async function main() {
         noOfTeams,
         pickingOrder,
         hasCoinFlipMapvoteDecider,
-        isMix,
+        isMix
       } = curr;
       data.push({
         name,
@@ -76,14 +76,14 @@ async function main() {
         noOfTeams,
         pickingOrder,
         isCoinFlipEnabled: Boolean(hasCoinFlipMapvoteDecider),
-        isMix,
+        isMix
       });
     });
 
     await Guilds.findByIdAndUpdate(server_id, {
       $set: {
-        gameTypes: data,
-      },
+        gameTypes: data
+      }
     }).exec();
   }
 
@@ -97,14 +97,14 @@ async function main() {
       data.push({
         id: timestamp,
         name,
-        address,
+        address
       });
     });
 
     await Guilds.findByIdAndUpdate(server_id, {
       $set: {
-        queryServers: data,
-      },
+        queryServers: data
+      }
     }).exec();
   }
 
@@ -120,7 +120,7 @@ async function main() {
               const valueData = Object.fromEntries(
                 Object.entries(value).map(([k, v]) => [
                   k === 'totalRating' ? 'rating' : k,
-                  v,
+                  v
                 ])
               );
               return [key, valueData];
@@ -132,7 +132,7 @@ async function main() {
       guildId: server_id,
       userId: id,
       defaultJoins: default_joins,
-      stats: statsData,
+      stats: statsData
     });
   }
 
@@ -148,7 +148,7 @@ async function main() {
       captains,
       turn,
       timer,
-      isMix,
+      isMix
     } = pug;
 
     const seq = await getNextSequences(server_id, name);
@@ -166,7 +166,7 @@ async function main() {
                 const valueData = Object.fromEntries(
                   Object.entries(value).map(([k, v]) => [
                     k === 'totalRating' ? 'rating' : k,
-                    v,
+                    v
                   ])
                 );
                 return [key, valueData];
@@ -180,7 +180,7 @@ async function main() {
         tag,
         team,
         pick,
-        stats: statsData,
+        stats: statsData
       };
     });
 
@@ -203,9 +203,9 @@ async function main() {
           players: playas,
           timerFn: timer,
           isCoinFlipEnabled: false,
-          isMix: Boolean(isMix),
-        },
-      },
+          isMix: Boolean(isMix)
+        }
+      }
     });
 
     await Users.bulkWrite(
@@ -214,14 +214,14 @@ async function main() {
           updateOne: {
             filter: {
               userId: pl.id,
-              guildId: server_id,
+              guildId: server_id
             },
             update: {
               $set: {
-                lastPug: created._id,
-              },
-            },
-          },
+                lastPug: created._id
+              }
+            }
+          }
         };
       }),
       { ordered: false }
