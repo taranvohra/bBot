@@ -1,11 +1,11 @@
-import Jimp from 'jimp';
-import fontkit from 'fontkit';
+import { loadFont } from "jimp";
+import fontkit from "fontkit";
 
 const FONTS = (async () => {
-  const ubuntuTTF = fontkit.openSync('assets/Ubuntu-Medium.ttf');
-  const ubuntuFNT = await Jimp.loadFont('assets/ubuntu.fnt');
-  const arialFNT = await Jimp.loadFont('assets/arial.fnt');
-  const obelixFNT = await Jimp.loadFont('assets/obelix.fnt');
+  const ubuntuTTF = fontkit.openSync("assets/Ubuntu-Medium.ttf");
+  const ubuntuFNT = await loadFont("assets/ubuntu.fnt");
+  const arialFNT = await loadFont("assets/arial.fnt");
+  const obelixFNT = await loadFont("assets/obelix.fnt");
 
   return {
     arialFNT,

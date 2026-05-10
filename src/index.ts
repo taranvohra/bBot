@@ -1,7 +1,7 @@
-import config from './config';
-import { Client, Intents, TextChannel, Message, User } from 'discord.js';
-import { compareAsc } from 'date-fns';
-import store from '~/store';
+import config from "./config";
+import { Client, GatewayIntentBits, Message, User, Channel } from "discord.js";
+import { compareAsc } from "date-fns";
+import store from "~/store";
 import {
   onMessage,
   onPresenceUpdate,
@@ -9,50 +9,63 @@ import {
   onGuildMemberUpdate,
   commandHandlers,
   onGuildDelete,
-} from '~/handlers';
-import { emojis } from '~/utils';
-import { connectDB, hydrateStore } from './setup';
-import { pugPubSub } from './pubsub';
-import { formatBroadcastCaptainsReady } from './formatting';
-import log from './log';
+} from "~/handlers";
+import { emojis } from "~/utils";
+import { connectDB, hydrateStore } from "./setup";
+import { pugPubSub } from "./pubsub";
+import { formatBroadcastCaptainsReady } from "./formatting";
+import log from "./log";
 
 /*
  *  bBot will only receive the following events
  *  https://discord.com/developers/docs/topics/gateway#list-of-intents
  */
-const intents = new Intents();
-intents.add('GUILDS', 'GUILD_MEMBERS', 'GUILD_PRESENCES', 'GUILD_MESSAGES');
-const bBot = new Client({ intents });
+const bBot = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildPresences,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
+});
+
+const sendToTextChannel = (
+  channel: Channel | null | undefined,
+  content: string,
+) => {
+  if (channel?.isSendable()) {
+    channel.send(content);
+  }
+};
 
 /*
  * B O T
  *   E V E N T S
  */
-bBot.on('ready', () => {
+bBot.on("ready", () => {
   const message = `Bot started running at ${new Date().toUTCString()}`;
   log.info(message);
   const HQChannel = bBot.channels.cache.get(config.HQ_CHANNEL_ID);
-  if (HQChannel) {
-    (HQChannel as TextChannel).send(`\`\`\`\n${message}\`\`\``);
-  }
+  sendToTextChannel(HQChannel, `\`\`\`\n${message}\`\`\``);
   sendRestartMessageToGuilds();
   monitorUsersForUnblocking();
   monitorForAutoRemovals();
 });
 
-bBot.on('disconnect', () => {});
+bBot.on("disconnect", () => {});
 
-bBot.on('messageCreate', onMessage);
+bBot.on("messageCreate", onMessage);
 
-bBot.on('presenceUpdate', onPresenceUpdate);
+bBot.on("presenceUpdate", onPresenceUpdate);
 
-bBot.on('guildMemberRemove', onGuildMemberRemove);
+bBot.on("guildMemberRemove", onGuildMemberRemove);
 
-bBot.on('guildMemberUpdate', onGuildMemberUpdate);
+bBot.on("guildMemberUpdate", onGuildMemberUpdate);
 
-bBot.on('guildDelete', onGuildDelete);
+bBot.on("guildDelete", onGuildDelete);
 
-pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
+pugPubSub.on("captains_ready", (guildId: string, pugName: string) => {
   log.info(`Captains ready for ${pugName} at guild ${guildId}`);
   const cache = store.getState();
   const pugs = cache.pugs[guildId];
@@ -64,10 +77,10 @@ pugPubSub.on('captains_ready', (guildId: string, pugName: string) => {
   if (!pug || !channelId || !guild) return;
 
   const channel = guild.channels.cache.get(channelId);
-  if (channel) {
-    (channel as TextChannel).send(formatBroadcastCaptainsReady(pug));
-    log.info(`Broadcasted captains ready for ${pugName} at ${guildId}`);
-  }
+  if (!channel) return;
+
+  sendToTextChannel(channel, formatBroadcastCaptainsReady(pug));
+  log.info(`Broadcasted captains ready for ${pugName} at ${guildId}`);
 });
 
 const sendRestartMessageToGuilds = () => {
@@ -82,9 +95,7 @@ const sendRestartMessageToGuilds = () => {
     const channelId = pugChannel ? pugChannel : queryChannel;
     if (channelId) {
       const channel = bBot.channels.cache.get(channelId);
-      if (channel) {
-        (channel as TextChannel).send(`I just restarted ${emojis.wokege}`);
-      }
+      sendToTextChannel(channel, `I just restarted ${emojis.wokege}`);
     }
   });
 };
@@ -109,6 +120,7 @@ const monitorUsersForUnblocking = () => {
         if (!channelId) return;
 
         const channel = guild.channels.cache.get(channelId);
+        if (!channel?.isSendable()) return;
         list.forEach((user) => {
           const message = {
             guild,
@@ -118,10 +130,10 @@ const monitorUsersForUnblocking = () => {
             ...user.culprit,
           } as User;
           if (compareAsc(now, user.expiresAt) >= 0) {
-            commandHandlers['handleAdminUnblockPlayer'](
-              message,
+            commandHandlers["handleAdminUnblockPlayer"](
+              message as Message<true>,
               [],
-              mentionedUser
+              mentionedUser,
             );
           }
         });
@@ -147,6 +159,7 @@ const monitorForAutoRemovals = () => {
       const { channel: channelId } = pugs;
       if (!channelId) return;
       const channel = guild.channels.cache.get(channelId);
+      if (!channel?.isSendable()) return;
 
       Object.entries(autoremovals).forEach(([userId, expiry]) => {
         if (expiry) {
@@ -155,13 +168,16 @@ const monitorForAutoRemovals = () => {
             const message = {
               guild,
               channel,
-              content: 'arr',
+              content: "arr",
               author: {
                 id: userId,
                 username: user?.username ?? userId,
               },
             } as Message;
-            commandHandlers['handleLeaveAllGameTypes'](message, []);
+            commandHandlers["handleLeaveAllGameTypes"](
+              message as Message<true>,
+              [],
+            );
           }
         }
       });
@@ -185,19 +201,15 @@ const monitorForAutoRemovals = () => {
 
 const logErrorToHQChannel = (message: string, error?: Error) => {
   const HQChannel = bBot.channels.cache.get(config.HQ_CHANNEL_ID);
-  if (HQChannel) {
-    (HQChannel as TextChannel).send(
-      `\`\`\`\n${message}\n${error?.stack}\`\`\``
-    );
-  }
+  sendToTextChannel(HQChannel, `\`\`\`\n${message}\n${error?.stack}\`\`\``);
 };
 
-process.on('uncaughtException', (error) => {
+process.on("uncaughtException", (error) => {
   log.error(error);
   logErrorToHQChannel(error.message, error);
 });
 
-process.on('unhandledRejection', (reason) => {
+process.on("unhandledRejection", (reason) => {
   const msg = `Unhandled Promise Rejection for reason ${reason}`;
   log.error(msg);
   logErrorToHQChannel(msg);

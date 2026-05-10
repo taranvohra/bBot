@@ -1,14 +1,13 @@
-import commands from '../commands';
+import commands from "../commands";
 import {
   Message,
   Presence,
   Guild,
   GuildMember,
   PartialGuildMember,
-  TextChannel,
-} from 'discord.js';
-import store, { guildDeleted } from '~/store';
-import { Guilds } from '~/models';
+} from "discord.js";
+import store, { guildDeleted } from "~/store";
+import { Guilds } from "~/models";
 import {
   CONSTANTS,
   isMemberPrivileged,
@@ -17,11 +16,11 @@ import {
   sanitizeName,
   isCommandConstraintSatified,
   isCommandGroupIgnored,
-} from '~/utils';
-import * as generalHandlers from './generalHandlers';
-import * as pugHandlers from './pugHandlers';
-import * as queryHandlers from './queryHandlers';
-import log from '../log';
+} from "~/utils";
+import * as generalHandlers from "./generalHandlers";
+import * as pugHandlers from "./pugHandlers";
+import * as queryHandlers from "./queryHandlers";
+import log from "../log";
 
 export const commandHandlers = {
   ...generalHandlers,
@@ -30,10 +29,12 @@ export const commandHandlers = {
 };
 
 export const onMessage = async (message: Message) => {
+  if (!message.inGuild()) return;
+
   const { author, content, guild, member, channel, client } = message;
 
   if (author.id === client.user?.id) return;
-  if (!guild || !member) return;
+  if (!member) return;
 
   const prefix = CONSTANTS.defaultPrefix; // TODO add option to pick guild specific prefix
   if (!content.startsWith(prefix)) return;
@@ -45,15 +46,15 @@ export const onMessage = async (message: Message) => {
   //   return;
   // }
 
-  const argsArr = content.substring(prefix.length).split(' ');
+  const argsArr = content.substring(prefix.length).split(" ");
   if (argsArr.length === 0) return;
 
   const cmd = argsArr[0].toLowerCase();
   const args = argsArr.slice(1);
-  const type = args.length === 0 ? 'solo' : 'args';
+  const type = args.length === 0 ? "solo" : "args";
 
   const foundCommand = commands.find((command) => {
-    if (command.type === 'both')
+    if (command.type === "both")
       return isCommandConstraintSatified(command, cmd);
     else
       return command.type === type && isCommandConstraintSatified(command, cmd);
@@ -61,8 +62,8 @@ export const onMessage = async (message: Message) => {
 
   if (foundCommand) {
     if (foundCommand.needsRegisteredGuild && !isGuildRegistered(guild.id)) {
-      message.channel.send(
-        `Please register this guild before using any of the other commands`
+      channel.send(
+        `Please register this guild before using any of the other commands`,
       );
       return;
     }
@@ -72,25 +73,23 @@ export const onMessage = async (message: Message) => {
     const { valid, reason } = isCommandInValidChannel(
       foundCommand,
       guild.id,
-      channel.id
+      channel.id,
     );
 
     if (!valid) {
       if (reason === undefined) {
-        message.channel.send(
-          `Active channel for ${foundCommand.group} is not present`
-        );
+        channel.send(`Active channel for ${foundCommand.group} is not present`);
       } else {
-        message.channel.send(
-          `Active channel for ${foundCommand.group} is <#${reason}>`
+        channel.send(
+          `Active channel for ${foundCommand.group} is <#${reason}>`,
         );
       }
       return;
     }
 
     if (foundCommand.isPrivileged && !isMemberPrivileged(member)) {
-      message.channel.send(
-        `This is a privileged command. You do not have the appropriate role to use this command.`
+      channel.send(
+        `This is a privileged command. You do not have the appropriate role to use this command.`,
       );
       return;
     }
@@ -107,7 +106,7 @@ export const onMessage = async (message: Message) => {
 
 export const onPresenceUpdate = async (_: Presence | null, after: Presence) => {
   const { user, status, guild } = after;
-  if (status === 'offline') {
+  if (status === "offline") {
     if (!guild || !user) return;
     const cache = store.getState();
     const pugs = cache.pugs[guild.id];
@@ -120,24 +119,27 @@ export const onPresenceUpdate = async (_: Presence | null, after: Presence) => {
       const isInPug = pug.players.find((p) => p.id === user?.id);
       if (isInPug) {
         const channel = guild.channels.cache.get(pugChannel);
-        if (!channel) return;
+        if (!channel?.isSendable()) return;
         const message = {
           guild,
-          content: 'zzz',
+          content: "zzz",
           author: {
             id: user.id,
             username: user.username,
           },
           channel,
         };
-        commandHandlers['handleLeaveAllGameTypes'](message as Message, []);
+        commandHandlers["handleLeaveAllGameTypes"](
+          message as Message<true>,
+          [],
+        );
       }
     });
   }
 };
 
 export const onGuildMemberRemove = (
-  member: GuildMember | PartialGuildMember
+  member: GuildMember | PartialGuildMember,
 ) => {
   const { guild, user } = member;
   const cache = store.getState();
@@ -151,24 +153,24 @@ export const onGuildMemberRemove = (
     const isInPug = pug.players.find((p) => p.id === user.id);
     if (isInPug) {
       const channel = guild.channels.cache.get(pugChannel);
-      if (!channel) return;
+      if (!channel?.isSendable()) return;
       const message = {
         guild,
-        content: 'left',
+        content: "left",
         author: {
           id: user.id,
           username: user.username,
         },
         channel,
       };
-      commandHandlers['handleLeaveAllGameTypes'](message as Message, []);
+      commandHandlers["handleLeaveAllGameTypes"](message as Message<true>, []);
     }
   });
 };
 
 export const onGuildMemberUpdate = (
   prev: GuildMember | PartialGuildMember,
-  updated: GuildMember
+  updated: GuildMember,
 ) => {
   const { roles: prevRoles } = prev;
   const {
@@ -185,24 +187,23 @@ export const onGuildMemberUpdate = (
   if (!channelId) return;
 
   const hadCooldownRoleBefore = prevRoles.cache.some(
-    (role) => role.name === 'COOLDOWN'
+    (role) => role.name === "COOLDOWN",
   );
   const hasCooldownRoleNow = newRoles.cache.some(
-    (role) => role.name === 'COOLDOWN'
+    (role) => role.name === "COOLDOWN",
   );
 
   const channel = guild.channels.cache.get(channelId);
-  if (channel) {
-    let textChannel = channel as TextChannel;
+  if (channel?.isSendable()) {
     if (!hadCooldownRoleBefore && hasCooldownRoleNow) {
-      textChannel.send(
+      channel.send(
         `<@${id}>, you have been given the \`COOLDOWN\` role. This is because the staff feel you spam certain bot commands alot. The following commands are part of this restriction:-\n
         **- Promote**\n\nThis means you & other members part of this restriction will be able to use the aforementioned command(s) \`once\` every ${CONSTANTS.coolDownSeconds} seconds.
-        `
+        `,
       );
     } else if (hadCooldownRoleBefore && !hasCooldownRoleNow) {
-      textChannel.send(
-        `<@${id}>, the \`COOLDOWN\` restriction has been lifted up by the staff. Ensure it doesn't happen again.`
+      channel.send(
+        `<@${id}>, the \`COOLDOWN\` restriction has been lifted up by the staff. Ensure it doesn't happen again.`,
       );
     }
   }

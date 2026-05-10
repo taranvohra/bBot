@@ -1,7 +1,7 @@
-import { TextChannel } from 'discord.js';
-import log from '../log';
-import { formatUserLogs } from '../formatting';
-import { Guilds, GuildStats, Logs } from '~/models';
+import { TextChannel } from "discord.js";
+import log from "../log";
+import { formatUserLogs } from "../formatting";
+import { Guilds, GuildStats, Logs } from "~/models";
 import {
   updateGuildPugChannel,
   updateGuildQueryChannel,
@@ -9,7 +9,7 @@ import {
   addGuildIgnoredCommandGroup,
   removeGuildIgnoredCommandGroup,
   createNewUserLog,
-} from '~/actions';
+} from "~/actions";
 import store, {
   initPugs,
   initMisc,
@@ -20,27 +20,24 @@ import store, {
   setPrefix,
   ignoreCommandGroup,
   unIgnoreCommandGroup,
-} from '~/store';
-import { CONSTANTS } from '~/utils';
+} from "~/store";
+import { CONSTANTS } from "~/utils";
 
 export const handleRegisterServer: Handler = async (message, _) => {
   log.info(`Entering handleRegisterServer`);
-  const { guild } = message;
-  if (!guild) return;
+  const { guild, channel } = message;
 
   const guildExists = await Guilds.findById(guild.id);
   if (guildExists) {
     log.debug(`${guild.id} (${guild.name}) is already registered`);
-    message.channel.send(
-      `This discord server is already registered with bBot :wink:`
-    );
+    channel.send(`This discord server is already registered with bBot :wink:`);
     return;
   }
 
   await Guilds.create({
     _id: guild.id,
-    queryChannel: '',
-    pugChannel: '',
+    queryChannel: "",
+    pugChannel: "",
     gameTypes: [],
     queryServers: [],
     blocks: [],
@@ -60,7 +57,7 @@ export const handleRegisterServer: Handler = async (message, _) => {
   log.debug(`Initializing store for ${guild.id}`);
 
   store.dispatch(
-    initPugs({ guildId: guild.id, list: [], gameTypes: [], channel: null })
+    initPugs({ guildId: guild.id, list: [], gameTypes: [], channel: null }),
   );
   store.dispatch(
     initMisc({
@@ -68,58 +65,57 @@ export const handleRegisterServer: Handler = async (message, _) => {
       cooldowns: {},
       ignoredCommandGroup: [],
       autoremovals: {},
-    })
+    }),
   );
   store.dispatch(initBlocks({ guildId: guild.id, list: [], captains: [] }));
   store.dispatch(initQueries({ guildId: guild.id, list: [], channel: null }));
 
-  message.channel.send(`**${guild?.name}** has been registered with bBot!`);
+  channel.send(`**${guild?.name}** has been registered with bBot!`);
   log.info(`Exiting handleRegisterServer`);
 };
 
 export const handleSetPugChannel: Handler = async (message, _) => {
   log.info(`Entering handleSetPugChannel`);
   const {
+    channel,
     channel: { id: channelId },
     guild,
   } = message;
-  if (!guild) return;
 
   await updateGuildPugChannel(guild.id, channelId);
   log.info(`Pug channel updated for guild ${guild.id} to ${channelId}`);
 
   store.dispatch(setPugChannel({ guildId: guild.id, channelId }));
 
-  message.channel.send(`<#${channelId}> has been set as the pug channel`);
+  channel.send(`<#${channelId}> has been set as the pug channel`);
   log.info(`Exiting handleSetPugChannel`);
 };
 
 export const handleSetQueryChannel: Handler = async (message, _) => {
   log.info(`Entering handleSetQueryChannel`);
   const {
+    channel,
     channel: { id: channelId },
     guild,
   } = message;
-  if (!guild) return;
 
   await updateGuildQueryChannel(guild.id, channelId);
   log.info(`Query channel updated for guild ${guild.id} to ${channelId}`);
 
   store.dispatch(setQueryChannel({ guildId: guild.id, channelId }));
 
-  message.channel.send(`<#${channelId}> has been set as the query channel`);
+  channel.send(`<#${channelId}> has been set as the query channel`);
   log.info(`Exiting handleSetQueryChannel`);
 };
 
 export const handleSetPrefix: Handler = async (message, args) => {
   log.info(`Entering handleSetPrefix`);
-  const { guild } = message;
-  if (!guild) return;
+  const { guild, channel } = message;
 
   const [prefix] = args;
 
   if (prefix.length !== 1) {
-    message.channel.send(`Prefix must be 1 character long`);
+    channel.send(`Prefix must be 1 character long`);
     return;
   }
 
@@ -128,14 +124,13 @@ export const handleSetPrefix: Handler = async (message, args) => {
 
   store.dispatch(setPrefix({ guildId: guild.id, prefix }));
 
-  message.channel.send(`**${prefix}** has been set as the default prefix`);
+  channel.send(`**${prefix}** has been set as the default prefix`);
   log.info(`Exiting handleSetPrefix`);
 };
 
 export const handleIgnoreCommandGroup: Handler = async (message, args) => {
   log.info(`Entering handleIgnoreCommandGroup`);
-  const { guild } = message;
-  if (!guild) return;
+  const { guild, channel } = message;
 
   const group = args[0].toLowerCase();
   const cache = store.getState();
@@ -145,13 +140,13 @@ export const handleIgnoreCommandGroup: Handler = async (message, args) => {
   const { ignoredCommandGroup } = misc;
 
   if (!group || !CONSTANTS.commandGroups.includes(group)) {
-    message.channel.send(`Please mention a command group, (pugs or queries)`);
+    channel.send(`Please mention a command group, (pugs or queries)`);
     return;
   }
 
   if (ignoredCommandGroup.includes(group)) {
     log.info(`Command group ${group} is already present`);
-    message.channel.send(`Command group **${group}** is already ignored`);
+    channel.send(`Command group **${group}** is already ignored`);
     return;
   }
 
@@ -160,16 +155,15 @@ export const handleIgnoreCommandGroup: Handler = async (message, args) => {
 
   store.dispatch(ignoreCommandGroup({ guildId: guild.id, group }));
 
-  message.channel.send(
-    `Commands under group **${group}** will be ignored from now onwards`
+  channel.send(
+    `Commands under group **${group}** will be ignored from now onwards`,
   );
   log.info(`Exiting handleIgnoreCommandGroup`);
 };
 
 export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
   log.info(`Entering handleUnIgnoreCommandGroup`);
-  const { guild } = message;
-  if (!guild) return;
+  const { guild, channel } = message;
 
   const group = args[0].toLowerCase();
   const cache = store.getState();
@@ -179,14 +173,14 @@ export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
   const { ignoredCommandGroup } = misc;
 
   if (!group || !CONSTANTS.commandGroups.includes(group)) {
-    message.channel.send(`Please mention a command group, (pugs or queries)`);
+    channel.send(`Please mention a command group, (pugs or queries)`);
     return;
   }
 
   if (!ignoredCommandGroup.includes(group)) {
     log.info(`Command group ${group} was not ignored in the first place`);
-    message.channel.send(
-      `Invalid. Command group **${group}** was not ignored in the first place`
+    channel.send(
+      `Invalid. Command group **${group}** was not ignored in the first place`,
     );
     return;
   }
@@ -196,8 +190,8 @@ export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
 
   store.dispatch(unIgnoreCommandGroup({ guildId: guild.id, group }));
 
-  message.channel.send(
-    `Commands under group **${group}** will not be ignored from now onwards`
+  channel.send(
+    `Commands under group **${group}** will not be ignored from now onwards`,
   );
   log.info(`Exiting handleUnIgnoreCommandGroup`);
 };
@@ -205,25 +199,25 @@ export const handleUnIgnoreCommandGroup: Handler = async (message, args) => {
 export const handleWarnUser: Handler = async (message, args) => {
   log.info(`Entering handleWarnUser`);
   const { guild, mentions, author } = message;
-  if (!guild) return;
+  const { channel } = message;
 
   const mentionedUser = mentions.users.first();
   if (!mentionedUser) {
-    message.channel.send(`No user was mentioned`);
+    channel.send(`No user was mentioned`);
     return;
   }
 
-  const reason = args.slice(1).join(' ');
+  const reason = args.slice(1).join(" ");
   if (!reason) {
-    message.channel.send(`No reason mentioned`);
+    channel.send(`No reason mentioned`);
     return;
   }
 
   const logDescription = `**WARNED** for reason: __${reason}__ by <@${author.id}>`;
   createNewUserLog(guild.id, mentionedUser.id, logDescription);
 
-  message.channel.send(
-    `<@${mentionedUser.id}>, you have been **WARNED** for __${reason}__`
+  channel.send(
+    `<@${mentionedUser.id}>, you have been **WARNED** for __${reason}__`,
   );
   log.info(`Exiting handleWarnUser`);
 };
@@ -231,11 +225,11 @@ export const handleWarnUser: Handler = async (message, args) => {
 export const handleViewUserLogs: Handler = async (message) => {
   log.info(`Entering handleViewUserLogs`);
   const { guild, mentions } = message;
-  if (!guild) return;
+  const { channel } = message;
 
   const mentionedUser = mentions.users.first();
   if (!mentionedUser) {
-    message.channel.send(`No user was mentioned`);
+    channel.send(`No user was mentioned`);
     return;
   }
 
@@ -250,25 +244,28 @@ export const handleViewUserLogs: Handler = async (message) => {
   const msg = `:scroll: Showing last 10 logs of **${mentionedUser.username}** :scroll:\n\n${logsBody}`;
 
   message.author.send(msg);
-  message.channel.send(`<@${message.author.id}>, you have received a DM`);
+  channel.send(`<@${message.author.id}>, you have received a DM`);
   log.info(`Exiting handleViewUserLogs`);
 };
 
 export const handleGetInvite: Handler = async (message) => {
   log.info(`Entering handleGetInvite`);
   const { guild, channel } = message;
-  if (!guild) return;
 
   try {
+    if (!("createInvite" in channel)) {
+      throw new Error("Channel does not support invites");
+    }
+
     const invite = await (channel as TextChannel).createInvite({
       maxAge: 0,
       maxUses: 0,
     });
-    message.channel.send(invite.url);
+    channel.send(invite.url);
   } catch (error) {
     log.error(`Cannot create invites at guild ${guild.id}`);
-    message.channel.send(
-      `Could not create invite. Make sure \`Create Invite\` permission is ticked for me`
+    channel.send(
+      `Could not create invite. Make sure \`Create Invite\` permission is ticked for me`,
     );
   }
 

@@ -1,7 +1,7 @@
-import { Message, Client, User } from 'discord.js';
-import { Pug } from '~/models';
+import { Message, User } from "discord.js";
+import { Pug } from "~/models";
 
-declare module 'discord.js' {
+declare module "discord.js" {
   interface Message {
     cmd?: string;
   }
@@ -9,8 +9,8 @@ declare module 'discord.js' {
 
 declare global {
   export type Command = {
-    group: 'general' | 'pugs' | 'queries';
-    type: 'solo' | 'args' | 'both';
+    group: "general" | "pugs" | "queries";
+    type: "solo" | "args" | "both";
     key: string;
     aliases: string[];
     rgx?: (arg: string) => RegExp;
@@ -19,10 +19,10 @@ declare global {
   };
 
   export type Handler = (
-    message: Message,
+    message: Message<true>,
     args: string[],
     customMentionedUser?: User,
-    returnMsg?: boolean
+    returnMsg?: boolean,
   ) => Promise<string | void>;
 
   export type WithGuildID = {
@@ -31,17 +31,17 @@ declare global {
 
   export type JoinStatus = {
     name: string;
-    result: 'full' | 'present' | 'joined' | 'not-found';
+    result: "full" | "present" | "joined" | "not-found";
     user?: User;
     pug?: Pug;
   };
 
   export type LeaveStatus = {
     name: string;
-    result: 'not-in' | 'left' | 'not-found';
+    result: "not-in" | "left" | "not-found";
     user?: User;
     pug?: Pug;
   };
 
-  export type TeamEmojis = 'agonies' | 'cores' | 'logos';
+  export type TeamEmojis = "agonies" | "cores" | "logos";
 }
